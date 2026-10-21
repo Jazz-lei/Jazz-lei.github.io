@@ -34,7 +34,7 @@ window.SONGS=[
     'E7', 'E7', 'Am7', 'Am7', 'D7', 'D7', 'Dm7', 'G7',
     'Cmaj7', 'Cmaj7', 'E7', 'E7', 'A7', 'A7', 'Dm7', 'Dm7',
     'Fmaj7', 'Fm6', 'Cmaj7 Em7', 'A7', 'Dm7', 'G7', 'C6 Ebdim7', 'Dm7 G7' ] },
-  { id:'autumn-leaves', title:'Autumn Leaves', name:'Autumn Leaves', key:'Em', open:'Cm', bars:[
+  { id:'autumn-leaves', title:'Autumn Leaves', name:'Autumn Leaves', key:'Em', open:'Gm', bars:[
     'Am7', 'D7', 'Gmaj7', 'Cmaj7', 'F#m7b5', 'B7alt', 'Em6', 'Em6',
     'Am7', 'D7', 'Gmaj7', 'Cmaj7', 'F#m7b5', 'B7alt', 'Em6', 'Em6',
     'F#m7b5', 'B7b9', 'Em6', 'Em6', 'Am7', 'D7', 'Gmaj7', 'Gmaj7',
