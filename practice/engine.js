@@ -660,8 +660,8 @@ function stop(){
 $('play').onclick=()=>playing?stop():start();
 $('bpm').oninput=e=>{ $('bpmv').textContent=e.target.value; $('bpmq').value=e.target.value; };
 // 고정 바: 템포 −/+ (4씩), 설정 창
-function setBpm(v){ v=Math.round(+v); if(!isFinite(v)) v=+$('bpm').value; v=Math.max(60,Math.min(280,v)); $('bpm').value=v; $('bpmv').textContent=v; $('bpmq').value=v; }
-// 템포 숫자 직접 입력: 엔터나 다른 곳을 누르면 적용 (60~280)
+function setBpm(v){ v=Math.round(+v); if(!isFinite(v)) v=+$('bpm').value; v=Math.max(60,Math.min(350,v)); $('bpm').value=v; $('bpmv').textContent=v; $('bpmq').value=v; }
+// 템포 숫자 직접 입력: 엔터나 다른 곳을 누르면 적용 (60~350)
 $('bpmq').addEventListener('change',e=>setBpm(e.target.value));
 $('bpmq').addEventListener('keydown',e=>{ if(e.key==='Enter'){ setBpm(e.target.value); e.target.blur(); } });
 $('bpmq').addEventListener('focus',e=>e.target.select());
