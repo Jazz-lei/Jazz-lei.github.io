@@ -25,10 +25,10 @@ window.SONGS=[
     'Am7', 'Dm7', 'Bm7b5', 'Bb7',
     'Am7 D7alt', 'Gm7 C7', 'F6', 'Gm7 C7' ] },
   { id:'rhythm-changes', title:'Rhythm Changes', name:'Rhythm Changes', key:'Bb', bars:[
-    'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebdim7', 'Dm7 G7', 'Cm7 F7',
-    'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebdim7', 'Cm7 F7', 'Bb6',
+    'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Dm7 G7', 'Cm7 F7',
+    'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Cm7 F7', 'Bb6',
     'D7', 'D7', 'G7', 'G7', 'C7', 'C7', 'F7', 'F7',
-    'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebdim7', 'Cm7 F7', 'Bb6' ] },
+    'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Cm7 F7', 'Bb6' ] },
   { id:'all-of-me', title:'All of Me', name:'All of Me', key:'C', bars:[
     'Cmaj7', 'Cmaj7', 'E7', 'E7', 'A7', 'A7', 'Dm7', 'Dm7',
     'E7', 'E7', 'Am7', 'Am7', 'D7', 'D7', 'Dm7', 'G7',
