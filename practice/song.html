@@ -52,7 +52,10 @@ details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:c
 .tempo button,#gear,#sheetx{font:inherit;background:var(--paper);color:var(--ink);border:0;cursor:pointer}
 .tempo button{width:34px;height:36px;font-size:18px;font-weight:600}
 .tempo button:hover,#gear:hover{background:var(--soft)}
-#bpmq{font-family:var(--mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;min-width:6ch;text-align:center}
+.bpmin{display:flex;align-items:center;font-family:var(--mono);font-size:15px;font-weight:600;padding-left:4px}
+#bpmq{width:4.2ch;font:inherit;font-variant-numeric:tabular-nums;text-align:center;border:0;background:transparent;color:var(--ink);padding:6px 2px;-moz-appearance:textfield;appearance:textfield}
+#bpmq::-webkit-outer-spin-button,#bpmq::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+#bpmq:focus{outline:2px solid var(--a);outline-offset:-2px;border-radius:4px}
 #gear{width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
 #gear[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgb(0 0 0 / .12);max-height:min(70vh,560px);overflow:auto}
@@ -155,7 +158,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
         <select id="key" aria-label="키"></select>
         <div class="tempo" role="group" aria-label="템포">
           <button id="tdn" type="button" aria-label="템포 내리기">−</button>
-          <span id="bpmq">♩=160</span>
+          <label class="bpmin"><span aria-hidden="true">♩=</span><input id="bpmq" type="number" inputmode="numeric" min="60" max="280" step="1" value="160" aria-label="템포 (BPM)"></label>
           <button id="tup" type="button" aria-label="템포 올리기">+</button>
         </div>
         <button id="gear" type="button" aria-label="설정 열기" aria-expanded="false" aria-controls="sheet">
@@ -185,7 +188,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
           </div>
           <p class="hint">프레이즈 끝 길게를 켜면 A는 1마디, B는 2마디마다 마지막 음을 4박의 4분음표로 길게 끝내요. B는 2마디마다 지정음(1·3·5음)에서 새로 시작해요. 끄면 쉬지 않고 이어서 연주해요.</p>
           <p class="hint">12키 순환을 켜면 시작 코러스 하나를 연주한 뒤 4도 위 키로 넘어가서, 12키를 모두 돌고 멈춰요.</p>
-          <p class="hint">단축키: 스페이스 재생·정지 · ← → 키 바꾸기 · − + 템포</p></div>
+          <p class="hint">단축키: 스페이스 재생·정지 · ← → 키 바꾸기 · − + 템포. 위쪽 템포 숫자를 눌러 직접 입력할 수도 있어요.</p></div>
       </div>
     </div>
   </div>

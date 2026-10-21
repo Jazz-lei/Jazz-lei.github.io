@@ -658,9 +658,13 @@ function stop(){
   $('playt').textContent='재생'; $('play').classList.remove('on'); $('play').setAttribute('aria-label','재생'); markCur(-1); markSel();
 }
 $('play').onclick=()=>playing?stop():start();
-$('bpm').oninput=e=>{ $('bpmv').textContent=e.target.value; $('bpmq').textContent='♩='+e.target.value; };
+$('bpm').oninput=e=>{ $('bpmv').textContent=e.target.value; $('bpmq').value=e.target.value; };
 // 고정 바: 템포 −/+ (4씩), 설정 창
-function setBpm(v){ v=Math.max(60,Math.min(280,v)); $('bpm').value=v; $('bpmv').textContent=v; $('bpmq').textContent='♩='+v; }
+function setBpm(v){ v=Math.round(+v); if(!isFinite(v)) v=+$('bpm').value; v=Math.max(60,Math.min(280,v)); $('bpm').value=v; $('bpmv').textContent=v; $('bpmq').value=v; }
+// 템포 숫자 직접 입력: 엔터나 다른 곳을 누르면 적용 (60~280)
+$('bpmq').addEventListener('change',e=>setBpm(e.target.value));
+$('bpmq').addEventListener('keydown',e=>{ if(e.key==='Enter'){ setBpm(e.target.value); e.target.blur(); } });
+$('bpmq').addEventListener('focus',e=>e.target.select());
 $('tdn').onclick=()=>setBpm(+$('bpm').value-4);
 $('tup').onclick=()=>setBpm(+$('bpm').value+4);
 function sheet(open){ $('sheet').hidden=!open; $('gear').setAttribute('aria-expanded',String(open)); }
