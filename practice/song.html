@@ -1,0 +1,200 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>비밥 스케일 연습</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: lead-sheet practice desk — sticky transport (play · now playing · chorus jump), compact settings, then choruses grouped by cycle on white staff paper */
+:root{
+  --bg:#eef1f4; --paper:#ffffff; --ink:#15202b; --muted:#5d6b78; --line:#d5dce3; --soft:#e4e9ee;
+  --hot:#e0303f; --a:#2b62a3; --b:#b9581f; --c:#2e7d55;
+  --a-bg:#e3ecf7; --b-bg:#f7e9df; --c-bg:#e0f0e7;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
+  --hot:#ff6170; --a:#7fb1ea; --b:#f0a06a; --c:#7cd3a3;
+  --a-bg:#1e2d40; --b-bg:#3a2a1f; --c-bg:#1d3329; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
+  --hot:#ff6170; --a:#7fb1ea; --b:#f0a06a; --c:#7cd3a3;
+  --a-bg:#1e2d40; --b-bg:#3a2a1f; --c-bg:#1d3329; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+
+header{padding-top:24px;display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+h1{font-size:26px;line-height:1.25;margin:0;font-weight:700;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:62ch}
+.songnote{max-width:70ch;font-size:14px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--b);border-radius:8px;padding:10px 14px}
+.songnote p{margin:0}
+.songnote p+p{margin-top:6px}
+details.rules{max-width:70ch;font-size:14px;color:var(--muted)}
+details.rules summary{cursor:pointer;color:var(--ink);font-weight:500;width:fit-content}
+details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+
+/* transport */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:14px;align-items:center}
+#play{font:inherit;font-weight:700;font-size:16px;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:0 22px;height:46px;cursor:pointer;display:flex;align-items:center;gap:8px;flex:none}
+#play .ico{width:0;height:0;border-left:12px solid currentColor;border-top:7px solid transparent;border-bottom:7px solid transparent}
+#play.on{background:var(--hot)}
+#play.on .ico{border:0;width:11px;height:11px;background:currentColor;border-radius:2px}
+.now{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.now .k{font-size:12px;color:var(--muted)}
+.now .v{font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now .v .chord{font-family:var(--mono);font-weight:600}
+.quick{display:flex;gap:8px;align-items:center;flex:none}
+.quick select{width:auto;padding:7px 8px;font-weight:600}
+.tempo{display:flex;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tempo button,#gear,#sheetx{font:inherit;background:var(--paper);color:var(--ink);border:0;cursor:pointer}
+.tempo button{width:34px;height:36px;font-size:18px;font-weight:600}
+.tempo button:hover,#gear:hover{background:var(--soft)}
+#bpmq{font-family:var(--mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;min-width:6ch;text-align:center}
+#gear{width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
+#gear[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgb(0 0 0 / .12);max-height:min(70vh,560px);overflow:auto}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 0}
+#sheetx{font-size:14px;color:var(--muted);padding:6px 8px;border-radius:6px}
+#sheetx:hover{color:var(--ink);background:var(--soft)}
+.sheet .panel{border:0;background:transparent}
+.score svg{cursor:pointer}
+.score svg .selbar{fill:var(--cb);stroke:var(--cc);stroke-width:1.5}
+.jump{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+.jump button{font:600 13px var(--mono);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:5px 9px;cursor:pointer;flex:none;font-variant-numeric:tabular-nums}
+.jump button.A{color:var(--a)} .jump button.B{color:var(--b)} .jump button.C{color:var(--c)}
+.jump button.sel{outline:2px solid currentColor;outline-offset:-2px}
+.jump button.cur.A{background:var(--a);color:var(--paper);border-color:var(--a)}
+.jump button.cur.B{background:var(--b);color:var(--paper);border-color:var(--b)}
+.jump button.cur.C{background:var(--c);color:var(--paper);border-color:var(--c)}
+.jump .sep{width:1px;background:var(--line);flex:none;margin:2px 2px}
+
+/* settings */
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px 24px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.wide{grid-column:1/-1}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.field>label{font-size:13px;color:var(--muted);font-weight:500}
+.inline{display:flex;gap:10px;align-items:center;min-width:0}
+input[type=range]{flex:1;min-width:0;accent-color:var(--ink)}
+.num{font-family:var(--mono);font-weight:600;min-width:4ch;text-align:right;font-variant-numeric:tabular-nums}
+select{font:inherit;font-size:15px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.toggles{display:flex;flex-wrap:wrap;gap:8px;align-content:flex-end}
+.toggles label{display:flex;align-items:center;gap:6px;font-size:14px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;user-select:none}
+.toggles input{accent-color:var(--ink);margin:0}
+.toggles label:has(input:checked){background:var(--soft);border-color:var(--muted)}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+
+/* cycles & choruses */
+.cycle{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.cycle-head{display:flex;gap:12px;align-items:flex-start;padding-top:14px;border-top:2px solid var(--cc)}
+.cycle-head .letter{font:700 28px/1 var(--mono);color:var(--cc);flex:none;padding-top:2px}
+.cycle-head h2{margin:0;font-size:18px;line-height:1.3}
+.cycle-head p{margin:2px 0 0;font-size:14px;color:var(--muted);max-width:62ch}
+.cycle h3.sub{margin:6px 0 -4px;font:600 14px var(--mono);color:var(--cc)}
+.cycle.A{--cc:var(--a);--cb:var(--a-bg)} .cycle.B{--cc:var(--b);--cb:var(--b-bg)} .cycle.C{--cc:var(--c);--cb:var(--c-bg)}
+.chorus{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;scroll-margin-top:140px}
+.chorus-h{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cb);border-bottom:1px solid var(--line)}
+.chorus-h .id{font:700 16px var(--mono);color:var(--cc)}
+.chorus-h .start{font-size:14px;font-weight:500}
+.chorus-h .play1{margin-left:auto;font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer}
+.chorus.playing{border-color:var(--cc);box-shadow:0 0 0 2px var(--cc)}
+.score{padding:4px 2px 6px;overflow-x:auto}
+.score svg{color:var(--ink)}
+.score svg path,.score svg text{fill:currentColor}
+.score .ottava text{fill:currentColor;font:italic 600 12px var(--sans)}
+.score .ottava path{stroke:currentColor;fill:none;stroke-width:1;stroke-dasharray:4 3}
+.score .abcjs-note.cur path,.score .abcjs-note.cur{fill:var(--hot)!important}
+.legend{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.legend .dot{width:10px;height:10px;border-radius:50%;background:var(--hot);flex:none}
+.err{color:var(--hot);font-size:14px}
+@media (max-width:560px){
+  h1{font-size:22px}
+  .panel{grid-template-columns:1fr}
+  #play{padding:0 16px}
+  .row{flex-wrap:wrap;row-gap:8px}
+  .quick{width:100%}
+  .quick select{flex:1}
+  .sheet{position:fixed;left:0;right:0;bottom:0;border-radius:16px 16px 0 0;max-height:75vh;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .now .v{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><span class="kn"></span> · <span class="sg-bars"></span> bars · 8th notes</div>
+    <h1><span class="sg-name"></span> 비밥 스케일</h1>
+    <p class="lead">8분음표 비밥 스케일을 코러스마다 근음·3음·5음에서 시작해요. 세 가지 사이클로 같은 진행을 다르게 연결합니다.</p>
+    <div class="songnote" id="songnote" hidden></div>
+    <details class="rules">
+      <summary>연결 규칙 자세히 보기</summary>
+      <ul>
+        <li><b>사이클 A</b>는 코드가 바뀔 때마다 지정음에서 다시 시작해요.</li>
+        <li><b>사이클 B</b>는 앞 음에서 가장 가까운 코드톤으로 이어가요. 하행(B)과 상행(B↑) 두 가지가 있어요. 2마디 동안은 옥타브를 바꾸지 않고 한 흐름으로 이어가고, 프레이즈 끝 길게를 켜면 2마디 끝을 4분음표로 마치고 지정음에서 새로 시작해요. 옥타브는 2마디가 끝날 때만 필요하면 옮겨요. 프레이즈마다 가능한 한 8va 없이 읽을 수 있는 옥타브를 골라요.</li>
+        <li><b>사이클 C</b>는 한 마디는 하행, 다음 마디는 상행으로 바꾸면서 반음이나 온음으로만 이어져요.</li>
+        <li>Related II-7은 V7의 비밥 스케일로 묶어 연주해요. 사이클 A에서는 시작음을 II-7의 1·3·5음으로 잡아요.</li>
+        <li>한 마디 안에 II-V가 함께 있으면 V7 하나로 보고 연주해요. 예: G키의 Am7 D7 → D D♭ C B A G F♯ E.</li>
+        <li>코드별 스케일: 도미넌트 7 → 도미넌트 비밥, 7alt·m7(♭5) → b9·b13 도미넌트 비밥, Maj7·6 → 메이저 6 비밥, 토닉 마이너 → 마이너 6 비밥, V7으로 가는 m7(Related II-7) → V7 비밥, V7으로 가지 않는 m7 → 마이너 7 비밥(1 2 ♭3 4 5 6 ♭7 7), dim7 → 홀-하프 디미니시드, 7(#11)·반음 아래로 해결하는 도미넌트(트라이톤 서브) → 리디안 도미넌트 비밥.</li>
+        <li>C4 아래로 내려갈 것 같으면 마디(코드) 시작에서 옥타브를 올려서 하행이 끊기지 않게 해요.</li>
+        <li>정박(다운비트)에는 코드톤이 오도록 해요. 코드톤이 아닌 음에서 시작해 한 칸 밀리면 크로매틱 음을 하나 넣어 다시 맞추고(예: A A♯ B, E E♭ D), 상행에서는 필요하면 비밥 경과음을 빼요.</li>
+        <li>코드가 바뀔 때 앞 코드의 마지막 음이 비밥 경과음(예: F6의 D♭)이나 크로매틱이면, 그 음을 진행 방향으로 한 걸음 해결해서 다음 코드를 시작해요 (예: D♭ → E♭7의 C B B♭).</li>
+        <li>상행은 코드가 바뀔 때 위의 코드톤으로 뛰지 않고 반음·온음 한 걸음으로 이어가요 (예: …A B♭ │ E♭7 C D♭ E♭ F G A B♭).</li>
+        <li>마디나 코드의 마지막 음이 비밥 경과음인데 다음 음으로 반음 해결이 안 되면, 앞 음과 2도 이내인 반음 접근음으로 바꿔요.</li>
+      </ul>
+    </details>
+  </header>
+
+  <div class="bar">
+    <div class="row">
+      <button id="play" aria-label="재생"><span class="ico"></span><span id="playt">재생</span></button>
+      <div class="now"><span class="k" id="posk">시작 위치</span><span class="v" id="pos">A-1 · 근음</span></div>
+      <div class="quick">
+        <select id="key" aria-label="키"></select>
+        <div class="tempo" role="group" aria-label="템포">
+          <button id="tdn" type="button" aria-label="템포 내리기">−</button>
+          <span id="bpmq">♩=160</span>
+          <button id="tup" type="button" aria-label="템포 올리기">+</button>
+        </div>
+        <button id="gear" type="button" aria-label="설정 열기" aria-expanded="false" aria-controls="sheet">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.2 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="jump" id="jump" aria-label="코러스로 이동"></div>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-h"><b>설정</b><button id="sheetx" type="button" aria-label="설정 닫기">닫기</button></div>
+      <div class="panel">
+        <div class="field"><label for="from">시작 코러스</label>
+          <select id="from"></select></div>
+        <div class="field"><label for="bpm">템포</label>
+          <div class="inline"><input type="range" id="bpm" min="60" max="280" value="160"><span class="num" id="bpmv">160</span></div></div>
+        <div class="field"><label for="swing">스윙 비율</label>
+          <div class="inline"><input type="range" id="swing" min="50" max="70" value="60"><span class="num" id="swingv">60%</span></div></div>
+        <div class="field wide"><label>옵션</label>
+          <div class="toggles">
+            <label><input type="checkbox" id="ci" checked> 예비박</label>
+            <label><input type="checkbox" id="comp" checked> 반주</label>
+            <label><input type="checkbox" id="click"> 2·4박 클릭</label>
+            <label><input type="checkbox" id="follow" checked> 악보 따라가기</label>
+            <label><input type="checkbox" id="space" checked> 프레이즈 끝 길게</label>
+            <label><input type="checkbox" id="cyc"> 12키 순환</label>
+          </div>
+          <p class="hint">프레이즈 끝 길게를 켜면 A는 1마디, B는 2마디마다 마지막 음을 4박의 4분음표로 길게 끝내요. B는 2마디마다 지정음(1·3·5음)에서 새로 시작해요. 끄면 쉬지 않고 이어서 연주해요.</p>
+          <p class="hint">12키 순환을 켜면 시작 코러스 하나를 연주한 뒤 4도 위 키로 넘어가서, 12키를 모두 돌고 멈춰요.</p>
+          <p class="hint">단축키: 스페이스 재생·정지 · ← → 키 바꾸기 · − + 템포</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend"><span class="dot"></span>악보의 마디를 누르면 그 마디가 시작 위치로 선택되고, 재생을 누르면 거기서부터 연주해요. 같은 마디를 다시 누르면 선택이 풀려요. 재생 중인 음은 빨간색으로 표시되고, 소리는 합성음이라 실제 피아노와 다르게 들릴 수 있어요.</div>
+  <div id="scores"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/abcjs@6.5.2/dist/abcjs-basic-min.js"></script>
+<script src="songs.js"></script>
+<script src="engine.js"></script>
+</body></html>

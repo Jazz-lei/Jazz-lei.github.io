@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jazz Lei · Jazz Practice</title>
+<meta name="description" content="Jazz Lei의 즉흥연주 연습 페이지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: slim top bar (brand + 2 categories) → category = searchable title list → practice = full-height frame */
+:root{
+  --bg:#eef1f4; --paper:#ffffff; --ink:#15202b; --muted:#5d6b78; --line:#d5dce3; --soft:#e4e9ee;
+  --accent:#c9962b; --accent-ink:#15202b;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --top:64px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
+  --accent:#e0b04a; --accent-ink:#12171c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
+  --accent:#e0b04a; --accent-ink:#12171c; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;word-break:keep-all;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;display:flex;flex-direction:column}
+
+/* top bar */
+.top{height:var(--top);flex:none;display:flex;align-items:center;gap:20px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:10}
+.brand{display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink);flex:none}
+.brand b{font:700 20px var(--mono);letter-spacing:-.01em}
+.brand span{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+nav{display:flex;gap:4px;min-width:0}
+nav a{flex:none;text-decoration:none;color:var(--muted);font-weight:500;font-size:14px;padding:8px 12px;border-radius:8px;white-space:nowrap}
+nav a:hover{color:var(--ink);background:var(--soft)}
+nav a[aria-current="page"]{color:var(--accent-ink);background:var(--accent)}
+a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* views */
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.view{display:none;flex:1;min-height:0}
+.view.on{display:flex;flex-direction:column}
+.scroll{overflow-y:auto;padding-top:40px;padding-bottom:64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.inner{max-width:880px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+
+/* home */
+.hero h1{font-size:40px;line-height:1.15;margin:8px 0 12px;text-wrap:balance}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{margin:0;color:var(--muted);max-width:56ch;font-size:16px}
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cat{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;text-decoration:none;color:var(--ink)}
+.cat:hover{border-color:var(--accent)}
+.cat b{font-size:17px}
+
+/* count badge: rounded rect, ink on paper (zero = muted) */
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;border-radius:6px;
+  background:var(--ink);color:var(--paper);font:600 12px/1 var(--mono);font-variant-numeric:tabular-nums}
+.badge.zero{background:var(--soft);color:var(--muted)}
+nav a{display:inline-flex;align-items:center;gap:8px}
+nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accent)}
+
+/* sub menu */
+.subs{display:flex;flex-wrap:wrap;gap:6px}
+.subs a{flex:none;display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);font-weight:500;font-size:14px;
+  padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--paper);white-space:nowrap}
+.subs a:hover{color:var(--ink);border-color:var(--muted)}
+.subs a[aria-current="true"]{color:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.subs[data-off] a[aria-current="true"]{box-shadow:none;border-color:var(--line);color:var(--muted)}
+.result{font-size:13px;color:var(--muted);margin:-12px 0 0}
+
+/* category list */
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.head h1{margin:4px 0 0;font-size:28px;line-height:1.2}
+.search{width:240px;max-width:100%;font:inherit;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.list:empty{display:none}
+.list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.list li{min-width:0}
+.list a{display:block;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-decoration:none;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list a:hover{border-color:var(--accent);color:var(--accent)}
+.empty{color:var(--muted);font-size:14px;margin:0;padding:20px;border:1px dashed var(--line);border-radius:10px;text-align:center}
+
+/* practice */
+.crumb{flex:none;display:flex;align-items:center;gap:10px;font-size:14px;
+  padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bg)}
+.crumb a{color:var(--muted);text-decoration:none;font-weight:500;flex:none}
+.crumb a:hover{color:var(--ink)}
+.crumb b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.frame{flex:1;min-height:0;border:0;width:100%;background:var(--bg);display:block}
+
+@media (max-width:560px){
+  :root{--top:56px}
+  .top{gap:12px}
+  .brand span{display:none}
+  nav a{padding:7px 10px;font-size:14px}
+  nav .long{display:none}
+  .subs a{font-size:13px;padding:7px 10px}
+  .hero h1{font-size:30px}
+  .scroll{padding-top:28px}
+  .cats{grid-template-columns:1fr}
+  .search{width:100%}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#home"><b>Jazz Lei</b><span>Jazz Practice</span></a>
+  <nav id="nav" aria-label="메뉴">
+    <a href="#basic" data-cat="basic">Basic<span class="long"> Practice</span> <span class="badge" data-n="basic"></span></a>
+    <a href="#song" data-cat="song">Song<span class="long"> Practice</span> <span class="badge" data-n="song"></span></a>
+  </nav>
+</header>
+
+<main>
+  <section class="view scroll" id="view-home">
+    <div class="inner">
+      <div class="hero">
+        <div class="eyebrow">Jazz Improvisation · Practice Room</div>
+        <h1>재즈의 언어를 <em>12키</em>로 손에 익히는 연습실</h1>
+        <p>악보를 보며 반주에 맞춰 바로 연습할 수 있는 인터랙티브 연습 페이지예요.</p>
+      </div>
+      <div class="cats">
+        <a class="cat" href="#basic"><b>Basic Practice</b><span class="badge" data-n="basic"></span></a>
+        <a class="cat" href="#song"><b>Song Practice</b><span class="badge" data-n="song"></span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="view scroll" id="view-cat">
+    <div class="inner">
+      <div class="head">
+        <div><div class="eyebrow">Practice</div><h1 id="cat-title"></h1></div>
+        <input class="search" id="q" type="search" placeholder="제목 검색" aria-label="제목 검색">
+      </div>
+      <div class="subs" id="subs" role="navigation" aria-label="세부 메뉴"></div>
+      <p class="result" id="result" hidden></p>
+      <ul class="list" id="list"></ul>
+      <p class="empty" id="empty" hidden></p>
+    </div>
+  </section>
+
+  <section class="view" id="view-practice">
+    <div class="crumb"><a id="back" href="#">← <span id="back-t"></span></a><b id="p-title"></b></div>
+    <iframe class="frame" id="frame" title="연습 페이지" allow="autoplay"></iframe>
+  </section>
+</main>
+
+<script src="practice/songs.js"></script>
+<script>
+/* ===== 연습 목록 =====
+   Song Practice의 비밥 스케일 곡들은 practice/songs.js 에서 자동으로 불러와요 (곡 추가는 거기서).
+   그 밖의 연습은 practice 폴더에 html 파일을 넣고 아래에 한 줄 추가하세요.
+   id   : 주소 이름(영문·숫자·하이픈)
+   cat  : 'basic' 또는 'song'
+   sub  : 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure'
+   title: 목록에 보일 제목
+   file : 파일 경로 */
+const PRACTICES=[
+  {id:'two-five-one-bebop', cat:'basic', sub:'bebop', title:'II-V-I Be-bop Scale',  file:'practice/two-five-one-bebop.html'},
+  ...(window.SONGS||[]).map(s=>({id:s.id, cat:'song', sub:'bebop', title:s.title, file:'practice/song.html#'+s.id})),
+];
+const CATS={basic:'Basic Practice', song:'Song Practice'};
+const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice'};
+
+const $=id=>document.getElementById(id);
+const count=(c,s)=>PRACTICES.filter(p=>p.cat===c&&(!s||p.sub===s)).length;
+function setBadge(el,n){ el.textContent=n; el.classList.toggle('zero',n===0); el.setAttribute('aria-label',n+'개'); }
+document.querySelectorAll('[data-n]').forEach(el=>setBadge(el,count(el.dataset.n)));
+
+let curCat=null, curSub=null;
+function renderSubs(){
+  $('subs').innerHTML='';
+  for(const s in SUBS){
+    const a=document.createElement('a'); a.href='#'+curCat+'-'+s;
+    a.append(SUBS[s]+' '); const b=document.createElement('span'); b.className='badge'; setBadge(b,count(curCat,s)); a.append(b);
+    if(s===curSub) a.setAttribute('aria-current','true');
+    $('subs').append(a);
+  }
+}
+function renderList(){
+  const q=$('q').value.trim().toLowerCase();
+  // 검색어가 있으면 세부 메뉴와 상관없이 카테고리 전체에서 찾음
+  const items=PRACTICES.filter(p=>p.cat===curCat&&(q?p.title.toLowerCase().includes(q):p.sub===curSub));
+  $('subs').toggleAttribute('data-off',!!q);
+  $('result').hidden=!q; $('result').textContent=CATS[curCat]+' 전체에서 '+items.length+'개 찾음';
+  $('list').innerHTML='';
+  for(const p of items){
+    const li=document.createElement('li'), a=document.createElement('a');
+    a.href='#'+p.id; a.textContent=p.title; a.title=p.title; li.append(a); $('list').append(li);
+  }
+  $('empty').hidden=items.length>0;
+  $('empty').textContent=q?'검색 결과가 없어요.':'곧 추가될 예정이에요.';
+}
+
+function parse(r){
+  const p=PRACTICES.find(x=>x.id===r); if(p) return {view:'practice',p,cat:p.cat};
+  const [c,s]=r.split('-');
+  if(CATS[c]){
+    let sub=SUBS[s]?s:null;
+    if(!sub) sub=Object.keys(SUBS).find(k=>count(c,k)>0)||Object.keys(SUBS)[0]; // 기본: 연습이 있는 첫 세부 메뉴
+    return {view:'cat',cat:c,sub};
+  }
+  return {view:'home'};
+}
+function show(){
+  const st=parse(location.hash.slice(1)||'home');
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+st.view));
+  document.querySelectorAll('#nav a').forEach(a=>a.dataset.cat===st.cat?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+  if(st.view==='cat'){
+    if(curCat!==st.cat) $('q').value='';
+    curCat=st.cat; curSub=st.sub;
+    $('cat-title').textContent=CATS[curCat]; renderSubs(); renderList();
+    document.title=SUBS[curSub]+' · '+CATS[curCat]+' · Jazz Lei';
+  } else if(st.view==='practice'){
+    const p=st.p;
+    $('back').href='#'+p.cat+'-'+p.sub; $('back-t').textContent=CATS[p.cat]+' · '+SUBS[p.sub];
+    $('p-title').textContent=p.title;
+    if($('frame').getAttribute('src')!==p.file) $('frame').setAttribute('src',p.file);
+    document.title=p.title+' · Jazz Lei';
+  } else document.title='Jazz Lei · Jazz Practice';
+}
+$('q').addEventListener('input',renderList);
+addEventListener('hashchange',show); show();
+</script>
+</body>
+</html>
