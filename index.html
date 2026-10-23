@@ -159,7 +159,8 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
    file : 파일 경로 */
 const PRACTICES=[
   {id:'two-five-one-bebop', cat:'basic', sub:'bebop', title:'II-V-I Be-bop Scale',  file:'practice/two-five-one-bebop.html'},
-  ...(window.SONGS||[]).map(s=>({id:s.id, cat:'song', sub:'bebop', title:s.title, file:'practice/song.html#'+s.id})),
+  ...(window.SONGS||[]).flatMap(s=>(s.methods||['bebop']).map(m=>{ const id=m==='bebop'?s.id:s.id+'--'+m;
+    return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
 ];
 const CATS={basic:'Basic Practice', song:'Song Practice'};
 const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice'};
@@ -223,6 +224,9 @@ function show(){
 }
 $('q').addEventListener('input',renderList);
 addEventListener('hashchange',show); show();
+// 연습 화면 안에서 이전·다음 곡으로 넘어가면 위쪽 메뉴·제목도 같이 바꿈
+$('frame').addEventListener('load',()=>{ try{ const w=$('frame').contentWindow;
+  w.addEventListener('hashchange',()=>{ const h=w.location.hash.slice(1); if(h&&PRACTICES.some(p=>p.id===h)&&location.hash.slice(1)!==h){ location.hash=h; } }); }catch(e){} });
 </script>
 </body>
 </html>

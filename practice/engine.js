@@ -4,7 +4,7 @@ const LET='CDEFGAB', LSEMI=[0,2,4,5,7,9,11];
 function parse(n){ const l=LET.indexOf(n[0]); let a=0; for(const c of n.slice(1)){ if(c==='b')a--; if(c==='#')a++; } return {l,a,pc:((LSEMI[l]+a)%12+12)%12}; }
 const KEYS=['F','Bb','Eb','Ab','Db','Gb','B','E','A','D','G','C'];
 const KSIG={F:-1,Bb:-2,Eb:-3,Ab:-4,Db:-5,Gb:-6,B:5,E:4,A:3,D:2,G:1,C:0};
-let SONG=null, REF='F', KEY='F', MINOR=false, FORM=[];
+let SONG=null, REF='F', KEY='F', MINOR=false, FORM=[], CHORDS=[], METHOD='bebop';
 const kdisp=k=>k.replace(/b/g,'♭').replace(/#/g,'♯');
 const nameOf=(l,pc)=>{ let a=((pc-LSEMI[l])%12+12)%12; if(a>6)a-=12; return LET[l]+(a<0?'b'.repeat(-a):'#'.repeat(a)); };
 // 곡의 기준 키(REF)에서 지금 키(KEY)로 음 이름을 옮김
@@ -29,7 +29,7 @@ const keyLabel=k=>kdisp(tonicOf(k))+(MINOR?'m':'');
    min : 마이너 6 비밥 (1 2 b3 4 5 #5 6 7)           ← 토닉 마이너(m6, mMaj7, m, 마이너 곡의 토닉 m7)
    dim : 홀-하프 디미니시드 (1 2 b3 4 b5 b6 6 7)      ← dim7
    lyd : 리디안 도미넌트 비밥 (1 2 3 #4 5 6 b7 7)   ← 7#11, 반음 아래로 해결하는 도미넌트(트라이톤 서브)
-   m7  : 마이너 7 비밥 (1 2 b3 4 5 6 b7 7)          ← V7으로 가지 않는 m7 (V7으로 가면 Related II-7 → V7 스케일)
+   m7  : 마이너 7 비밥 (1 2 b3 4 5 6 b7 7)          ← 지금은 쓰지 않음 (m7은 모두 Related II-7)
    한 마디(또는 반 마디) 안의 II-V는 V7 스케일 하나로 묶어서 연주 */
 const SCALES={
   dom:{iv:[0,2,4,5,7,9,10,11], lt:[0,1,2,3,4,5,6,6], x:7},
@@ -88,7 +88,7 @@ function scaleFor(c){
     case 'm6': case 'mmaj7': return ['min',c.root];
     case 'dim': return ['dim',c.root];
     case 'm7b5': return ['alt',up4(c.root)];
-    case 'm7': return (MINOR && c.pc===parse(SONG_TONIC).pc) ? ['min',c.root] : c.toV ? ['dom',up4(c.root)] : ['m7',c.root]; // 다음 코드가 자기 V7이면 Related II-7
+    case 'm7': return (MINOR && c.pc===parse(SONG_TONIC).pc) ? ['min',c.root] : ['dom',up4(c.root)]; // m7은 모두 Related II-7 → 4도 위 V7 비밥 (마이너 곡의 토닉 m7만 마이너 6 비밥)
   }
 }
 let SONG_TONIC='F';
@@ -96,8 +96,12 @@ const isIIV=(a,b)=>(a.qual==='m7'||a.qual==='m7b5')&&(b.qual==='dom'||b.qual==='
 // 곡의 마디 목록 → 연주 단위(세그먼트). k = 스케일, syms = 악보에 적을 코드와 위치(8분음표)
 function buildForm(bars){
   // 'F#dim7=D7alt' → 악보에는 F#dim7, 연주는 D7alt 스케일
-  const tok=t=>{ const [shown,play]=t.split('='); const c=chordInfo(play||shown); c.sym=shown; return c; };
-  const all=bars.map(bar=>bar.trim().split(/\s+/).map(tok)), flat=all.flat();
+  // 끝에 !를 붙이면(D7!) 아래 III7·VI7·VII7 규칙을 적용하지 않고 9·13 그대로
+  const tok=t0=>{ const nat=t0.endsWith('!'), t=t0.replace(/!$/,''); const [shown,play]=t.split('='); const c=chordInfo(play||shown); c.sym=shown; c.nat=nat; return c; };
+  const all=bars.map(bar=>bar.trim().split(/\s+/).map(tok)), flat=all.flat(); CHORDS=all;
+  // 키의 III7·VI7·VII7은 마이너 코드로 해결하는 V7이라 ♭9·♭13 (예: C키 E7·A7·B7). 마이너 곡은 나란한조 메이저 기준
+  const ref=parse(REF).pc;
+  flat.forEach(c=>{ if(c.qual==='dom'&&!c.nat&&[4,9,11].includes((c.pc-ref+12)%12)){ c.qual='alt'; c.sym=c.sym.replace(/^([A-G][b#]?)[^/]*/,'$17alt'); } });
   // 도미넌트 다음 코드가 반음 아래면 트라이톤 서브로 표시 (마지막 코드는 첫 코드로 이어진다고 봄)
   // 같은 코드가 이어지면(Gm7 │ Gm7 │ C7) 그다음 다른 코드를 봄
   flat.forEach((c,i)=>{ let j=(i+1)%flat.length; for(let k=0;k<flat.length&&flat[j].pc===c.pc&&flat[j].qual===c.qual;k++) j=(j+1)%flat.length; const nx=flat[j]; c.subV=c.qual==='dom'&&nx.pc===(c.pc+11)%12;
@@ -405,52 +409,233 @@ function abcName(l,oct){
 }
 const OTTAVA_ABOVE=88; // E6보다 높은 음이 있는 구간만 8va로 한 옥타브 낮춰 표기
 function toABC(ch,barsPerLine,bpm){
-  let body='', idx=0; ch.ottava=[];
-  ch.bars.forEach((segs,bi)=>{
+  // 악보 문자열(ABC)과, 그려질 음표·쉼표 하나하나의 정보(길이·마디·연주 이벤트)를 같은 순서로 만듦
+  const out=[]; let idx=0, lastNote=null; ch.ottava=[]; ch.toks=[];
+  const ott=!ch.method && (ch.mode==='B'||ch.mode==='Bu');
+  const all=ch.pickup?[[{notes:ch.pickup,syms:[],pick:true}],...ch.bars]:ch.bars;
+  all.forEach((segs,bi0)=>{ const bi=ch.pickup?bi0-1:bi0;   // 못갖춘마디는 -1
     const state={};
     segs.forEach(seg=>{
-      const snd=seg.notes.filter(n=>!n.rest&&!n.hold);
-      const up=(ch.mode==='B'||ch.mode==='Bu') && snd.length>0 && Math.max(...snd.map(n=>n.m))>OTTAVA_ABOVE;
-      if(up){ const g=ch.ottava[ch.ottava.length-1]; if(g&&g[1]===idx-1) g[1]=idx+snd.length-1; else ch.ottava.push([idx,idx+snd.length-1]); }
-      idx+=snd.length;
+      const snd=seg.notes.filter(n=>!n.rest&&!n.hold&&!n.tc);
+      const up=ott && snd.length>0 && Math.max(...snd.map(n=>n.m))>OTTAVA_ABOVE;
+      const nt=seg.notes.reduce((x,n)=>x+(n.rest||n.tc?0:n.six?2:n.trip?3:n.hold?0:1),0)+(seg.notes[0]&&seg.notes[0].hold?1:0);
+      if(up){ const g=ch.ottava[ch.ottava.length-1]; if(g&&g[1]===idx-1) g[1]=idx+nt-1; else ch.ottava.push([idx,idx+nt-1]); }
+      idx+=nt;
+      const nm=n=>{ const oct=noteOct(n.m,n.sp)-(up?1:0), key=n.sp.l+'_'+oct;
+        const cur=key in state?state[key]:keyAcc(n.sp.l); let acc='';
+        if(cur!==n.sp.a){ acc=n.sp.a===-1?'_':n.sp.a===1?'^':n.sp.a===0?'=':n.sp.a===-2?'__':'^^'; state[key]=n.sp.a; }
+        return acc+abcName(n.sp.l,oct); };
       const ns=seg.notes;
       for(let i=0;i<ns.length;){
         const n=ns[i];
-        if(i%4===0 && i>0) body+=' ';
-        const cs=seg.syms.find(s=>s.at===i); if(cs) body+='"'+cs.sym+'"';
+        if(i%4===0 && i>0) out.push(' ');
+        const cs=seg.syms.find(s=>s.at===i), sym=cs?'"'+cs.sym+'"':'';
         let j=i+1;
+        if(n.tc){ i++; continue; }
         if(n.rest){ // 이어지는 쉼표는 하나로 (코드가 바뀌는 자리에서는 나눔)
           while(j<ns.length&&ns[j].rest&&!seg.syms.some(s=>s.at===j)) j++;
-          body+='z'+(j-i>1?j-i:''); i=j; continue;
+          out.push(sym+'z'+(j-i>1?j-i:'')); ch.toks.push({rest:true,d8:j-i,bar:bi,ev:n.ev}); i=j; continue;
+        }
+        if(n.six){ out.push(sym+nm(n.six[0])+'/'+nm(n.six[1])+'/'); n.six.forEach(x=>ch.toks.push({d8:.5,bar:bi,ev:x.ev}));
+          lastNote={oi:out.length-1,n:n.six[1]}; i++; continue; }
+        if(n.trip){ /* 셋잇단은 앞뒤 음과 빔을 나눔 */ if(out.length&&out[out.length-1]!==' ') out.push(' ');
+          out.push('(3'+sym+n.trip.map(nm).join('')); n.trip.forEach(x=>ch.toks.push({d8:2/3,bar:bi,ev:x.ev}));
+          lastNote={oi:out.length-1,n:n.trip[2]}; out.push(' '); i+=2; continue; }
+        if(n.hold){ // 앞 마디에서 붙임줄로 이어지는 음
+          while(j<ns.length&&ns[j].hold) j++;
+          if(lastNote){ out[lastNote.oi]+='-'; out.push(sym+nm(lastNote.n)+(j-i>1?j-i:'')); ch.toks.push({d8:j-i,bar:bi,ev:null,tie:true}); lastNote={oi:out.length-1,n:lastNote.n}; }
+          else { out.push(sym+'z'+(j-i>1?j-i:'')); ch.toks.push({rest:true,d8:j-i,bar:bi,ev:null}); }
+          i=j; continue;
         }
         while(j<ns.length&&ns[j].hold) j++;
-        const oct=noteOct(n.m,n.sp)-(up?1:0), key=n.sp.l+'_'+oct;
-        const cur=key in state?state[key]:keyAcc(n.sp.l);
-        let acc='';
-        if(cur!==n.sp.a){ acc=n.sp.a===-1?'_':n.sp.a===1?'^':n.sp.a===0?'=':n.sp.a===-2?'__':'^^'; state[key]=n.sp.a; }
-        body+=acc+abcName(n.sp.l,oct)+(j-i>1?j-i:'');
+        out.push(sym+nm(n)+(j-i>1?j-i:'')); ch.toks.push({d8:j-i,bar:bi,ev:n.ev}); lastNote={oi:out.length-1,n};
         i=j;
       }
-      body+=' ';
+      out.push(' ');
     });
-    body+= bi===ch.bars.length-1?'|]':'|';
-    if((bi+1)%barsPerLine===0 && bi<ch.bars.length-1) body+='\n';
-    else body+=' ';
+    out.push(bi===ch.bars.length-1?'|]':'|');
+    if(bi>=0 && (bi+1)%barsPerLine===0 && bi<ch.bars.length-1) out.push('\n');
+    else out.push(' ');
   });
-  return `X:1\nM:4/4\nL:1/8\nK:${KEY}\n`+body+'\n';
+  return `X:1\nM:4/4\nL:1/8\nK:${KEY}\n`+out.join('')+'\n';
+}
+/* ===== 코드톤 · 아르페지오 · 엔클로저 연습 (Swing Solo Guide Book Ch.1·2, Approach note guide) =====
+   마디(코드)마다 정해진 리듬 패턴에 코드의 1·3·5·7·9·11·13음을 넣어 만들어요.
+   패턴 기호:  N(음,방향)  방향 u 위로 · d 아래로 · n 가장 가까운 · = 같은 음
+              H 앞 음 늘이기 · R 쉼표 · TIE 앞 마디에서 붙임줄 · S(a,b) 16분음표 둘 · T3(a,b,c) 셋잇단 (+TC 자리)
+              NX(음) 다음 코드의 음을 미리(당김음) · AP(종류) 다음 코드 목표음으로 접근 · APS 이 코드 첫 음의 반음 아래
+              접근 종류: cb 반음 아래 · ca 반음 위 · cb2 온음 아래 · da 위 다이아토닉 · db 아래 다이아토닉 */
+const N=(d,dir)=>({t:'n',d,dir:dir||'n'}), H={t:'h'}, R={t:'r'}, TIE={t:'tie'}, TC={t:'tc'};
+const S=(a,b)=>({t:'six',x:[a,b]}), T3=(a,b,c)=>({t:'trip',x:[a,b,c]}), NX=d=>({t:'nx',d}), AP=k=>({t:'ap',k}), APS={t:'aps'};
+// 엔클로저: 목표음(3음) 2분음표 + 다음 코드 3음으로 가는 접근음
+const ENC=ks=>({full:[N('3'),H,H,H,...(ks.length===4?[]:ks.length===3?[R]:[R,R]),...ks.map(AP)],
+               half:[N('3'),...(ks.length>=3?ks.slice(-3):[H,...ks]).map(k=>typeof k==='string'?AP(k):k)], target:'3', win:[62,79]});
+const METHODS={
+  chordtone:{name:'코드톤', book:'Swing Solo Guide Book · Chapter 1',
+    lead:'코드마다 코드톤(1·3·5·7음)만으로 리듬을 바꿔 가며 연주해요. 같은 진행을 8분음표, 당김음, 16분음표, 셋잇단으로 연결합니다.',
+    rules:['6화음(C6, Cm6)은 7음 대신 6음을 써요.','한 마디에 코드가 둘이면 2박짜리 짧은 패턴으로 연주해요.',
+      '당김음은 마지막 8분음표에서 다음 코드의 음을 미리 치고 붙임줄로 이어요.','16분음표 패턴은 7-1-7-5로 다음 코드의 3음을 감싸며 들어가요.'],
+    groups:{A:['8분음표','코드톤을 8분음표로 이어요. 마디 끝은 다음 코드의 가이드톤(3·7음) 근처로 가요.'],
+            B:['당김음 (싱코페이션)','4박 뒷박에서 다음 코드의 음을 미리 치고 붙임줄로 넘어가요.'],
+            C:['16분음표 · 셋잇단','16분음표 엔클로저와 셋잇단 리듬으로 코드톤을 연주해요.']},
+    v:[{g:'A',title:'3-5-1-7',full:[N('3'),H,H,H,N('3','='),N('5','u'),N('1','u'),N('7','d')],half:[N('3'),N('5','u'),N('1','u'),N('7','d')],win:[60,77]},
+       {g:'A',title:'5-7-5-3-1',full:[N('5'),N('7','u'),N('5','d'),N('3','d'),N('1','d'),H,H,H],half:[N('5'),N('3','d'),N('1','d'),H],win:[64,81]},
+       {g:'B',title:'3-5-7 → 다음 3음',full:[TIE,TIE,TIE,TIE,N('3','='),N('5','u'),N('7','u'),NX('3')],half:[TIE,N('5','u'),N('7','u'),NX('3')],win:[60,77]},
+       {g:'B',title:'5-7-5-3-1 → 다음 5음',full:[TIE,N('7','u'),N('5','d'),N('3','d'),N('1','d'),H,H,NX('5')],first:[N('5'),N('7','u'),N('5','d'),N('3','d'),N('1','d'),H,H,NX('5')],
+        half:[TIE,N('3','d'),N('1','d'),NX('5')],win:[64,81]},
+       {g:'C',title:'16분음표 3-5-1-7-1-7-5',full:[N('3'),H,H,N('3','='),N('5','u'),N('1','u'),S(N('7','d'),N('1','u')),S(N('7','d'),N('5','d'))],
+        half:[N('3'),N('5','u'),N('1','u'),S(N('7','d'),N('5','d'))],win:[60,77]},
+       {g:'C',title:'셋잇단 1-3-5-7',full:[N('3'),H,H,H,R,N('1','d'),T3(N('3','u'),N('5','u'),N('7','u')),TC],half:[T3(N('1'),N('3','u'),N('5','u')),TC,N('7','u'),H],win:[60,77]},
+       {g:'C',title:'셋잇단 1-3-1-3-5-3-5-7',full:[N('1'),H,T3(N('3','u'),N('1','d'),N('3','u')),TC,T3(N('5','u'),N('3','d'),N('5','u')),TC,N('7','u'),H],
+        half:[T3(N('1'),N('3','u'),N('5','u')),TC,N('7','u'),H],win:[57,72]}]},
+  arpeggio:{name:'아르페지오', book:'Swing Solo Guide Book · Chapter 2',
+    lead:'코드톤 아르페지오에 9·11·13음과 크로매틱 접근음을 더해, 코드 하나를 한 번에 그리는 연습이에요.',
+    rules:['접근음(*)은 다음에 칠 아르페지오 첫 음의 반음 아래예요.','6화음(C6, Cm6)은 7음 대신 6음을 써요.',
+      '코드별 아르페지오: m7·m7(♭5) 5-7-9-11-9-3-5-7, Maj7·6·마이너 6 3-5-7-9-7-1-3-5, 도미넌트 3-5-7-9-13-5 (alt는 ♭9·♭13).',
+      '한 마디에 코드가 둘이면 아르페지오 앞부분 4음만 연주해요.'],
+    groups:{A:['크로매틱 접근 아르페지오','아르페지오를 길게 끝낸 뒤, 다음 코드 첫 음의 반음 아래에서 들어가요.'],
+            B:['셋잇단 크로매틱 접근','반음 아래 접근음에서 셋잇단 아르페지오로 올라가요.'],
+            C:['확장 아르페지오','코드별로 많이 쓰는 아르페지오와 두 아르페지오를 합친 형태예요.']},
+    v:[{g:'A',title:'* 1-3-5-7',full:[N('1'),N('3','u'),N('5','u'),N('7','u'),H,H,H,AP('cb')],half:[N('1'),N('3','u'),N('5','u'),N('7','u')],target:'1',win:[57,70]},
+       {g:'A',title:'* 3-5-7-9',full:[N('3'),N('5','u'),N('7','u'),N('9','u'),H,H,H,AP('cb')],half:[N('3'),N('5','u'),N('7','u'),N('9','u')],target:'3',win:[59,72]},
+       {g:'B',title:'* 셋잇단 1-3-5-7',full:[R,APS,T3(N('1'),N('3','u'),N('5','u')),TC,N('7','u'),H,H,H],half:[T3(N('1'),N('3','u'),N('5','u')),TC,N('7','u'),H],win:[57,72]},
+       {g:'B',title:'* 셋잇단 3-5-7-9',full:[R,APS,T3(N('3'),N('5','u'),N('7','u')),TC,N('9','u'),H,H,H],half:[T3(N('3'),N('5','u'),N('7','u')),TC,N('9','u'),H],win:[59,72]},
+       {g:'C',title:'코드별 아르페지오',byQual:true,win:[57,70]},
+       {g:'C',title:'1-3-5-7 + 3-5-7-9',full:[N('1'),N('3','u'),N('5','u'),N('7','u'),N('3','d'),N('5','u'),N('7','u'),N('9','u')],half:[N('1'),N('3','u'),N('5','u'),N('7','u')],win:[57,68]}]},
+  enclosure:{name:'엔클로저', book:'Approach note guide',
+    lead:'다음 코드의 3음을 위아래에서 감싸(엔클로저) 다운비트에 착지하는 연습이에요. 3음을 2분음표로 들려준 뒤 접근음으로 다음 코드에 들어가요.',
+    rules:['접근음: 위 다이아토닉(그 코드 스케일의 한 음 위) · 반음 위 · 반음 아래 · 온음 아래.','한 마디에 코드가 둘이면 목표음을 짧게 하고 접근음 2~3개로 들어가요.',
+      '같은 원리로 근음·5음·7음을 목표로 바꿔서도 연습해 보세요.'],
+    groups:{A:['2음 엔클로저','목표음을 두 음으로 감싸요.'],B:['3음 엔클로저','목표음을 세 음으로 감싸요.'],C:['4음 엔클로저','목표음을 네 음으로 감싸요.']},
+    v:[{g:'A',title:'(1-1) 위 다이아토닉 · 반음 아래',...ENC(['da','cb'])},
+       {g:'A',title:'(1-2) 반음 아래 · 위 다이아토닉',...ENC(['cb','da'])},
+       {g:'B',title:'(1) 온음 아래 · 반음 아래 · 위 다이아토닉',...ENC(['cb2','cb','da'])},
+       {g:'B',title:'(2) 반음 아래 · 위 다이아토닉 · 반음 위',...ENC(['cb','da','ca'])},
+       {g:'B',title:'(3) 위 다이아토닉 · 반음 위 · 반음 아래',...ENC(['da','ca','cb'])},
+       {g:'B',title:'(4) 위 다이아토닉 · 온음 아래 · 반음 아래',...ENC(['da','cb2','cb'])},
+       {g:'C',title:'(1) 반음 아래 · 위 다이아토닉 · 반음 위 · 반음 아래',...ENC(['cb','da','ca','cb'])},
+       {g:'C',title:'(2) 온음 아래 · 반음 아래 · 위 다이아토닉 · 반음 위',...ENC(['cb2','cb','da','ca'])},
+       {g:'C',title:'(4) 위 다이아토닉 · 온음 아래 · 반음 아래 · 위 다이아토닉',...ENC(['da','cb2','cb','da'])}]}
+};
+// 코드별 아르페지오 (교재 Chapter 2)
+function qualPattern(q,half){
+  const p= ['m7','m7b5','dim'].includes(q)?[N('5'),N('7','u'),N('9','u'),N('11','u'),N('9','d'),N('3','u'),N('5','u'),N('7','u')]
+         : ['dom','alt','lyd'].includes(q)?[N('3'),N('5','u'),N('7','u'),N('9','u'),N('13','d'),N('5','d'),H,H]
+         : [N('3'),N('5','u'),N('7','u'),N('9','u'),N('7','d'),N('1','u'),N('3','u'),N('5','u')];
+  return half?p.slice(0,4):p;
+}
+const DEG_IV=(q,d)=>{ const Q=QUAL[q]; if(d==='1') return Q.iv[0]; if(d==='3') return Q.iv[1]; if(d==='5') return Q.iv[2]; if(d==='7') return Q.iv[3];
+  if(d==='9') return q==='alt'?1:2; if(d==='11') return 5; if(d==='13') return q==='alt'?8:9; };
+const M_LO=55, M_HI=88;
+function genMethod(meth){
+  const M=METHODS[meth], C=chordDefs();
+  // 마디별 코드 정보 (지금 키 기준)
+  const segs=[]; FORM.forEach((bar,bi)=>bar.forEach((sg,si)=>segs.push({bi,si,sg})));
+  const ctxOf=({sg})=>{ const c=sg.c, ch=C[sg.k], root=parse(simpRoot(tn(c.root))).pc, S8=SCALES[sg.k.split(':')[0]];
+    const sroot=parse(ch.sym).pc, diat=S8.iv.filter((iv,i)=>i!==S8.x).map(iv=>(sroot+iv)%12).sort((a,b)=>a-b);
+    return {c,ch,root,diat,pc:d=>(root+DEG_IV(c.qual,d))%12, sp:m=>spOf(ch,m)}; };
+  const ctxs=segs.map(ctxOf);
+  const pick=(pc,prev,dir)=>{ if(dir==='='&&((prev%12)+12)%12===pc) return prev;
+    const u=prev+((pc-prev)%12+12)%12;
+    if(dir==='u') return u<=prev?u+12:u; if(dir==='d') return u-12;
+    return (u-prev)<=(prev-(u-12))?u:u-12; };
+  const into=(m,[lo,hi])=>{ while(m<lo) m+=12; while(m>hi) m-=12; return m; };
+  const fit=m=>into(m,[M_LO+2,M_HI-2]); // 이어지는 음은 가장 가까운 자리, 음역(G3–E6)을 벗어날 때만 옥타브 이동
+  const leads=x=>x.t==='ap'||x.t==='nx';
+  const firstOf=a=>{ for(const x of a){ if(x.t==='n') return x; if(x.x){ const y=firstOf(x.x); if(y) return y; } } return null; };
+  // 패턴 하나를 실제 음으로: cx 지금 코드, nx 다음 코드, prev 앞 음, forced 앞에서 정해 준 첫 음(접근·당김음)
+  function run(V,pat,cx,nx,prev,forced,anchor,okNext){
+    // 다음 코드로 이끄는 목표음: 가장 가까운 자리부터, 다음 마디가 음역(G3–E6) 안에 들어가는 옥타브로
+    const tgt=(pc,g=0)=>{ const n0=pick(pc,cur==null?67:cur,'n'); const cs=[n0,n0-12,n0+12,n0-24,n0+24].sort((a,b)=>Math.abs(a-n0)-Math.abs(b-n0)).filter(m=>m>=M_LO+g&&m<=M_HI-g);
+      return (okNext&&cs.find(okNext))??fit(n0); };
+    const firstSpec=firstOf(pat);
+    const notes=[]; let cur=prev, nextF=null, T=null; const ms=[];
+    const put=(m,sp)=>{ ms.push(m); return {m,sp}; };
+    const one=x=>{ const m=x===firstSpec&&anchor!=null?anchor:pick(cx.pc(x.d),cur==null?67:cur,x.dir); cur=m; return put(m,cx.sp(m)); };
+    for(const x of pat){
+      if(x.t==='h'){ notes.push({hold:true}); continue; }
+      if(x.t==='r'){ notes.push({rest:true}); continue; }
+      if(x.t==='tc'){ notes.push({tc:true}); continue; }
+      if(x.t==='tie'){ if(forced!=null){ notes.push({hold:true}); cur=forced; } else notes.push({rest:true}); continue; }
+      if(x.t==='n'){ notes.push(one(x)); continue; }
+      if(x.t==='six'){ notes.push({six:x.x.map(one)}); continue; }
+      if(x.t==='trip'){ notes.push({trip:x.x.map(one)}); continue; }
+      if(x.t==='nx'){ const m=tgt(nx.pc(x.d)); nextF=m; cur=m; notes.push(put(m,nx.sp(m))); continue; }
+      if(x.t==='aps'){ const m=anchor-1; notes.push(put(m,chromSp(m,true))); continue; }
+      if(x.t==='ap'){
+        if(T==null){ T=tgt(nx.pc(V.target),2); nextF=T; }
+        let m, sp;
+        if(x.k==='cb'){ m=T-1; sp=chromSp(m,true); } else if(x.k==='ca'){ m=T+1; sp=chromSp(m,false); }
+        else if(x.k==='cb2'){ m=T-2; sp=nx.ch.byPc[((m%12)+12)%12]||chromSp(m,true); }
+        else { const up=x.k==='da', pcs=nx.diat; let k=T; do{ k+=up?1:-1; }while(!pcs.includes(((k%12)+12)%12)); m=k; sp=nx.sp(m);
+          // 위 다이아토닉이 반음 위와 같은 음이면(교재: E → F♯ F D♯) 온음 위를 써서 같은 음이 겹치지 않게
+          if(up&&m===T+1&&pat.some(y=>y.t==='ap'&&y.k==='ca')){ m=T+2; sp={l:sp.l,a:sp.a+1,pc:((m%12)+12)%12}; } }
+        cur=m; notes.push(put(m,sp)); continue; }
+    }
+    return {notes,nextF,last:cur,lo:ms.length?Math.min(...ms):67,hi:ms.length?Math.max(...ms):67};
+  }
+  // 변주 하나 만들기. ref = 시작 음높이 기준. 앞 음과 이어지는 음은 항상 가장 가까운 자리로 잇고,
+  // 음역을 벗어날 때만 옥타브를 옮김. 여러 시작 높이를 시험해서 옥타브 이동·도약이 가장 적은 것을 고름
+  function variant(V,ref){
+    const bars=FORM.map(()=>[]); let score=0;
+    let pickup=null, prev=null, forced=null;
+    const hasPk=!V.byQual&&V.full.some(leads);
+    const patOf=i=>{ const len=segs[i].sg.len, half=len<8; let pat=V.byQual?qualPattern(ctxs[i].c.qual,half):(i===0&&V.first&&!hasPk?V.first:(half?V.half:V.full));
+      if(len===2) pat=[N('3'),H];
+      if(i===segs.length-1&&hasPk) pat=pat.map(x=>leads(x)?R:x); // 마지막 마디 끝은 쉼표 (반복하면 못갖춘마디가 그 자리에)
+      return pat; };
+    // 목표음 m에서 시작하면 그 마디가 음역 안에 들어가는지
+    const okAt=j=>m=>{ const pj=patOf(j), tj=pj[0].t==='tie'; const r=run(V,pj,ctxs[j],ctxs[(j+1)%segs.length],m,tj?m:null,tj?null:m); return r.lo>=M_LO&&r.hi<=M_HI; };
+    if(hasPk){ // 못갖춘마디: 다음 코드로 이끄는 음은 1마디 앞에서
+      const tail=V.full.slice(V.full.findIndex(leads));
+      const r=run(V,tail,ctxs[0],ctxs[0],ref,null,null,okAt(0));
+      pickup=r.notes; prev=r.last; forced=r.nextF; if(r.lo<M_LO||r.hi>M_HI) score+=5000;
+    }
+    segs.forEach((s,i)=>{
+      const cx=ctxs[i], nx=ctxs[(i+1)%segs.length];
+      const pat=patOf(i), okN=okAt((i+1)%segs.length);
+      const firstSpec=firstOf(pat);
+      const isForcedFirst=forced!=null && firstSpec && pat.indexOf(firstSpec)<=2 && pat[0].t!=='tie';
+      const tied=pat[0].t==='tie'&&forced!=null; // 붙임줄로 시작하면 첫 음은 패턴의 방향대로
+      let anchor=null; const from=prev==null?ref:prev;
+      if(firstSpec&&!tied){ anchor=isForcedFirst&&cx.pc(firstSpec.d)===((forced%12)+12)%12?forced:pick(cx.pc(firstSpec.d),from,'n'); }
+      const f=pat[0].t==='tie'?forced:null;
+      let r=run(V,pat,cx,nx,prev,f,anchor,okN);
+      const out_=x=>x.lo<M_LO||x.hi>M_HI, locked=isForcedFirst&&anchor===forced;
+      if(anchor!=null && !locked && out_(r)){
+        let ok=false; for(const d of [12,-12,24,-24]){ const r2=run(V,pat,cx,nx,prev,f,anchor+d,okN); if(!out_(r2)){ r=r2; anchor+=d; ok=true; break; } }
+        score+=ok?1000:5000; }
+      else if(out_(r)) score+=5000;
+      if(anchor!=null&&prev!=null) score+=Math.abs(anchor-prev);
+      score+=Math.abs((r.lo+r.hi)/2-71)*0.2;
+      bars[s.bi].push({k:s.sg.k,sym:cx.ch.sym,notes:r.notes,tones:cx.ch.tones.map(t=>t.pc),
+        syms:s.sg.syms.map(([sy,at])=>({sym:C[sy].sym,at,tones:C[sy].tones.map(t=>t.pc)}))});
+      prev=r.last; forced=r.nextF;
+    });
+    return {bars,pickup,score};
+  }
+  const out=[];
+  M.v.forEach((V,vi)=>{
+    const grpIdx=M.v.slice(0,vi).filter(x=>x.g===V.g).length;
+    let best=null; for(let ref=M_LO+2;ref<=M_HI-2;ref+=2){ const r=variant(V,ref); if(!best||r.score<best.score) best=r; }
+    out.push({method:meth,mode:V.g,deg:grpIdx,title:V.title,bars:best.bars,pickup:best.pickup});
+  });
+  return out;
 }
 /* ===== GEN END ===== */
 
 const $=id=>document.getElementById(id);
-let DATA=[], FLAT=[], noteEls=[], ctx=null, master=null, playing=false, timer=null, idx=0, nextT=0, q=[], ciLeft=0, lastLine=null;
+let DATA=[], FLAT=[], COMP=[], CH_START=[], TOTAL=0, ctx=null, master=null, playing=false, timer=null, idx=0, cidx=0, clickP=0, base=0, P0=0, lastSpb=0, q=[];
 
 const MODES=['A','B','Bu','C'], LAB={A:'A',B:'B',Bu:'B↑',C:'C'}, CLS=m=>m==='Bu'?'B':m;
 const cid=c=>LAB[c.mode]+'-'+(c.deg+1)+(c.half==null?'':'ab'[c.half]);   // 예: B-1a
 const cjump=c=>LAB[c.mode]+(c.deg+1)+(c.half==null?'':'ab'[c.half]);     // 예: B1a
 const cfrom=c=>c.half==null?'':(c.half?'3–4':'1–2')+'마디부터';
+const ctitle=c=>c.title||(DEGNAME[c.deg]+' 시작');             // 시작 코러스 목록·재생 위치에 쓰는 이름
+const cstart=c=>c.title||(DEGNAME[c.deg]+'에서 시작');
 function fillFrom(){
   const old=+$('from').value||0, oc=DATA_PREV[old];
-  $('from').innerHTML=DATA.map((c,i)=>`<option value="${i}">${cid(c)} · ${DEGNAME[c.deg]} 시작${c.half==null?'':' · '+cfrom(c)}</option>`).join('');
+  $('from').innerHTML=DATA.map((c,i)=>`<option value="${i}">${cid(c)} · ${ctitle(c)}${c.half==null?'':' · '+cfrom(c)}</option>`).join('');
   // 쉼표 옵션을 바꿔도 비슷한 코러스를 계속 선택
   let ni=oc?DATA.findIndex(c=>c.mode===oc.mode&&c.deg===oc.deg&&(c.half==null||oc.half==null||c.half===oc.half)):0;
   $('from').value=String(ni<0?0:ni);
@@ -458,14 +643,33 @@ function fillFrom(){
 let DATA_PREV=[];
 
 function build(){
-  SPACE=$('space').checked; DATA=generate(); FLAT=[];
-  DATA.forEach((c,ci)=>{ let curSym=null;
-    c.bars.forEach((segs,bi)=>segs.forEach(seg=>seg.notes.forEach((note,ni)=>{
-      const cs=seg.syms.find(s=>s.at===ni);
-      if(cs) curSym={sym:cs.sym,tones:cs.tones,len:((seg.syms.find(s=>s.at>ni)||{at:seg.notes.length}).at-ni)};
-      FLAT.push({m:note.m,rest:!!note.rest,hold:!!note.hold,chorus:ci,bar:bi,key:KEY,chordStart:cs?curSym:null,sym:curSym.sym,el:null});
-    })));
+  SPACE=$('space').checked; DATA=METHOD==='bebop'?generate():genMethod(METHOD);
+  // 연주 이벤트: 음표·쉼표(FLAT), 반주(COMP). 위치는 8분음표 단위 (마디 = 8)
+  FLAT=[]; COMP=[]; CH_START=[]; let P=0;
+  DATA.forEach((c,ci)=>{ CH_START[ci]=P; let last=null, cur=null;
+    const k=c.pickup?c.pickup.length:0;
+    (c.pickup?[[{notes:c.pickup,syms:[]}],...c.bars]:c.bars).forEach((segs,bi0)=>{ const bi=c.pickup?bi0-1:bi0; let bp=bi<0?-k:0;
+      segs.forEach(seg=>{
+        seg.syms.forEach((s,si)=>{ const end=(seg.syms[si+1]||{at:seg.notes.length}).at; COMP.push({P:P+bp+s.at,dur:end-s.at,tones:s.tones,chorus:ci}); });
+        seg.notes.forEach((n,j)=>{
+          const p=P+bp+j, cs=seg.syms.find(s=>s.at===j); if(cs) cur=cs.sym;
+          const ev=o=>Object.assign({chorus:ci,bar:bi,key:KEY,sym:cur,el:null},o);
+          if(n.tc) return;
+          if(n.hold){ if(last) last.dur+=1; return; }
+          if(n.rest){ n.ev=ev({rest:true,P:p,dur:1}); FLAT.push(n.ev); last=n.ev; return; }
+          if(n.six){ n.six.forEach((x,k)=>{ x.ev=ev({m:x.m,P:p+k/2,dur:.5,trip:true}); FLAT.push(x.ev); /* 16분음표도 스윙 없이 고르게 */ last=x.ev; }); return; }
+          if(n.trip){ n.trip.forEach((x,k)=>{ x.ev=ev({m:x.m,P:p+k*2/3,dur:2/3,trip:true}); FLAT.push(x.ev); last=x.ev; }); return; }
+          n.ev=ev({m:n.m,P:p,dur:1}); FLAT.push(n.ev); last=n.ev;
+        });
+        bp+=seg.notes.length;
+      });
+      if(bi>=0) P+=8;
+    });
   });
+  TOTAL=P;
+  // 다음 코러스의 못갖춘마디와 겹치는 앞 코러스 마지막 쉼표는 빼고, 위치 순서로 정렬
+  DATA.forEach((c,ci)=>{ if(ci>0&&c.pickup){ const from=CH_START[ci]-c.pickup.length-1e-9; FLAT=FLAT.filter(e=>!(e.chorus===ci-1&&e.P>=from)); /* 앞 코러스 끝의 '처음으로 돌아가는 음' 자리는 다음 코러스 못갖춘마디가 대신 */ } });
+  FLAT.sort((a,b)=>a.P-b.P);
   document.querySelectorAll('.kn').forEach(e=>e.textContent=keyLabel(KEY));
 }
 function render(){
@@ -476,24 +680,28 @@ let SW_D=980, SW_M=520;
 function draw(){
   if(!window.ABCJS){ $('scores').innerHTML='<p class="err">악보 라이브러리를 불러오지 못했어요. 새로고침해 주세요.</p>'; return; }
   const w=$('scores').clientWidth||360, bpl=w<600?2:4;
-  const CY={A:['코드마다 다시 시작','코드가 바뀔 때마다 지정한 음(1·3·5음)에서 새로 하행해요.'],
+  const CY=METHOD!=='bebop'?METHODS[METHOD].groups:{A:['코드마다 다시 시작','코드가 바뀔 때마다 지정한 음(1·3·5음)에서 새로 하행해요.'],
             B:['끊지 않고 이어가기','앞 코드의 마지막 음에서 가장 가까운 코드톤으로 이어가요. 2마디 동안은 옥타브를 바꾸지 않고 한 흐름으로 연주해요. E6보다 높아지는 구간만 8va로 표기해요.'],
             C:['하행 · 상행 교대','한 마디씩 방향을 바꾸고, 연결은 반음이나 온음으로만 해요.']};
-  const SUB={B:'하행',Bu:'상행'};
+  const SUB=METHOD==='bebop'?{B:'하행',Bu:'상행'}:{};
   $('scores').innerHTML=['A','B','C'].map(m=>`<section class="cycle ${m}"><div class="cycle-head"><span class="letter">${m}</span><div><h2>사이클 ${m} · ${CY[m][0]}</h2><p>${CY[m][1]}</p></div></div>`+
-    DATA.map((c,i)=>CLS(c.mode)!==m?'':(SUB[c.mode]&&(i===0||DATA[i-1].mode!==c.mode)?`<h3 class="sub">${LAB[c.mode]} · ${SUB[c.mode]}</h3>`:'')+`<article class="chorus" id="ch${i}"><div class="chorus-h"><span class="id">${cid(c)}</span><span class="start">${DEGNAME[c.deg]}에서 시작${c.half==null?'':' · '+cfrom(c)}</span><button class="play1" data-i="${i}">여기서 재생</button></div><div class="score" id="sc${i}"></div></article>`).join('')+`</section>`).join('');
+    DATA.map((c,i)=>CLS(c.mode)!==m?'':(SUB[c.mode]&&(i===0||DATA[i-1].mode!==c.mode)?`<h3 class="sub">${LAB[c.mode]} · ${SUB[c.mode]}</h3>`:'')+`<article class="chorus" id="ch${i}"><div class="chorus-h"><span class="id">${cid(c)}</span><span class="start">${cstart(c)}${c.half==null?'':' · '+cfrom(c)}</span><button class="play1" data-i="${i}">여기서 재생</button><button class="loop1" data-loop="${i}" aria-label="이 코러스 반복 재생">↻ 반복</button></div><div class="score" id="sc${i}"></div></article>`).join('')+`</section>`).join('');
   $('jump').innerHTML=DATA.map((c,i)=>(i&&c.mode!==DATA[i-1].mode?'<span class="sep"></span>':'')+`<button class="${CLS(c.mode)}" data-i="${i}">${cjump(c)}</button>`).join('');
+  // 코러스마다 '반복': 이 코러스 전체를 구간 반복으로 바로 재생
+  document.querySelectorAll('[data-loop]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.loop; if(playing) stop();
+    SEL={chorus:i,bar:0,end:DATA[i].bars.length-1,done:true}; $('from').value=String(i); setLoop(true); start(); });
   document.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{ SEL=null; markBar(); $('from').value=b.dataset.i; if(b.classList.contains('play1')){ if(playing) stop(); start(); } else { stop(); $('ch'+b.dataset.i).scrollIntoView({block:'start'}); } });
   markSel();
-  const flat=FLAT.filter(n=>!n.rest&&!n.hold); let fi=0;
   DATA.forEach((c,ci)=>{
     ABCJS.renderAbc('sc'+ci,toABC(c,bpl,+$('bpm').value),{add_classes:true,responsive:'resize',paddingtop:22,paddingbottom:4,paddingleft:6,paddingright:6,staffwidth:w<600?SW_M:SW_D});
-    const els=[...document.querySelectorAll('#sc'+ci+' .abcjs-note')];
+    // 그려진 음표·쉼표에 길이·마디·연주 이벤트를 연결 (그린 순서 = 악보 문자열 순서)
+    const all=[...document.querySelectorAll('#sc'+ci+' .abcjs-note, #sc'+ci+' .abcjs-rest')];
+    if(all.length===c.toks.length) all.forEach((el,k)=>{ const t=c.toks[k]; el.dataset.d8=t.d8; el.dataset.bar=t.bar; el.dataset.ch=ci; if(t.ev) t.ev.el=el; });
+    const els=all.filter(e=>e.classList.contains('abcjs-note'));
     try{ equalize(document.querySelector('#sc'+ci+' svg')); }catch(e){}
     try{ drawOttava(document.querySelector('#sc'+ci+' svg'),els,c.ottava||[]); }catch(e){}
-    els.forEach(el=>{ if(flat[fi]) flat[fi].el=el; fi++; });
   });
-  markBar();
+  markBar(); markBlank();
   if(playing) markCur(curCh);
 }
 
@@ -512,22 +720,25 @@ function equalize(svg){
     const bars=[...svg.querySelectorAll('.abcjs-bar.abcjs-l'+l)].map(e=>({e,m:mOf(e),x:e.getBBox().x})).sort((a,b)=>a.m-b.m);
     if(bars.length<2) return;
     const start=START;
-    const end=bars[bars.length-1].x, W=(end-start)/bars.length, nw=bars.map((_,i)=>start+W*i).concat(end);
-    bars.forEach((b,i)=>move(b.e,nw[i+1]-b.x));
     const els=[...svg.querySelectorAll('.abcjs-l'+l)].filter(e=>{ const c=e.getAttribute('class');
       return top(e) && !/abcjs-(bar|staff|clef|key-signature|time-signature|tempo)/.test(c) && mOf(e)!==null && mOf(e)<bars.length; });
+    // 마디 넓이: 보통은 모두 같게, 못갖춘마디(8분음표 8개보다 짧은 마디)는 길이에 맞게 좁게
+    const durOf=e=>e.dataset.d8?+e.dataset.d8:0;
+    const wts=bars.map((_,m)=>{ const t=els.filter(e=>mOf(e)===m&&(e.classList.contains('abcjs-note')||e.classList.contains('abcjs-rest'))).reduce((x,e)=>x+durOf(e),0); return t>0&&t<7.99?Math.max(.28,t/8+.12):1; });
+    const end=bars[bars.length-1].x, W=(end-start)/wts.reduce((a,b)=>a+b,0), nw=[start]; wts.forEach(w=>nw.push(nw[nw.length-1]+W*w)); nw[nw.length-1]=end;
+    bars.forEach((b,i)=>move(b.e,nw[i+1]-b.x));
     for(let m=0;m<bars.length;m++){
       const inM=els.filter(e=>mOf(e)===m);
       // 길이(8분음표 개수)에 비례해서 배치: 4분음표는 두 칸, 쉼표는 자기 구간 가운데
-      const d8=e=>{ const m=(e.getAttribute('class')||'').match(/abcjs-d(\d+)(?:-(\d+))?(\s|$)/); return m?Math.max(1,Math.round(parseFloat(m[1]+'.'+(m[2]||'0'))*8)):1; };
+      const d8=e=>{ if(e.dataset.d8) return +e.dataset.d8; const m=(e.getAttribute('class')||'').match(/abcjs-d(\d+)(?:-(\d+))?(\s|$)/); return m?Math.max(1,Math.round(parseFloat(m[1]+'.'+(m[2]||'0'))*8)):1; };
       const notes=inM.filter(e=>e.classList.contains('abcjs-note')||e.classList.contains('abcjs-rest')).map(e=>{
         const rest=e.classList.contains('abcjs-rest');
         const h=rest?e:(e.querySelector('.abcjs-notehead')||e), hb=h.getBBox(), st=rest?null:e.querySelector('.abcjs-stem'), sb=st?st.getBBox():hb;
         return {e,rest,n8:d8(e),hx:hb.x+hb.width/2,sx:sb.x+sb.width/2};
       }).sort((a,b)=>a.hx-b.hx);
       if(!notes.length) continue;
-      const tot=notes.reduce((x,n)=>x+n.n8,0), L=nw[m]+10, R=nw[m+1]-4, slot=(R-L)/Math.max(8,tot);
-      let cum=0; notes.forEach(n=>{ const c=n.rest?cum+n.n8/2:cum+0.5; n.dx=L+slot*c-n.hx; move(n.e,n.dx);
+      const tot=notes.reduce((x,n)=>x+n.n8,0), L=nw[m]+10, R=nw[m+1]-4, slot=(R-L)/(tot<7.99?tot:Math.max(8,tot));
+      let cum=0; notes.forEach(n=>{ const c=n.rest?cum+n.n8/2:cum+Math.min(n.n8,1)/2; n.dx=L+slot*c-n.hx; move(n.e,n.dx); // 16분음표·셋잇단은 자기 길이만큼
         if(n.rest){ // 쉼표에 붙은 코드 이름은 쉼표 가운데가 아니라 그 박의 시작 자리로
           const t=n.e.querySelector('.abcjs-chord');
           if(t){ const tb=t.getBBox(); t.setAttribute('transform',`translate(${L+slot*(cum+0.5)-6-(tb.x+n.dx)},0)`); } }
@@ -596,28 +807,45 @@ function comp(t,tones,dur){
   const v3=48+((third-48)%12+12)%12, v7=48+((sev-48)%12+12)%12;
   tone(t,bass,dur,.13,'sine'); tone(t,v3,dur,.05,'sine'); tone(t,v7,dur,.05,'sine');
 }
+// 위치(8분음표 단위) → 시간. 8분음표 뒷박에만 스윙을 주고, 셋잇단은 고르게
+function tmap(x,trip,sw){ const b=Math.floor(x/2+1e-9), f=x/2-b; if(trip||f<1e-9) return b+f; return b+(f<=.5?f*sw/.5:sw+(f-.5)*(1-sw)/.5); }
 function schedule(){
-  const spb=60/+$('bpm').value, sw=+$('swing').value/100;
-  while(nextT<ctx.currentTime+.6){
-    if(ciLeft>0){ const b=4-ciLeft; click(nextT,b===0); q.push({t:nextT,count:b+1}); ciLeft--; nextT+=spb; continue; }
-    const cyc=$('cyc').checked;
-    if(idx>=FLAT.length || (cyc && FLAT[idx].chorus!==playFrom)){
-      if(!cyc || keysDone>=11){ q.push({t:nextT,end:true}); clearInterval(timer); return; }
-      keysDone++; KEY=KEYS[(KEYS.indexOf(KEY)+1)%12]; $('key').value=KEY;
-      build(); idx=FLAT.findIndex(n=>n.chorus===playFrom); setTimeout(draw,0);
+  const spb=60/+$('bpm').value, sw=+$('swing').value/100, T=(P,tr)=>base+tmap(P-P0,tr,sw)*spb;
+  if(lastSpb && spb!==lastSpb){ // 재생 중 템포를 바꾸면 다음 음 자리에서 이어 붙임
+    const pn=Math.min(FLAT[idx]?FLAT[idx].P:TOTAL, clickP); const told=base+tmap(pn-P0,false,sw)*lastSpb; base=told-tmap(pn-P0,false,sw)*spb; }
+  lastSpb=spb;
+  const horizon=ctx.currentTime+.6;
+  for(;;){
+    const cyc=$('cyc').checked, looping=$('loop').checked, rep=cyc||looping;
+    // 반복 구간: 구간 반복으로 고른 마디들, 아니면 코러스 전체. 1마디부터면 못갖춘마디도 포함
+    const a=looping&&PREG.sel?PREG.a:0, b=looping&&PREG.sel?PREG.b:DATA[playFrom].bars.length-1;
+    const kp=a===0&&DATA[playFrom].pickup?DATA[playFrom].pickup.length:0;
+    const rs=CH_START[playFrom]+a*8, re=CH_START[playFrom]+(b+1)*8;
+    const endP=rep?re-kp:TOTAL; // 다음 반복의 못갖춘마디가 시작하는 자리
+    const ev=FLAT[idx], cp=COMP[cidx];
+    const pe=ev&&ev.P<endP-1e-9?ev.P:Infinity, pc=cp&&cp.P<endP-1e-9?cp.P:Infinity, pk=clickP<endP-1e-9?clickP:Infinity;
+    const p=Math.min(pe,pc,pk);
+    if(p===Infinity){
+      const tEnd=T(endP); if(tEnd>horizon) return;
+      const n=+$('loopn').value;
+      if(!rep || (cyc&&keysDone>=11) || (looping&&n>0&&reps+1>=n)){ q.push({t:rep?T(re):tEnd,end:true}); clearInterval(timer); return; }
+      const tBar=T(re-8); // 구간 마지막 마디 시작 시각에 맞춰 다음 반복을 이어 붙임
+      reps++;
+      if(cyc){ keysDone++; KEY=KEYS[(KEYS.indexOf(KEY)+1)%12]; $('key').value=KEY; build(); setTimeout(draw,0); }
+      P0=rs-8; base=tBar; const sp=rs-kp;
+      idx=FLAT.findIndex(e=>e.P>=sp-1e-9); cidx=COMP.findIndex(e=>e.P>=sp-1e-9); clickP=Math.ceil((sp-1e-9)/2)*2;
+      if(idx<0) idx=FLAT.length; if(cidx<0) cidx=COMP.length;
+      q.push({t:base+tmap(sp-P0,false,sw)*spb,rep:reps});
+      const inc=+$('loopt').value; if(inc){ setBpm(+$('bpm').value+inc); return; } // 다음 호출에서 새 템포로 이어 붙임
+      continue;
     }
-    const pair=idx%2, beatStart=nextT-(pair?sw*spb:0);
-    const n=FLAT[idx];
-    const len=pair?(1-sw)*spb:sw*spb;
-    if(!n.rest&&!n.hold){ let ex=0; for(let k=idx+1;k<FLAT.length&&FLAT[k].hold;k++) ex++; tone(nextT,n.m,(len+ex*spb/2)*0.9,.2); }
-    if(n.chordStart && $('comp').checked) comp(nextT,n.chordStart.tones,spb*n.chordStart.len/2*0.95);
-    else if(idx===startIdx && $('comp').checked){ // 코드 중간부터 시작하면 지금 코드를 남은 길이만큼 반주
-      let a=idx; while(a>0&&!FLAT[a].chordStart&&FLAT[a-1].chorus===n.chorus) a--; const cs=FLAT[a].chordStart;
-      if(cs){ let e=idx+1; while(e<FLAT.length&&!FLAT[e].chordStart&&FLAT[e].chorus===n.chorus) e++; comp(nextT,cs.tones,spb*(e-idx)/2*0.95); } }
-    if(!pair && $('click').checked){ const beat=(idx%8)/2; if(beat===1||beat===3) click(nextT,false); }
-    if(!n.hold) q.push({t:nextT,n});
+    const t=T(p, p===pe&&ev.trip); if(t>horizon) return;
+    if(p===pk){ const bt=((p%8)+8)%8; if($('click').checked&&(bt===2||bt===6)) click(t,false); clickP+=2; continue; }
+    if(p===pc){ cidx++; if($('comp').checked) comp(t,cp.tones,(T(cp.P+cp.dur)-t)*0.95); continue; }
     idx++;
-    nextT= pair? beatStart+spb : nextT+sw*spb;
+    const bl=isBlank(ev.chorus,ev.bar,reps);
+    if(!ev.rest&&!bl) tone(t,ev.m,(T(ev.P+ev.dur,ev.trip)-t)*0.9,.2);
+    q.push({t,n:ev,bl});
   }
 }
 function ui(){
@@ -626,36 +854,50 @@ function ui(){
     const e=q.shift();
     if(e.end){ stop(); return; }
     if(e.count){ $('posk').textContent='예비박'; $('pos').textContent=e.count+' / 4'; continue; }
+    if(e.rep!==undefined){ BREP=e.rep; markBlank(); continue; }
     const n=e.n;
     document.querySelectorAll('.abcjs-note.cur').forEach(x=>x.classList.remove('cur'));
-    if(n.el&&!n.rest){ n.el.classList.add('cur');
+    if(n.el&&!n.rest&&!e.bl){ n.el.classList.add('cur');
       if($('follow').checked){ const r=n.el.getBoundingClientRect(); if(r.top<90||r.bottom>innerHeight-40) n.el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); } }
     const c=DATA[n.chorus];
-    $('posk').textContent=`${keyLabel(n.key)} · ${cid(c)} · ${DEGNAME[c.deg]} 시작`;
-    $('pos').innerHTML=`${n.bar+1}마디 · <span class="chord">${n.sym.replace(/b/g,'♭').replace(/#/g,'♯')}</span>`;
+    $('posk').textContent=`${keyLabel(n.key)} · ${cid(c)} · ${ctitle(c)}`;
+    $('pos').innerHTML=n.bar<0?'못갖춘마디':`${n.bar+1}마디 · <span class="chord">${(n.sym||'').replace(/b/g,'♭').replace(/#/g,'♯')}</span>`;
     if(curCh!==n.chorus){ curCh=n.chorus; markCur(curCh); }
   }
   requestAnimationFrame(ui);
 }
-function start(from){
+function start(){
   if(!FLAT.length) return;
-  if(from===undefined && SEL){ const i=FLAT.findIndex(n=>n.chorus===SEL.chorus&&n.bar===SEL.bar); if(i>=0) from=i; }
   if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); }
   if(ctx.state==='suspended') ctx.resume();
   master=ctx.createGain(); master.gain.value=1; master.connect(ctx.destination);
-  if(from!==undefined){ idx=from; playFrom=FLAT[from].chorus; $('from').value=String(playFrom); } // 악보에서 누른 마디부터
-  else { playFrom=+$('from').value; idx=FLAT.findIndex(n=>n.chorus===playFrom); }
-  keysDone=0; startIdx=idx;
+  // 시작 위치: 선택한 마디의 처음, 없으면 시작 코러스의 처음
+  let startP, barP;
+  if(SEL&&SEL.bar>0){ playFrom=SEL.chorus; barP=startP=CH_START[SEL.chorus]+SEL.bar*8; $('from').value=String(playFrom); }
+  else { playFrom=SEL?SEL.chorus:+$('from').value; barP=CH_START[playFrom]; startP=barP-(DATA[playFrom].pickup?DATA[playFrom].pickup.length:0); } // 1마디부터면 못갖춘마디도
+  PREG={sel:!!SEL, a:SEL?SEL.bar:0, b:SEL?SEL.end:DATA[playFrom].bars.length-1};
+  reps=0; BREP=0; markBlank();
+  idx=FLAT.findIndex(e=>e.P>=startP-1e-9); if(idx<0) idx=FLAT.length;
+  cidx=COMP.findIndex(e=>e.P>=startP-1e-9); if(cidx<0) cidx=COMP.length;
+  keysDone=0;
   document.querySelectorAll('.abcjs-note.cur').forEach(e=>e.classList.remove('cur'));
-  q=[]; ciLeft=$('ci').checked?4:0; nextT=ctx.currentTime+.08; playing=true;
+  const spb=60/+$('bpm').value, sw=+$('swing').value/100, t0=ctx.currentTime+.08; q=[];
+  if($('ci').checked){ // 예비박은 시작 마디 바로 앞 마디에서 (못갖춘마디는 그 마디 끝에 겹쳐서)
+    P0=barP-8; base=t0; clickP=barP; for(let k=0;k<4;k++){ click(t0+k*spb,k===0); q.push({t:t0+k*spb,count:k+1}); } }
+  else { P0=barP-(startP<barP?8:0); base=t0-tmap(startP-P0,false,sw)*spb; clickP=Math.ceil((startP-1e-9)/2)*2; }
+  lastSpb=spb; playing=true;
+  // 코드 중간부터 시작하면 지금 코드를 남은 길이만큼 반주
+  const cov=COMP.find(c=>c.P<startP-1e-9&&c.P+c.dur>startP+1e-9);
+  if(cov&&$('comp').checked) comp(base+tmap(startP-P0,false,sw)*spb,cov.tones,tmap(cov.P+cov.dur-startP,false,sw)*spb*0.95);
   schedule(); timer=setInterval(schedule,25); requestAnimationFrame(ui);
   $('playt').textContent='정지'; $('play').classList.add('on'); $('play').setAttribute('aria-label','정지'); curCh=-1;
-  if($('follow').checked && FLAT[idx].el) FLAT[idx].el.scrollIntoView({block:'center'});
+  const f=FLAT[idx]; if($('follow').checked && f && f.el) f.el.scrollIntoView({block:'center'});
 }
 function stop(){
   playing=false; clearInterval(timer);
   if(master){ const m=master; m.gain.setTargetAtTime(0,ctx.currentTime,.02); setTimeout(()=>m.disconnect(),300); master=null; }
   $('playt').textContent='재생'; $('play').classList.remove('on'); $('play').setAttribute('aria-label','재생'); markCur(-1); markSel();
+  if(BREP){ BREP=0; markBlank(); }
 }
 $('play').onclick=()=>playing?stop():start();
 $('bpm').oninput=e=>{ $('bpmv').textContent=e.target.value; $('bpmq').value=e.target.value; };
@@ -678,41 +920,94 @@ document.addEventListener('keydown',e=>{
   const t=e.target; if(t.closest&&t.closest('input,select,textarea,[contenteditable]')) return;
   if(e.key===' '){ if(t.tagName==='BUTTON') return; e.preventDefault(); playing?stop():start(); }
   else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ e.preventDefault(); const i=KEYS.indexOf(KEY), n=KEYS[(i+(e.key==='ArrowRight'?1:11))%12]; KEY=n; $('key').value=n; render(); }
+  else if(e.key==='r'||e.key==='R'){ setLoop(!$('loop').checked); }
+  else if((e.key==='n'||e.key==='N')&&!$('songnav').hidden){ location.hash=$('nexts').getAttribute('href'); }
+  else if((e.key==='p'||e.key==='P')&&!$('songnav').hidden){ location.hash=$('prevs').getAttribute('href'); }
   else if(e.key==='-'||e.key==='_'){ setBpm(+$('bpm').value-4); }
   else if(e.key==='+'||e.key==='='){ setBpm(+$('bpm').value+4); }
 });
 // 악보의 마디를 누르면 그 마디를 시작 위치로 선택 (재생 버튼을 누르면 거기서부터)
 $('scores').addEventListener('click',e=>{
-  let el=e.target.closest('.abcjs-note');
+  let el=e.target.closest('.abcjs-note,.abcjs-rest');
   if(!el){ // 음표 사이를 눌러도 가장 가까운 음표로 (휴대폰에서 누르기 쉽게)
     const sc=e.target.closest('.score'); if(!sc) return; let bd=1e9;
-    sc.querySelectorAll('.abcjs-note').forEach(n=>{ const r=n.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+    sc.querySelectorAll('.abcjs-note,.abcjs-rest').forEach(n=>{ const r=n.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
       const d=Math.abs(cx-e.clientX)+Math.abs(cy-e.clientY)*0.6; if(d<bd){ bd=d; el=n; } });
     if(!el||bd>60) return; }
-  const f=FLAT.findIndex(n=>n.el===el); if(f<0) return;
-  const nb={chorus:FLAT[f].chorus,bar:FLAT[f].bar};
-  SEL=(SEL&&SEL.chorus===nb.chorus&&SEL.bar===nb.bar)?null:nb; // 같은 마디를 다시 누르면 선택 해제
+  if(el.dataset.bar===undefined) return;
+  const nb={chorus:+el.dataset.ch,bar:Math.max(0,+el.dataset.bar)}; // 못갖춘마디를 누르면 1마디
+  if($('blank').value==='pick'){ const k=nb.chorus+':'+nb.bar; PICK.has(k)?PICK.delete(k):PICK.add(k); markBlank(); return; } // 빈칸 직접 고르기
+  if($('loop').checked){ // 구간 반복: 시작 마디 → 끝 마디
+    if(SEL&&!SEL.done&&SEL.chorus===nb.chorus) SEL={chorus:nb.chorus,bar:Math.min(SEL.bar,nb.bar),end:Math.max(SEL.bar,nb.bar),done:true};
+    else SEL={chorus:nb.chorus,bar:nb.bar,end:nb.bar,done:false};
+  } else SEL=(SEL&&SEL.chorus===nb.chorus&&SEL.bar===nb.bar&&SEL.end===nb.bar)?null:{chorus:nb.chorus,bar:nb.bar,end:nb.bar,done:true}; // 같은 마디를 다시 누르면 선택 해제
   if(SEL) $('from').value=String(SEL.chorus);
   markBar(); markSel();
 });
 $('swing').oninput=e=>$('swingv').textContent=e.target.value+'%';
 $('from').onchange=()=>{ SEL=null; markBar(); if(!playing) stop(); const el=$('ch'+$('from').value); el&&el.scrollIntoView({block:'start'}); };
-let curCh=-1, playFrom=0, keysDone=0, startIdx=0, SEL=null;
+let curCh=-1, playFrom=0, keysDone=0, startIdx=0, SEL=null, PREG={sel:false,a:0,b:0}, reps=0, BREP=0;
+const PICK=new Set();
+// 빈칸 마디인가 (못갖춘마디는 1마디를 따라감)
+function isBlank(ch,bar,rp){
+  const mode=$('blank').value, b=Math.max(0,bar), n=DATA[ch]?DATA[ch].bars.length:0;
+  if(mode==='off') return false; if(mode==='all') return true;
+  if(mode==='alt') return Math.floor(b/2)%2===1; if(mode==='alt2') return Math.floor(b/2)%2===0;
+  if(mode==='pick') return PICK.has(ch+':'+b);
+  if(mode==='grow'){ // 구간 반복 중이면 그 구간 안에서 늘림
+    const lp=playing&&$('loop').checked&&PREG.sel, lo=lp?PREG.a:0, cnt=lp?PREG.b-PREG.a+1:n;
+    const step=cnt<=4?1:2, pr=[3,1,2,0], order=[...Array(cnt).keys()].sort((x,y)=>pr.indexOf(x%4)-pr.indexOf(y%4)||x-y).map(x=>x+lo);
+    return order.slice(0,(rp==null?BREP:rp)*step).includes(b); }
+  return false;
+}
+// 마디들을 감싸는 상자 (여러 줄에 걸치면 줄마다)
+function boxes(svg,bars,cls,label){ const tight=!!label; // 빈칸 상자는 오선 높이만
+  const byLine=new Map();
+  bars.forEach(bar=>svg.querySelectorAll('[data-bar="'+bar+'"]').forEach(e=>{ const l=lineOf(e); if(!byLine.has(l)) byLine.set(l,[]); byLine.get(l).push(e); }));
+  const NS='http://www.w3.org/2000/svg', made=[];
+  byLine.forEach((els,l)=>{
+    const bx=els.map(e=>{ const h=tight&&e.querySelector('.abcjs-notehead'); return h?Object.assign(bb(e),{x:bb(e).x}):bb(e); }), staff=svg.querySelector('.abcjs-staff.abcjs-l'+l);
+    const sb=staff?staff.getBBox():{y:Math.min(...bx.map(b=>b.y)),height:40};
+    const x1=Math.min(...bx.map(b=>b.x))-10, x2=Math.max(...bx.map(b=>b.x+b.width))+10;
+    const y1=tight?sb.y-10:Math.min(sb.y,...bx.map(b=>b.y))-6, y2=tight?sb.y+sb.height+10:Math.max(sb.y+sb.height,...bx.map(b=>b.y+b.height))+6;
+    const r=document.createElementNS(NS,'rect'); r.setAttribute('class',cls);
+    r.setAttribute('x',x1); r.setAttribute('y',y1); r.setAttribute('width',x2-x1); r.setAttribute('height',y2-y1); r.setAttribute('rx',6);
+    svg.insertBefore(r,svg.firstChild); made.push(r);
+    if(label){ const t=document.createElementNS(NS,'text'); t.setAttribute('class','blanklab'); t.setAttribute('x',(x1+x2)/2); t.setAttribute('y',sb.y+sb.height/2+4); t.setAttribute('text-anchor','middle'); t.textContent=label; svg.appendChild(t); made.push(t); }
+  });
+  return made;
+}
+// 빈칸 마디: 음표·쉼표·빔을 가리고 점선 상자로 표시 (코드 이름은 그대로)
+function markBlank(){
+  document.querySelectorAll('.score svg .bl').forEach(e=>e.classList.remove('bl'));
+  document.querySelectorAll('.blankbox,.blanklab').forEach(e=>e.remove());
+  if($('blank').value==='off') return;
+  DATA.forEach((c,ci)=>{
+    const svg=document.querySelector('#sc'+ci+' svg'); if(!svg) return;
+    c.bars.forEach((_,bar)=>{
+      if(!isBlank(ci,bar)) return;
+      const ids=bar===0&&c.pickup?[-1,0]:[bar];
+      ids.forEach(id=>{ const lm=new Set(); svg.querySelectorAll('[data-bar="'+id+'"]').forEach(e=>lm.add(lineOf(e)+'_'+mOf(e)));
+        lm.forEach(k=>{ const [l,m]=k.split('_'); svg.querySelectorAll('.abcjs-l'+l+'.abcjs-m'+m).forEach(e=>{ const cl=e.getAttribute('class')||'';
+          if(!/abcjs-(chord|bar|staff|clef|key-signature|time-signature)/.test(cl)) e.classList.add('bl'); }); }); });
+      boxes(svg,ids,'blankbox','즉흥');
+    });
+  });
+}
 // 선택한 마디를 악보에 표시 (마디 뒤에 옅은 상자)
 function markBar(){
   document.querySelectorAll('.selbar').forEach(r=>r.remove());
   if(!SEL) return;
   const svg=document.querySelector('#sc'+SEL.chorus+' svg'); if(!svg) return;
-  const els=FLAT.filter(n=>n.chorus===SEL.chorus&&n.bar===SEL.bar&&n.el).map(n=>n.el);
-  if(!els.length) return;
-  const bx=els.map(bb), l=lineOf(els[0]), staff=svg.querySelector('.abcjs-staff.abcjs-l'+l);
-  const sb=staff?staff.getBBox():{y:Math.min(...bx.map(b=>b.y)),height:40};
-  const x1=Math.min(...bx.map(b=>b.x))-10, x2=Math.max(...bx.map(b=>b.x+b.width))+10;
-  const y1=Math.min(sb.y,...bx.map(b=>b.y))-6, y2=Math.max(sb.y+sb.height,...bx.map(b=>b.y+b.height))+6;
-  const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
-  r.setAttribute('class','selbar'); r.setAttribute('x',x1); r.setAttribute('y',y1); r.setAttribute('width',x2-x1); r.setAttribute('height',y2-y1); r.setAttribute('rx',6);
-  svg.insertBefore(r,svg.firstChild);
+  const bars=[]; for(let b=SEL.bar;b<=SEL.end;b++) bars.push(b);
+  boxes(svg,bars,'selbar');
 }
+// 구간 반복 켜고 끄기
+function setLoop(on){ $('loop').checked=on; $('loopb').setAttribute('aria-pressed',String(on));
+  if(!on&&SEL){ SEL.end=SEL.bar; SEL.done=true; } markBar(); markSel(); }
+$('loopb').onclick=()=>setLoop(!$('loop').checked);
+$('loop').onchange=()=>setLoop($('loop').checked);
+$('blank').onchange=()=>markBlank();
 $('key').onchange=()=>{ KEY=$('key').value; render(); };
 $('space').onchange=()=>render();
 function markCur(i){ document.querySelectorAll('#jump button').forEach(b=>b.classList.toggle('cur',+b.dataset.i===i));
@@ -720,31 +1015,49 @@ function markCur(i){ document.querySelectorAll('#jump button').forEach(b=>b.clas
   const b=document.querySelector('#jump button.cur'); b&&b.scrollIntoView({block:'nearest',inline:'nearest'}); }
 function markSel(){ const s=+$('from').value, c=DATA[s];
   document.querySelectorAll('#jump button').forEach(b=>b.classList.toggle('sel',+b.dataset.i===s));
-  if(!playing&&c){ $('posk').textContent='시작 위치'; $('pos').textContent=`${keyLabel(KEY)} · ${cid(c)} · ${SEL?(SEL.bar+1)+'마디부터':DEGNAME[c.deg]+'에서 시작'}`; } }
+  const lp=$('loop').checked;
+  const where=SEL?(lp?(SEL.end>SEL.bar?`${SEL.bar+1}–${SEL.end+1}마디 반복`:`${SEL.bar+1}마디 반복`+(SEL.done?'':' · 끝 마디를 누르세요')):(SEL.bar+1)+'마디부터'):(lp?'코러스 전체 반복':cstart(c));
+  if(!playing&&c){ $('posk').textContent='시작 위치'; $('pos').textContent=`${keyLabel(KEY)} · ${cid(c)} · ${where}`; } }
 let lastW=0; addEventListener('resize',()=>{ const w=$('scores').clientWidth; if((w<600)!==(lastW<600)&&!playing){ lastW=w; render(); } });
 lastW=$('scores').clientWidth;
 
 /* ===== 곡 불러오기 =====
    주소 끝의 #곡id 로 songs.js 에서 곡을 찾음 (예: song.html#f-blues) */
 function loadSong(){
-  const id=location.hash.slice(1);
+  const [id,mh]=location.hash.slice(1).split('--');   // 예: jazz-blues--chordtone
   const s=(window.SONGS||[]).find(x=>x.id===id)||(window.SONGS||[])[0];
+  METHOD=METHODS[mh]?mh:'bebop';
   if(!s){ $('scores').innerHTML='<p class="err">곡 정보를 찾을 수 없어요.</p>'; return; }
   if(playing) stop();
-  SONG=s; SEL=null; MINOR=/m$/.test(s.key); SONG_TONIC=s.key.replace(/m$/,'');
+  SONG=s; SEL=null; PICK.clear(); MINOR=/m$/.test(s.key); SONG_TONIC=s.key.replace(/m$/,'');
   const t=parse(SONG_TONIC); REF=MINOR?nameOf((t.l+2)%7,(t.pc+3)%12):SONG_TONIC;
   if(!(REF in KSIG)) throw new Error('지원하지 않는 키예요: '+s.key);
   KEY=REF;
   if(s.open){ const o=parse(s.open.replace(/m$/,'')), ok=MINOR?nameOf((o.l+2)%7,(o.pc+3)%12):s.open; if(ok in KSIG) KEY=ok; } // 처음 열 때 키 (예: Autumn Leaves는 Cm)
   try{ FORM=buildForm(s.bars); }catch(e){ $('scores').innerHTML='<p class="err">'+e.message+'</p>'; return; }
+  // 코드톤·아르페지오·엔클로저는 II-V를 묶지 않고 코드마다 따로
+  if(METHOD!=='bebop') FORM=CHORDS.map(cs=>cs.map(c=>{ const [t,r]=scaleFor(c); return {k:t+':'+r,len:8/cs.length,syms:[[c.sym,0]],c}; }));
   $('key').innerHTML=KEYS.map(k=>`<option value="${k}">${keyLabel(k)}</option>`).join('');
   $('key').value=KEY;
   $('from').value='0'; DATA=[];
   document.querySelectorAll('.sg-name').forEach(e=>e.innerHTML=s.name.replace('{key}','<span class="kn"></span>'));
   document.querySelectorAll('.sg-bars').forEach(e=>e.textContent=s.bars.length);
-  document.title=s.title+' 비밥 스케일';
+  const M=METHODS[METHOD];
+  $('mname').textContent=M?M.name:'비밥 스케일';
+  document.title=s.title+' '+(M?M.name:'비밥 스케일');
+  if(!HEAD0) HEAD0={lead:$('lead').innerHTML,rules:$('rules').innerHTML};
+  $('lead').innerHTML=M?M.lead:HEAD0.lead;
+  $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝에는 다시 1마디로 돌아가는 음이 있어요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
+  $('space').closest('label').hidden=!!M; $('spacehint').hidden=!!M;
+  // 같은 메뉴(Basic/Song · 연습법) 안에서 이전·다음 곡
+  const list=(window.SONGS||[]).filter(x=>(x.cat||'song')===(s.cat||'song')&&(x.methods||['bebop']).includes(METHOD));
+  const at=list.indexOf(s), hid=x=>METHOD==='bebop'?x.id:x.id+'--'+METHOD;
+  const pv=list[(at-1+list.length)%list.length], nx=list[(at+1)%list.length];
+  $('songnav').hidden=list.length<2;
+  if(list.length>1){ $('prevs').href='#'+hid(pv); $('prevs').querySelector('b').textContent=pv.title; $('nexts').href='#'+hid(nx); $('nexts').querySelector('b').textContent=nx.title; }
   $('songnote').innerHTML=(s.notes||[]).map(n=>'<p>'+n+'</p>').join(''); $('songnote').hidden=!(s.notes&&s.notes.length);
   render();
 }
+let HEAD0=null;
 addEventListener('hashchange',loadSong);
 loadSong();

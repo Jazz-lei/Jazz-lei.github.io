@@ -6,12 +6,19 @@
    key   : 원래 키. 마이너 곡은 끝에 m (예: 'Gm')
    open  : (선택) 처음 열 때 키. 없으면 key와 같아요
    notes : (선택) 연습 페이지 위에 보일 설명
+   cat   : (선택) 'basic'이면 Basic Practice, 없으면 Song Practice
+   methods: (선택) 연습법 목록 'bebop' · 'chordtone' · 'arpeggio' · 'enclosure'. 없으면 비밥 스케일만
+   코드 끝에 !를 붙이면(D7!) III7·VI7·VII7 자동 ♭9·♭13 규칙을 적용하지 않아요
    'F#dim7=D7alt'처럼 쓰면 악보에는 앞의 코드, 연주는 뒤의 코드 스케일로 해요
    bars  : 마디마다 코드. 한 마디에 1개, 2개(2박씩) 또는 4개(1박씩)
            코드 표기 예: F7, Bb7, Cm7, Am7b5, D7alt, Eb7#11, Cmaj7, C6, Cm6, CmMaj7, Bdim7
            (반음 아래로 해결하는 도미넌트는 #11을 안 적어도 자동으로 #11 스케일) */
 window.SONGS=[
-  { id:'jazz-blues', title:'Jazz Blues', name:'Jazz Blues', key:'F', bars:[
+  { id:'major-251', cat:'basic', methods:['chordtone','arpeggio','enclosure'], title:'Major II-V-I', name:'Major II-V-I', key:'C', bars:[
+    'Dm7', 'G7', 'Cmaj7', 'C6' ] },
+  { id:'minor-251', cat:'basic', methods:['chordtone','arpeggio','enclosure'], title:'Minor II-V-I', name:'Minor II-V-I', key:'Cm', bars:[
+    'Dm7b5', 'G7alt', 'CmMaj7', 'Cm6' ] },
+  { id:'jazz-blues', methods:['bebop','chordtone','arpeggio','enclosure'], title:'Jazz Blues', name:'Jazz Blues', key:'F', bars:[
     'F7', 'Bb7', 'F7', 'Cm7 F7',
     'Bb7', 'Bb7', 'F7', 'Am7b5 D7alt',
     'Gm7', 'C7', 'F7 D7alt', 'Gm7 C7' ] },
@@ -27,7 +34,7 @@ window.SONGS=[
   { id:'rhythm-changes', title:'Rhythm Changes', name:'Rhythm Changes', key:'Bb', bars:[
     'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Dm7 G7', 'Cm7 F7',
     'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Cm7 F7', 'Bb6',
-    'D7', 'D7', 'G7', 'G7', 'C7', 'C7', 'F7', 'F7',
+    'D7!', 'D7!', 'G7!', 'G7!', 'C7', 'C7', 'F7', 'F7',
     'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Cm7 F7', 'Bb6' ] },
   { id:'all-of-me', title:'All of Me', name:'All of Me', key:'C', bars:[
     'Cmaj7', 'Cmaj7', 'E7', 'E7', 'A7', 'A7', 'Dm7', 'Dm7',
@@ -54,7 +61,7 @@ window.SONGS=[
     bars:[
     'Fmaj7', 'F#dim7=D7alt', 'Gm7', 'C7', 'Am7', 'Dm7', 'Gm7', 'C7',
     'Fmaj7', 'F#dim7=D7alt', 'Gm7', 'C7', 'Am7', 'Dm7', 'Cm7', 'F7',
-    'Bbmaj7', 'Abm7 Db7', 'Gbmaj7', 'Em7 A7', 'Dmaj7', 'Abm7 Db7', 'Gbmaj7', 'Gm7 C7',
+    'Bbmaj7', 'Abm7 Db7', 'Gbmaj7', 'Em7 A7!', 'Dmaj7', 'Abm7 Db7', 'Gbmaj7', 'Gm7 C7',
     'Fmaj7', 'F#dim7=D7alt', 'Gm7', 'C7 Bb7', 'Am7 D7', 'Gm7 C7', 'Fmaj7', 'Gm7 C7' ] },
   { id:'how-high-the-moon', title:'How High the Moon', name:'How High the Moon', key:'G', bars:[
     'Gmaj7', 'Gmaj7', 'Gm7', 'C7', 'Fmaj7', 'Fmaj7', 'Fm7', 'Bb7',

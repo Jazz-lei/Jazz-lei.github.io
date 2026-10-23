@@ -28,6 +28,12 @@ header{padding-top:24px;display:flex;flex-direction:column;gap:8px}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
 h1{font-size:26px;line-height:1.25;margin:0;font-weight:700;text-wrap:balance}
 .lead{margin:0;color:var(--muted);max-width:62ch}
+.songnav{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:520px}
+.songnav a{display:flex;flex-direction:column;gap:2px;min-width:0;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.songnav a:hover{border-color:var(--muted)}
+.songnav #nexts{text-align:right}
+.songnav span{font-size:12px;color:var(--muted)}
+.songnav b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .songnote{max-width:70ch;font-size:14px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--b);border-radius:8px;padding:10px 14px}
 .songnote p{margin:0}
 .songnote p+p{margin-top:6px}
@@ -57,6 +63,9 @@ details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:c
 #bpmq::-webkit-outer-spin-button,#bpmq::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 #bpmq:focus{outline:2px solid var(--a);outline-offset:-2px;border-radius:4px}
 #gear{width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
+#loopb{width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--paper);color:var(--ink);cursor:pointer}
+#loopb:hover{background:var(--soft)}
+#loopb[aria-pressed="true"]{background:var(--b);color:var(--paper);border-color:var(--b)}
 #gear[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgb(0 0 0 / .12);max-height:min(70vh,560px);overflow:auto}
 .sheet-h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 0}
@@ -65,6 +74,10 @@ details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:c
 .sheet .panel{border:0;background:transparent}
 .score svg{cursor:pointer}
 .score svg .selbar{fill:var(--cb);stroke:var(--cc);stroke-width:1.5}
+.score svg .bl{visibility:hidden}
+.score svg .bl .abcjs-chord,.score svg .bl.abcjs-chord{visibility:visible}
+.score svg .blankbox{fill:var(--soft);stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.score svg .blanklab{fill:var(--muted);font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.04em}
 .jump{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
 .jump button{font:600 13px var(--mono);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:5px 9px;cursor:pointer;flex:none;font-variant-numeric:tabular-nums}
 .jump button.A{color:var(--a)} .jump button.B{color:var(--b)} .jump button.C{color:var(--c)}
@@ -102,6 +115,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 .chorus-h{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cb);border-bottom:1px solid var(--line)}
 .chorus-h .id{font:700 16px var(--mono);color:var(--cc)}
 .chorus-h .start{font-size:14px;font-weight:500}
+.chorus-h .loop1{font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer;margin-left:6px}
+.chorus-h .loop1:hover,.chorus-h .play1:hover{background:var(--cb)}
 .chorus-h .play1{margin-left:auto;font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer}
 .chorus.playing{border-color:var(--cc);box-shadow:0 0 0 2px var(--cc)}
 .score{padding:4px 2px 6px;overflow-x:auto}
@@ -129,18 +144,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 <div class="wrap">
   <header>
     <div class="eyebrow"><span class="kn"></span> · <span class="sg-bars"></span> bars · 8th notes</div>
-    <h1><span class="sg-name"></span> 비밥 스케일</h1>
-    <p class="lead">8분음표 비밥 스케일을 코러스마다 근음·3음·5음에서 시작해요. 세 가지 사이클로 같은 진행을 다르게 연결합니다.</p>
+    <h1><span class="sg-name"></span> <span id="mname">비밥 스케일</span></h1>
+    <p class="lead" id="lead">8분음표 비밥 스케일을 코러스마다 근음·3음·5음에서 시작해요. 세 가지 사이클로 같은 진행을 다르게 연결합니다.</p>
+    <nav class="songnav" id="songnav" aria-label="곡 이동" hidden>
+      <a id="prevs" href="#"><span>← 이전 곡</span><b></b></a>
+      <a id="nexts" href="#"><span>다음 곡 →</span><b></b></a>
+    </nav>
     <div class="songnote" id="songnote" hidden></div>
     <details class="rules">
       <summary>연결 규칙 자세히 보기</summary>
-      <ul>
+      <ul id="rules">
         <li><b>사이클 A</b>는 코드가 바뀔 때마다 지정음에서 다시 시작해요.</li>
         <li><b>사이클 B</b>는 앞 음에서 가장 가까운 코드톤으로 이어가요. 하행(B)과 상행(B↑) 두 가지가 있어요. 2마디 동안은 옥타브를 바꾸지 않고 한 흐름으로 이어가고, 프레이즈 끝 길게를 켜면 2마디 끝을 4분음표로 마치고 지정음에서 새로 시작해요. 옥타브는 2마디가 끝날 때만 필요하면 옮겨요. 프레이즈마다 가능한 한 8va 없이 읽을 수 있는 옥타브를 골라요.</li>
         <li><b>사이클 C</b>는 한 마디는 하행, 다음 마디는 상행으로 바꾸면서 반음이나 온음으로만 이어져요.</li>
         <li>Related II-7은 V7의 비밥 스케일로 묶어 연주해요. 사이클 A에서는 시작음을 II-7의 1·3·5음으로 잡아요.</li>
         <li>한 마디 안에 II-V가 함께 있으면 V7 하나로 보고 연주해요. 예: G키의 Am7 D7 → D D♭ C B A G F♯ E.</li>
-        <li>코드별 스케일: 도미넌트 7 → 도미넌트 비밥, 7alt·m7(♭5) → b9·b13 도미넌트 비밥, Maj7·6 → 메이저 6 비밥, 토닉 마이너 → 마이너 6 비밥, V7으로 가는 m7(Related II-7) → V7 비밥, V7으로 가지 않는 m7 → 마이너 7 비밥(1 2 ♭3 4 5 6 ♭7 7), dim7 → 홀-하프 디미니시드, 7(#11)·반음 아래로 해결하는 도미넌트(트라이톤 서브) → 리디안 도미넌트 비밥.</li>
+        <li>코드별 스케일: 도미넌트 7 → 도미넌트 비밥, 7alt·m7(♭5) → b9·b13 도미넌트 비밥, Maj7·6 → 메이저 6 비밥, 토닉 마이너 → 마이너 6 비밥, m7 → 모두 Related II-7으로 보고 4도 위 V7 비밥 (마이너 곡의 토닉 m7은 마이너 6 비밥), 키의 III7·VI7·VII7 → ♭9·♭13 도미넌트 비밥, dim7 → 홀-하프 디미니시드, 7(#11)·반음 아래로 해결하는 도미넌트(트라이톤 서브) → 리디안 도미넌트 비밥.</li>
         <li>C4 아래로 내려갈 것 같으면 마디(코드) 시작에서 옥타브를 올려서 하행이 끊기지 않게 해요.</li>
         <li>정박(다운비트)에는 코드톤이 오도록 해요. 코드톤이 아닌 음에서 시작해 한 칸 밀리면 크로매틱 음을 하나 넣어 다시 맞추고(예: A A♯ B, E E♭ D), 상행에서는 필요하면 비밥 경과음을 빼요.</li>
         <li>코드가 바뀔 때 앞 코드의 마지막 음이 비밥 경과음(예: F6의 D♭)이나 크로매틱이면, 그 음을 진행 방향으로 한 걸음 해결해서 다음 코드를 시작해요 (예: D♭ → E♭7의 C B B♭).</li>
@@ -161,6 +180,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
           <label class="bpmin"><span aria-hidden="true">♩=</span><input id="bpmq" type="number" inputmode="numeric" min="60" max="350" step="1" value="160" aria-label="템포 (BPM)"></label>
           <button id="tup" type="button" aria-label="템포 올리기">+</button>
         </div>
+        <button id="loopb" type="button" aria-pressed="false" aria-label="구간 반복" title="구간 반복">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 2l3 3-3 3M20 5H8a4 4 0 0 0-4 4v1M7 22l-3-3 3-3M4 19h12a4 4 0 0 0 4-4v-1"/></svg>
+        </button>
         <button id="gear" type="button" aria-label="설정 열기" aria-expanded="false" aria-controls="sheet">
           <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.2 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
         </button>
@@ -177,6 +199,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
           <div class="inline"><input type="range" id="bpm" min="60" max="350" value="160"><span class="num" id="bpmv">160</span></div></div>
         <div class="field"><label for="swing">스윙 비율</label>
           <div class="inline"><input type="range" id="swing" min="50" max="70" value="60"><span class="num" id="swingv">60%</span></div></div>
+        <div class="field"><label for="blank">빈칸 모드</label>
+          <select id="blank">
+            <option value="off">끄기</option>
+            <option value="alt">2마디 연주 · 2마디 빈칸</option>
+            <option value="alt2">2마디 빈칸 · 2마디 연주</option>
+            <option value="grow">반복할수록 빈칸 늘리기</option>
+            <option value="all">전부 빈칸 (반주만)</option>
+            <option value="pick">직접 고르기 (마디를 눌러서)</option>
+          </select></div>
+        <div class="field"><label for="loopn">구간 반복</label>
+          <div class="inline">
+            <select id="loopn" aria-label="반복 횟수"><option value="0">계속 반복</option><option value="2">2번</option><option value="4">4번</option><option value="8">8번</option></select>
+            <select id="loopt" aria-label="반복할 때마다 템포"><option value="0">템포 그대로</option><option value="2">반복마다 +2</option><option value="4">반복마다 +4</option><option value="8">반복마다 +8</option></select>
+          </div></div>
+        <div class="field wide"><p class="hint">빈칸 마디는 악보가 가려지고 반주만 나와요. 그 자리를 직접 즉흥으로 채워 보세요. ‘반복할수록 늘리기’는 구간 반복이나 12키 순환으로 다시 돌아올 때마다 빈칸이 늘어나요.</p>
+          <p class="hint">구간 반복(↻ 버튼)을 켜고 악보에서 시작 마디와 끝 마디를 차례로 누르면 그 구간만 반복해요. 한 마디를 두 번 누르면 그 마디만, 구간을 고르지 않으면 코러스 전체를 반복해요. 12키 순환도 켜면 반복할 때마다 다음 키로 넘어가요.</p></div>
         <div class="field wide"><label>옵션</label>
           <div class="toggles">
             <label><input type="checkbox" id="ci" checked> 예비박</label>
@@ -185,15 +223,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
             <label><input type="checkbox" id="follow" checked> 악보 따라가기</label>
             <label><input type="checkbox" id="space" checked> 프레이즈 끝 길게</label>
             <label><input type="checkbox" id="cyc"> 12키 순환</label>
+            <label><input type="checkbox" id="loop"> 구간 반복</label>
           </div>
-          <p class="hint">프레이즈 끝 길게를 켜면 A는 1마디, B는 2마디마다 마지막 음을 4박의 4분음표로 길게 끝내요. B는 2마디마다 지정음(1·3·5음)에서 새로 시작해요. 끄면 쉬지 않고 이어서 연주해요.</p>
+          <p class="hint" id="spacehint">프레이즈 끝 길게를 켜면 A는 1마디, B는 2마디마다 마지막 음을 4박의 4분음표로 길게 끝내요. B는 2마디마다 지정음(1·3·5음)에서 새로 시작해요. 끄면 쉬지 않고 이어서 연주해요.</p>
           <p class="hint">12키 순환을 켜면 시작 코러스 하나를 연주한 뒤 4도 위 키로 넘어가서, 12키를 모두 돌고 멈춰요.</p>
-          <p class="hint">단축키: 스페이스 재생·정지 · ← → 키 바꾸기 · − + 템포. 위쪽 템포 숫자를 눌러 직접 입력할 수도 있어요.</p></div>
+          <p class="hint">단축키: 스페이스 재생·정지 · R 구간 반복 · N/P 다음·이전 곡 · ← → 키 바꾸기 · − + 템포. 위쪽 템포 숫자를 눌러 직접 입력할 수도 있어요.</p></div>
       </div>
     </div>
   </div>
 
-  <div class="legend"><span class="dot"></span>악보의 마디를 누르면 그 마디가 시작 위치로 선택되고, 재생을 누르면 거기서부터 연주해요. 같은 마디를 다시 누르면 선택이 풀려요. 재생 중인 음은 빨간색으로 표시되고, 소리는 합성음이라 실제 피아노와 다르게 들릴 수 있어요.</div>
+  <div class="legend"><span class="dot"></span>악보의 마디를 누르면 그 마디가 시작 위치로 선택되고, 재생을 누르면 거기서부터 연주해요. 같은 마디를 다시 누르면 선택이 풀려요. 구간 반복(↻)을 켜면 시작 마디와 끝 마디를 차례로 눌러 반복 구간을 정해요. 재생 중인 음은 빨간색으로 표시되고, 소리는 합성음이라 실제 피아노와 다르게 들릴 수 있어요.</div>
   <div id="scores"></div>
 </div>
 
