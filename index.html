@@ -154,16 +154,17 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
    그 밖의 연습은 practice 폴더에 html 파일을 넣고 아래에 한 줄 추가하세요.
    id   : 주소 이름(영문·숫자·하이픈)
    cat  : 'basic' 또는 'song'
-   sub  : 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure'
+   sub  : 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure' | 'pentatonic'
    title: 목록에 보일 제목
    file : 파일 경로 */
 const PRACTICES=[
   {id:'two-five-one-bebop', cat:'basic', sub:'bebop', title:'II-V-I Be-bop Scale',  file:'practice/two-five-one-bebop.html'},
+  {id:'pentatonic',         cat:'basic', sub:'pentatonic', title:'Pentatonic Practice', file:'practice/pentatonic.html'},
   ...(window.SONGS||[]).flatMap(s=>(s.methods||['bebop']).map(m=>{ const id=m==='bebop'?s.id:s.id+'--'+m;
     return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
 ];
 const CATS={basic:'Basic Practice', song:'Song Practice'};
-const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice'};
+const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice', pentatonic:'Pentatonic Practice'};
 
 const $=id=>document.getElementById(id);
 const count=(c,s)=>PRACTICES.filter(p=>p.cat===c&&(!s||p.sub===s)).length;

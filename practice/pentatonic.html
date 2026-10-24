@@ -1,0 +1,778 @@
+<!doctype html><html lang="ko"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pentatonic Practice</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Music&display=swap">
+<style>
+/* Layout: mustard brand band on top, two tool tabs; tool = controls row + result surface */
+:root{
+  --paper:#eef1f4; --panel:#ffffff; --ink:#15202b; --muted:#5d6b78; --line:#d5dce3; --soft:#e4e9ee;
+  --mustard:#c9962b; --mustard-soft:#f6ecd6; --band:#D9A61C; --band-ink:#17150E;
+  --tag-base:#15202b; --tag-ext:#5F5A49; --tag-color:#2C6A88; --tag-alt:#B0452D; --tag-dim:#6B4E96;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --f-music:"Noto Music","Bravura","Segoe UI Symbol",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12171c; --panel:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
+  --mustard:#e0b04a; --mustard-soft:#3a3122; --band:#D9A61C; --band-ink:#17150E;
+  --tag-base:#e8edf2; --tag-ext:#B5AF9E; --tag-color:#71B6D6; --tag-alt:#E8826A; --tag-dim:#B9A0E0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12171c; --panel:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
+  --mustard:#e0b04a; --mustard-soft:#3a3122; --band:#D9A61C; --band-ink:#17150E;
+  --tag-base:#e8edf2; --tag-ext:#B5AF9E; --tag-color:#71B6D6; --tag-alt:#E8826A; --tag-dim:#B9A0E0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.band{background:var(--paper);color:var(--ink)}
+header .wrap{padding-block:24px 0;display:flex;flex-direction:column;gap:10px}
+.brand{font-family:var(--f-mono);letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--muted)}
+h1{font-family:var(--f-body);font-weight:700;font-size:26px;line-height:1.25;margin:0;text-wrap:balance}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.tab{font:500 14px var(--f-body);border:0;background:transparent;color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer}
+.tab:hover{color:var(--ink);background:var(--soft)}
+.tab[aria-selected="true"]{background:var(--mustard);color:var(--band-ink)}
+.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--mustard);outline-offset:2px}
+main .wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:26px}
+.lead{color:var(--muted);max-width:68ch;margin:0}
+.ctl{display:flex;flex-direction:column;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.lbl{font:600 11px var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);min-width:64px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.btn{font:500 14px var(--f-body);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:7px 11px;cursor:pointer;min-width:40px;transition:background .12s,border-color .12s}
+.btn:hover{border-color:var(--mustard)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.key{font-family:var(--f-mono);min-width:46px}
+.btn.primary{background:var(--mustard);border-color:var(--mustard);color:var(--band-ink);font-weight:600;padding:9px 18px}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.ghost{background:transparent}
+.hint{font-size:13px;color:var(--muted)}
+/* chord hero */
+.hero{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:flex-end;justify-content:space-between}
+.chordname{font-family:var(--f-display);font-weight:700;font-size:clamp(48px,9vw,84px);line-height:.9;letter-spacing:.01em}
+.chordko{color:var(--muted);margin-top:6px}
+.tones{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tone{font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);border-radius:6px;padding:3px 8px;background:var(--panel)}
+.tone small{color:var(--muted);margin-left:4px}
+/* option cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1;letter-spacing:.01em}
+.card p{margin:0;color:var(--muted);font-size:14px}
+.tag{align-self:flex-start;font:600 11px var(--f-body);letter-spacing:.1em;padding:3px 8px;border-radius:999px;border:1px solid currentColor}
+.tag.base{color:var(--tag-base)} .tag.ext{color:var(--tag-ext)} .tag.color{color:var(--tag-color)} .tag.alt{color:var(--tag-alt)} .tag.dim{color:var(--tag-dim)}
+.notes{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.nt{background:var(--soft);border-radius:8px;padding:7px 4px;text-align:center;font-variant-numeric:tabular-nums}
+.nt b{display:block;font:500 16px var(--f-mono)}
+.nt span{display:block;font:600 12px var(--f-mono);color:var(--mustard)}
+.kb{width:100%;max-width:240px;height:auto;display:block}
+.cardfoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+/* line generator */
+.formula{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.staffbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 10px;min-width:0}
+.staffhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline;padding:0 6px 6px}
+.staffhead strong{font-family:var(--f-display);font-size:26px;letter-spacing:.01em}
+#staff{overflow-x:auto}
+#staff svg{display:block;width:100%;min-width:680px;height:auto}
+.st-bar{stroke:var(--ink);stroke-width:1.2}
+.st-time{font:700 21px var(--f-display);fill:var(--ink)}
+.st-note.hollow ellipse{fill:none;stroke:var(--ink);stroke-width:1.8}
+.st-note.hollow.on ellipse{fill:none;stroke:var(--mustard)}
+.st-line{stroke:var(--ink);stroke-width:1;opacity:.55}
+.st-led{stroke:var(--ink);stroke-width:1.2}
+.st-sep{stroke:var(--mustard);stroke-width:1.5;stroke-dasharray:3 3}
+.st-clef{font-family:var(--f-music);fill:var(--ink)}
+.st-note ellipse{fill:var(--ink);transition:fill .08s}
+.st-note text.acc{font-family:var(--f-music);fill:var(--ink);font-size:17px}
+.st-note text.nm{font:500 11px var(--f-mono);fill:var(--muted);text-anchor:middle}
+.st-note.on ellipse{fill:var(--mustard)}
+.st-note.on text.nm{fill:var(--mustard);font-weight:600}
+.st-gnum{font:600 10px var(--f-mono);fill:var(--muted)}
+.st-stem{stroke:var(--ink);stroke-width:1.3}
+.st-beam{fill:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 13px var(--f-mono);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer}
+.chip:hover{border-color:var(--mustard)}
+.tempo{display:flex;align-items:center;gap:10px}
+.tempo input[type=range]{width:160px;accent-color:var(--mustard)}
+.tempo output{font:500 14px var(--f-mono);min-width:64px}
+select{font:500 14px var(--f-body);background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+label.chk{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+label.chk input{accent-color:var(--mustard);width:16px;height:16px}
+.bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:680px){.bars{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.bar{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.bar-head{font:600 11px var(--f-mono);color:var(--muted)}
+.slots{display:flex;gap:6px}
+.slot{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:8px 8px 7px;text-align:left;cursor:pointer}
+.slot:hover{border-color:var(--mustard)}
+.slot b{display:block;font:700 21px/1.05 var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot span{display:block;font:500 12px var(--f-mono);color:var(--mustard);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot[aria-pressed="true"]{border-color:var(--mustard);box-shadow:inset 0 0 0 1.5px var(--mustard);background:var(--mustard-soft)}
+.edtitle{font:700 22px var(--f-display);letter-spacing:.01em}
+.optag{opacity:.65;font-size:11px;margin-left:2px}
+.st-chord{font:700 18px var(--f-display);fill:var(--ink)}
+.st-psub{font:500 11px var(--f-mono);fill:var(--mustard)}
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:520px){.lbl{min-width:100%}.tempo input[type=range]{width:120px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <div class="brand">Basic Practice · Pentatonic</div>
+    <h1>Pentatonic Practice</h1>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-chords" aria-selected="true" aria-controls="panel-chords">코드 → 펜타토닉</button>
+      <button class="tab" role="tab" id="tab-lines" aria-selected="false" aria-controls="panel-lines">라인 생성기</button>
+      <button class="tab" role="tab" id="tab-prog" aria-selected="false" aria-controls="panel-prog">진행 만들기</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- ===== Tab 1 ===== -->
+  <section id="panel-chords" role="tabpanel" aria-labelledby="tab-chords">
+    <div class="wrap">
+      <p class="lead">코드를 고르면 그 위에서 쓸 수 있는 펜타토닉 후보가 나옵니다. 음 아래 숫자는 <b>코드 기준 텐션</b>이에요. 왜 그 스케일이 맞는지 바로 보입니다.</p>
+      <div class="ctl">
+        <div class="row"><span class="lbl">Root</span><div class="seg" id="c-roots"></div></div>
+        <div class="row"><span class="lbl">Chord</span><div class="seg" id="c-types"></div></div>
+      </div>
+      <div class="hero">
+        <div>
+          <div class="chordname" id="c-name">G7alt</div>
+          <div class="chordko" id="c-ko"></div>
+          <div class="tones" id="c-tones"></div>
+        </div>
+        <button class="btn primary" id="c-playchord">▶ 코드 듣기</button>
+      </div>
+      <div class="cards" id="c-cards"></div>
+    </div>
+  </section>
+
+  <!-- ===== Tab 2 ===== -->
+  <section id="panel-lines" role="tabpanel" aria-labelledby="tab-lines" hidden>
+    <div class="wrap">
+      <p class="lead">펜타토닉, 공식, 시작음을 고르면 4음 그룹 라인이 만들어집니다. 스케일만 바꿔서 같은 공식을 쳐보면 "한 음만 바뀌는" 차이가 손에 들어와요.</p>
+      <div class="ctl">
+        <div class="row"><span class="lbl">Root</span><div class="seg" id="l-roots"></div></div>
+        <div class="row"><span class="lbl">Scale</span><div class="seg" id="l-types"></div></div>
+        <div class="row"><span class="lbl">Formula</span><div class="seg" id="l-forms"></div><label class="chk"><input type="checkbox" id="l-round" checked>상하행 왕복</label></div>
+        <div class="row"><span class="lbl">Start</span><div class="seg" id="l-starts"></div><span class="formula" id="l-formtext"></span></div>
+        <div class="row">
+          <span class="lbl">Play</span>
+          <div class="tempo"><input type="range" id="l-tempo" min="60" max="260" step="2" value="140" aria-label="템포"><output id="l-tempo-out">140 bpm</output></div>
+          <label class="chk"><input type="checkbox" id="l-swing" checked>스윙</label>
+          <label class="chk"><input type="checkbox" id="l-click">메트로놈</label>
+        </div>
+        <div class="row">
+          <span class="lbl">Loop</span>
+          <label class="chk"><input type="checkbox" id="l-loop">반복 재생</label>
+          <select id="l-move" aria-label="반복할 때 키 이동">
+            <option value="0">같은 키</option>
+            <option value="1">반음씩 ↑</option>
+            <option value="-1">반음씩 ↓</option>
+            <option value="5">4도씩 (사이클)</option>
+          </select>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="l-play">▶ 재생</button>
+          <button class="btn" id="l-stop">■ 정지</button>
+          <button class="btn ghost" id="l-random">랜덤 skip/step 라인</button>
+        </div>
+      </div>
+      <div class="staffbox">
+        <div class="staffhead"><strong id="l-title">C −7 펜타</strong><span class="hint" id="l-sub"></span></div>
+        <div id="staff"></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:8px">이 펜타가 맞는 코드</div>
+        <div class="chips" id="l-fits"></div>
+      </div>
+      <footer>개념 정리 출처: Jerry Bergonzi, <i>Inside Improvisation Vol.2 – Pentatonics</i>. 개인 연습·레슨용 미리보기입니다.</footer>
+    </div>
+  </section>
+  <!-- ===== Tab 3 ===== -->
+  <section id="panel-prog" role="tabpanel" aria-labelledby="tab-prog" hidden>
+    <div class="wrap">
+      <p class="lead">8마디 코드 진행을 직접 만들고, 코드마다 쓸 펜타를 고르면 그 진행 위로 8분음표 라인이 만들어집니다. 라인을 끄고 반주만 틀어서 직접 즉흥해볼 수도 있어요.</p>
+      <div class="ctl">
+        <div class="row"><span class="lbl">Preset</span><div class="seg" id="p-presets"></div></div>
+        <div class="row"><span class="lbl">Key</span><button class="btn" id="p-down">반음 ↓</button><button class="btn" id="p-up">반음 ↑</button><span class="hint">진행 전체를 옮겨요</span></div>
+      </div>
+      <div class="bars" id="p-bars"></div>
+      <div class="ctl editor">
+        <div class="row" style="justify-content:space-between"><strong class="edtitle" id="p-sel"></strong><button class="btn" id="p-split"></button></div>
+        <div class="row"><span class="lbl">Root</span><div class="seg" id="p-roots"></div></div>
+        <div class="row"><span class="lbl">Chord</span><div class="seg" id="p-types"></div></div>
+        <div class="row"><span class="lbl">Penta</span><div class="seg" id="p-opts"></div></div>
+      </div>
+      <div class="ctl">
+        <div class="row"><span class="lbl">Formula</span><div class="seg" id="p-forms"></div><label class="chk"><input type="checkbox" id="p-mix">코드마다 공식 섞기</label><button class="btn ghost" id="p-regen">다시 만들기</button></div>
+        <div class="row">
+          <span class="lbl">Play</span>
+          <div class="tempo"><input type="range" id="p-tempo" min="60" max="260" step="2" value="140" aria-label="템포"><output id="p-tempo-out">140 bpm</output></div>
+          <label class="chk"><input type="checkbox" id="p-line" checked>라인</label>
+          <label class="chk"><input type="checkbox" id="p-comp" checked>반주</label>
+          <label class="chk"><input type="checkbox" id="p-swing" checked>스윙</label>
+          <label class="chk"><input type="checkbox" id="p-click">메트로놈</label>
+        </div>
+        <div class="row">
+          <span class="lbl">Loop</span>
+          <label class="chk"><input type="checkbox" id="p-loop">반복 재생</label>
+          <select id="p-move" aria-label="반복할 때 키 이동">
+            <option value="0">같은 키</option>
+            <option value="1">반음씩 ↑</option>
+            <option value="-1">반음씩 ↓</option>
+            <option value="5">4도씩 (사이클)</option>
+          </select>
+        </div>
+        <div class="row"><button class="btn primary" id="p-play">▶ 재생</button><button class="btn" id="p-stop">■ 정지</button></div>
+      </div>
+      <div class="staffbox">
+        <div class="staffhead"><strong>진행 위 라인</strong><span class="hint" id="p-sub"></span></div>
+        <div id="p-staff"></div>
+      </div>
+      <footer>개념 정리 출처: Jerry Bergonzi, <i>Inside Improvisation Vol.2 – Pentatonics</i>. 개인 연습·레슨용 미리보기입니다.</footer>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+const FLAT=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const SHARP=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const ROOT=['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const pretty=s=>s.replace(/([A-G])b/g,'$1♭').replace(/#/g,'♯');
+const mod=(n,m)=>((n%m)+m)%m;
+
+const PT={
+  min7:{ints:[0,3,5,7,10],name:'−7'},
+  min6:{ints:[0,3,5,7,9],name:'−6'},
+  majb6:{ints:[0,2,4,7,8],name:'major♭6'},
+  m7b5:{ints:[0,3,5,6,10],name:'−7♭5'},
+  majb2:{ints:[0,1,4,7,9],name:'major♭2'},
+  wt:{ints:[0,4,6,8,10],name:'홀톤'}
+};
+const PT_ORDER=['min7','min6','majb6','m7b5','majb2','wt'];
+const TAGS={base:'기본',ext:'확장',color:'컬러',alt:'얼터드',dim:'디미니시'};
+const BASE_DEG={0:'R',1:'♭9',2:'9',3:'♯9',4:'3',5:'11',6:'♯11',7:'5',8:'♭13',9:'13',10:'♭7',11:'7'};
+
+const CHORDS=[
+ {id:'m7',suf:'−7',ko:'마이너7 · Dorian / II−7',voice:[0,3,7,10,14],deg:{3:'♭3'},opts:[
+   [0,'min7','base','루트 위. 가장 기본이 되는 소리'],
+   [7,'min7','ext','5도 위. ♭3 대신 9th가 들어와 열린 소리'],
+   [2,'min7','ext','2도 위. 9th·11th·13th 중심의 컬러']]},
+ {id:'m6',suf:'−6',ko:'토닉 마이너 · −6 / −Δ',voice:[0,3,7,11,14],deg:{3:'♭3',9:'6'},opts:[
+   [0,'min6','base','루트 위 −6'],
+   [2,'min6','ext','온음 위. 7th·9th가 들어옴'],
+   [7,'majb6','color','5도 위 major♭6 (멜로딕 마이너 사운드)'],
+   [11,'wt','color','반음 아래 홀톤 펜타 (−Δ 컬러)']]},
+ {id:'maj7',suf:'Δ',ko:'메이저7 · Ionian / Lydian',voice:[0,4,7,11,14],deg:{9:'6'},opts:[
+   [9,'min7','base','6도 위 (관계단조) −7'],
+   [4,'min7','ext','3도 위. 7th·9th 포함'],
+   [11,'min7','ext','7도 위. ♯11이 들어와 리디안 사운드']]},
+ {id:'7',suf:'7',ko:'도미넌트 · Mixolydian (인사이드)',voice:[0,4,10,14,21],deg:{},opts:[
+   [9,'min7','base','13th 위 −7'],
+   [7,'min6','base','5도 위 −6']]},
+ {id:'7alt',suf:'7alt',ko:'얼터드 도미넌트',voice:[0,4,10,15,20],deg:{6:'♭5'},opts:[
+   [3,'min7','alt','♯9 위 −7'],
+   [1,'min6','alt','♭9 위 −6'],
+   [3,'min6','alt','♯9 위 −6'],
+   [8,'majb6','alt','♭13 위 major♭6']]},
+ {id:'7s11',suf:'7♯11',ko:'리디안 도미넌트',voice:[0,4,10,14,18],deg:{},opts:[
+   [7,'min6','base','5도 위 −6'],
+   [9,'min6','color','13th 위 −6. ♯11이 들어옴'],
+   [2,'majb6','color','9th 위 major♭6'],
+   [6,'wt','color','♯11 위 홀톤 펜타']]},
+ {id:'7b9',suf:'7(♭9,13)',ko:'디미니시 도미넌트 · Half-Whole',voice:[0,4,10,13,21],deg:{},opts:[
+   [0,'majb2','dim','루트 위 major♭2'],
+   [3,'majb2','dim','단3도 위 major♭2'],
+   [6,'majb2','dim','♭5 위 major♭2'],
+   [9,'majb2','dim','장6도 위 major♭2']]},
+ {id:'m7b5',suf:'ø',ko:'하프 디미니시 · Locrian',voice:[0,3,6,10,15],deg:{3:'♭3',6:'♭5'},opts:[
+   [3,'min6','base','♭3 위 −6'],
+   [0,'m7b5','base','루트 위 −7♭5'],
+   [5,'min7','ext','4도 위 −7'],
+   [10,'majb6','color','♭7 위 major♭6. 9th가 들어옴 (Locrian ♮2)']]},
+ {id:'maj7s5',suf:'Δ♯5',ko:'리디안 오그먼티드',voice:[0,4,8,11,14],deg:{8:'♯5'},opts:[
+   [4,'majb6','base','3도 위 major♭6'],
+   [11,'min6','ext','7도 위 −6']]},
+ {id:'7susb9',suf:'7sus♭9',ko:'서스 ♭9 (Phrygian)',voice:[0,5,10,13,19],deg:{5:'4'},opts:[
+   [10,'min6','base','♭7 위 −6']]}
+];
+
+/* spelling: pick flat or sharp names, fewer accidentals wins */
+function spell(rootPc, ints){
+  const pcs=ints.map(i=>mod(rootPc+i,12));
+  const acc=a=>pcs.reduce((n,p)=>n+(a[p].length>1?1:0),0);
+  const fa=acc(FLAT), sa=acc(SHARP);
+  let useSharp = sa<fa || (sa===fa && [1,4,6,8,9,11].includes(rootPc));
+  if(rootPc===1 && fa<=sa) useSharp=false;
+  const tbl=useSharp?SHARP:FLAT;
+  return pcs.map(p=>tbl[p]);
+}
+const pentName=(rootPc,type)=>pretty(spell(rootPc,PT[type].ints)[0])+' '+PT[type].name+' 펜타';
+const degLabel=(ch,semi)=> ch.deg[semi]!==undefined?ch.deg[semi]:BASE_DEG[semi];
+
+/* ===== Audio ===== */
+let ctx=null, master=null, timers=[];
+function ac(){
+  if(!ctx){const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; ctx=new C(); newMaster();}
+  if(ctx.state==='suspended') ctx.resume();
+  return ctx;
+}
+function newMaster(){ master=ctx.createGain(); master.gain.value=0.8; master.connect(ctx.destination); }
+function stopAll(){
+  timers.forEach(clearTimeout); timers=[];
+  if(ctx&&master){ try{master.disconnect();}catch(e){} newMaster(); }
+  document.querySelectorAll('.st-note.on').forEach(n=>n.classList.remove('on'));
+  playing=false; updatePlayBtn();
+}
+function tone(midi,t,dur,vel){
+  const f=440*Math.pow(2,(midi-69)/12);
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vel,t+0.006);
+  g.gain.exponentialRampToValueAtTime(vel*0.4,t+0.18);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur+0.35);
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=Math.min(9000,f*7);
+  const o1=ctx.createOscillator(); o1.type='triangle'; o1.frequency.value=f;
+  const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=f*2;
+  const g2=ctx.createGain(); g2.gain.value=0.25;
+  o1.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(g); g.connect(master);
+  o1.start(t); o2.start(t); o1.stop(t+dur+0.4); o2.stop(t+dur+0.4);
+}
+function click(t,acc){
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type='square'; o.frequency.value=acc?1800:1200;
+  g.gain.setValueAtTime(acc?0.08:0.05,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+0.05);
+}
+function chordPad(rootPc,voice,t,dur){
+  const base=48+rootPc - (rootPc>5?12:0);
+  tone(base-12,t,dur,0.10);
+  voice.forEach(v=>tone(base+v,t,dur,0.07));
+}
+
+/* ===== Tab switching ===== */
+const tabs={chords:[document.getElementById('tab-chords'),document.getElementById('panel-chords')],
+            lines:[document.getElementById('tab-lines'),document.getElementById('panel-lines')],
+            prog:[document.getElementById('tab-prog'),document.getElementById('panel-prog')]};
+function showTab(k){
+  Object.entries(tabs).forEach(([key,[t,p]])=>{const on=key===k; t.setAttribute('aria-selected',on); p.hidden=!on;});
+  if(k==='lines') renderStaff();
+  if(k==='prog') renderProg();
+  try{localStorage.setItem('pp-tab',k);}catch(e){}
+}
+tabs.chords[0].onclick=()=>showTab('chords');
+tabs.lines[0].onclick=()=>showTab('lines');
+tabs.prog[0].onclick=()=>showTab('prog');
+
+/* ===== Tab 1 ===== */
+const C={root:7,chord:'7alt'};
+function keyboard(pcs,rootPc){
+  const W=[0,2,4,5,7,9,11], B={1:0,3:1,6:3,8:4,10:5};
+  const kw=20,h=64; let s=`<svg class="kb" viewBox="0 0 ${kw*7+2} ${h+2}" role="img" aria-label="건반">`;
+  W.forEach((pc,i)=>{
+    const on=pcs.includes(pc);
+    s+=`<rect x="${1+i*kw}" y="1" width="${kw}" height="${h}" rx="2" fill="${on?'var(--mustard)':'var(--panel)'}" stroke="var(--line)"/>`;
+    if(pc===rootPc) s+=`<circle cx="${1+i*kw+kw/2}" cy="${h-8}" r="3.2" fill="var(--ink)"/>`;
+  });
+  Object.entries(B).forEach(([pc,i])=>{
+    pc=+pc; const on=pcs.includes(pc), x=1+(i+1)*kw-6.5;
+    s+=`<rect x="${x}" y="1" width="13" height="${h*0.6}" rx="2" fill="${on?'var(--mustard)':'var(--ink)'}" stroke="var(--ink)"/>`;
+    if(pc===rootPc) s+=`<circle cx="${x+6.5}" cy="${h*0.6-7}" r="3" fill="${on?'var(--ink)':'var(--paper)'}"/>`;
+  });
+  return s+'</svg>';
+}
+function buildRootButtons(el,getter,setter){
+  el.innerHTML='';
+  ROOT.forEach((n,pc)=>{
+    const b=document.createElement('button'); b.className='btn key'; b.textContent=pretty(n);
+    b.setAttribute('aria-pressed',getter()===pc); b.onclick=()=>setter(pc); el.appendChild(b);
+  });
+}
+function renderChords(){
+  buildRootButtons(document.getElementById('c-roots'),()=>C.root,pc=>{C.root=pc;renderChords();save();});
+  const ct=document.getElementById('c-types'); ct.innerHTML='';
+  CHORDS.forEach(ch=>{
+    const b=document.createElement('button'); b.className='btn';
+    b.textContent=pretty(ROOT[C.root])+ch.suf; b.setAttribute('aria-pressed',C.chord===ch.id);
+    b.onclick=()=>{C.chord=ch.id;renderChords();save();}; ct.appendChild(b);
+  });
+  const ch=CHORDS.find(c=>c.id===C.chord);
+  document.getElementById('c-name').textContent=pretty(ROOT[C.root])+ch.suf;
+  document.getElementById('c-ko').textContent=ch.ko;
+  const toneNames=spell(C.root,ch.voice.map(v=>v%12));
+  document.getElementById('c-tones').innerHTML=ch.voice.map((v,i)=>`<span class="tone">${pretty(toneNames[i])}<small>${degLabel(ch,v%12)}</small></span>`).join('');
+  const cards=document.getElementById('c-cards'); cards.innerHTML='';
+  ch.opts.forEach(([off,type,tag,desc])=>{
+    const pr=mod(C.root+off,12), ints=PT[type].ints, names=spell(pr,ints);
+    const pcs=ints.map(i=>mod(pr+i,12));
+    const card=document.createElement('article'); card.className='card';
+    card.innerHTML=`<span class="tag ${tag}">${TAGS[tag]}</span>
+      <h3>${pentName(pr,type)}</h3><p>${desc}</p>
+      <div class="notes">${names.map((n,i)=>`<div class="nt"><b>${pretty(n)}</b><span>${degLabel(ch,mod(pcs[i]-C.root,12))}</span></div>`).join('')}</div>
+      ${keyboard(pcs,C.root)}
+      <div class="cardfoot"><button class="btn primary" data-act="play">▶ 듣기</button><button class="btn" data-act="line">라인 만들기 →</button></div>`;
+    card.querySelector('[data-act=play]').onclick=()=>playOption(ch,pr,type);
+    card.querySelector('[data-act=line]').onclick=()=>{L.root=pr;L.type=type;L.rand=null;renderLines();showTab('lines');save();window.scrollTo({top:0,behavior:'smooth'});};
+    cards.appendChild(card);
+  });
+}
+function playOption(ch,pr,type){
+  if(!ac()) return; stopAll();
+  const t0=ctx.currentTime+0.06;
+  chordPad(C.root,ch.voice,t0,2.6);
+  let base=60+pr; if(base>67) base-=12;
+  const ints=PT[type].ints.concat([12]); const spb=0.21;
+  ints.forEach((iv,i)=>tone(base+iv,t0+0.35+i*spb,spb*0.9,0.22));
+  [...ints].reverse().slice(1).forEach((iv,i)=>tone(base+iv,t0+0.35+(ints.length+i)*spb,spb*0.9,0.2));
+}
+document.getElementById('c-playchord').onclick=()=>{
+  if(!ac()) return; stopAll(); const ch=CHORDS.find(c=>c.id===C.chord); chordPad(C.root,ch.voice,ctx.currentTime+0.05,2.4);
+};
+
+/* ===== Tab 2 ===== */
+const L={root:0,type:'min7',form:5,start:0,rand:null,round:true};
+const FORM={1:[-2,-1,2,-1],2:[-1,2,-1,-2],3:[2,-1,-2,-1],4:[-1,-2,-1,2]};
+[5,6,7,8].forEach(n=>FORM[n]=FORM[n-4].map(x=>-x));
+const MV={'-3':'↓2skip','-2':'↓skip','-1':'↓step','1':'↑step','2':'↑skip','3':'↑2skip'};
+const RHY={e:[0.5],eeq:[0.5,0.5,1],eeeeq:[0.5,0.5,0.5,0.5,1]};
+let line=[], playing=false;
+
+const mirror=f=>f<=4?f+4:f-4;
+const dirOf=f=>f<=4?'↓':'↑';
+function movesFor(){
+  if(L.rand){
+    return L.round ? L.rand.concat(L.rand.slice().reverse().map(x=>-x)) : L.rand;
+  }
+  const m=[]; for(let g=0;g<5;g++) m.push(...FORM[L.form]);
+  if(L.round) for(let g=0;g<5;g++) m.push(...FORM[mirror(L.form)]);
+  return m;
+}
+function makeRandom(){
+  const pool=[-2,-1,1,2,-2,-1,1,2,-3,3];
+  let moves, ok=false;
+  while(!ok){
+    moves=[]; let c=0, lo=0, hi=0;
+    for(let i=0;i<20;i++){
+      let m=pool[Math.floor(Math.random()*pool.length)];
+      if(Math.abs(c+m)>9) m=-m;
+      c+=m; lo=Math.min(lo,c); hi=Math.max(hi,c); moves.push(m);
+    }
+    ok = hi-lo<=11;
+  }
+  return moves;
+}
+function generate(){
+  const ints=PT[L.type].ints, names=spell(L.root,ints);
+  let idx=L.start; const seq=[idx];
+  movesFor().forEach(m=>{idx+=m;seq.push(idx);});
+  let midis=seq.map(i=>60+L.root+12*Math.floor(i/5)+ints[mod(i,5)]);
+  const lo=Math.min(...midis), hi=Math.max(...midis);
+  let k=Math.round((73-(lo+hi)/2)/12);
+  while(hi+12*k>90) k--; while(lo+12*k<52) k++;
+  line=seq.map((i,n)=>({midi:midis[n]+12*k,name:names[mod(i,5)]}));
+}
+function renderLines(){
+  buildRootButtons(document.getElementById('l-roots'),()=>L.root,pc=>{L.root=pc;afterChange();});
+  const tt=document.getElementById('l-types'); tt.innerHTML='';
+  PT_ORDER.forEach(t=>{
+    const b=document.createElement('button'); b.className='btn'; b.textContent=PT[t].name;
+    b.setAttribute('aria-pressed',L.type===t); b.onclick=()=>{L.type=t;afterChange();}; tt.appendChild(b);
+  });
+  const ff=document.getElementById('l-forms'); ff.innerHTML='';
+  for(let n=1;n<=8;n++){
+    const b=document.createElement('button'); b.className='btn key'; b.textContent=n;
+    b.title=FORM[n].map(m=>MV[m]).join(' ');
+    b.setAttribute('aria-pressed',!L.rand&&L.form===n); b.onclick=()=>{L.form=n;L.rand=null;afterChange();}; ff.appendChild(b);
+  }
+  const names=spell(L.root,PT[L.type].ints), ss=document.getElementById('l-starts'); ss.innerHTML='';
+  names.forEach((n,i)=>{
+    const b=document.createElement('button'); b.className='btn key'; b.textContent=pretty(n);
+    b.setAttribute('aria-pressed',L.start===i); b.onclick=()=>{L.start=i;afterChange();}; ss.appendChild(b);
+  });
+  document.getElementById('l-round').checked=L.round;
+  const fdesc=f=>`공식 ${f} ${dirOf(f)} (${FORM[f].map(m=>MV[m]).join(' ')})`;
+  document.getElementById('l-formtext').textContent = L.rand ? '랜덤 라인 (공식 버튼을 누르면 돌아감)'
+    : (L.round ? fdesc(L.form)+'  →  '+fdesc(mirror(L.form)) : fdesc(L.form));
+  document.getElementById('l-title').textContent=pentName(L.root,L.type);
+  const sub=L.rand?'랜덤':(L.round?`공식 ${L.form}${dirOf(L.form)} → ${mirror(L.form)}${dirOf(mirror(L.form))}`:'공식 '+L.form);
+  document.getElementById('l-sub').textContent=sub+' · 시작음 '+pretty(names[L.start])+' · 4/4, 8분음표 '+(L.round?'8마디':'4마디');
+  generate(); renderStaff(); renderFits();
+}
+function afterChange(){ const wasPlaying=playing; stopAll(); renderLines(); save(); if(wasPlaying==='lines') playLine(); }
+
+function renderFits(){
+  const el=document.getElementById('l-fits'); el.innerHTML='';
+  CHORDS.forEach(ch=>ch.opts.forEach(([off,type])=>{
+    if(type!==L.type) return;
+    const cr=mod(L.root-off,12);
+    const b=document.createElement('button'); b.className='chip'; b.textContent=pretty(ROOT[cr])+ch.suf;
+    b.onclick=()=>{C.root=cr;C.chord=ch.id;renderChords();showTab('chords');save();window.scrollTo({top:0,behavior:'smooth'});};
+    el.appendChild(b);
+  }));
+}
+
+/* staff drawing: stemless noteheads, grouped by 4 like the practice sheets */
+const LETTER={C:0,D:1,E:2,F:3,G:4,A:5,B:6};
+function staffStep(n){
+  let nat=n.midi, acc='';
+  if(n.name[1]==='#'){nat=n.midi-1;acc='♯';} else if(n.name[1]==='b'){nat=n.midi+1;acc='♭';}
+  const oct=Math.floor(nat/12)-1;
+  return {step:LETTER[n.name[0]]+7*oct-30, acc};
+}
+function drawStaff(box,ln,labels){
+  if(!ln.length||box.offsetParent===null) return;
+  /* fixed 4/4 grid: 8 eighths per bar, 4 bars per row */
+  const sp=9, noteW=27, barPad=12, ngap=10, clefW=46, STEM=28, MINSTEM=22, hx=5.2;
+  const barW=8*noteW+2*barPad+ngap, VBW=clefW+4*barW+6;
+  const last=ln.length-1, nBars=Math.floor(last/8)+1, nShow=Math.ceil(nBars/4)*4, nRows=nShow/4;
+  const rowH=labels?186:164, topPad=labels?74:50;
+  const place=i=>{const bar=Math.floor(i/8), k=i%8, row=Math.floor(bar/4), col=bar%4;
+    return {row, cx: clefW+col*barW+barPad+k*noteW+(k>=4?ngap:0)+noteW/2};};
+  const pts=ln.map((n,i)=>{const {row,cx}=place(i); const {step,acc}=staffStep(n);
+    const bottom=row*rowH+topPad+4*sp; return {i,row,cx,step,acc,bottom,y:bottom-step*(sp/2)};});
+  let svg=`<svg viewBox="0 0 ${VBW} ${nRows*rowH}" role="img" aria-label="악보: ${ln.map(n=>pretty(n.name)).join(' ')}">`;
+  for(let r=0;r<nRows;r++){
+    const y0=r*rowH+topPad, bottom=y0+4*sp;
+    const barsHere=Math.min(4,nShow-r*4), xEnd=clefW+barsHere*barW;
+    for(let l=0;l<5;l++) svg+=`<line class="st-line" x1="4" x2="${xEnd}" y1="${y0+l*sp}" y2="${y0+l*sp}"/>`;
+    svg+=`<text class="st-clef" x="6" y="${bottom+9}" font-size="44">𝄞</text>`;
+    if(r===0) svg+=`<text class="st-time" x="${clefW-12}" y="${y0+sp*2-1}">4</text><text class="st-time" x="${clefW-12}" y="${bottom-1}">4</text>`;
+    for(let c=0;c<barsHere;c++){
+      const bx=clefW+(c+1)*barW, bn=r*4+c+1;
+      if(!labels) svg+=`<text class="st-gnum" x="${clefW+c*barW+4}" y="${y0-22}">${bn}</text>`;
+      if(bn>nBars) svg+=`<rect class="st-beam" x="${clefW+c*barW+barW/2-7}" y="${y0+sp}" width="14" height="5"/>`;
+      if(bn===nShow) svg+=`<line class="st-bar" x1="${bx-5}" x2="${bx-5}" y1="${y0}" y2="${bottom}"/><rect class="st-beam" x="${bx-2.5}" y="${y0}" width="3.5" height="${4*sp}"/>`;
+      else svg+=`<line class="st-bar" x1="${bx}" x2="${bx}" y1="${y0}" y2="${bottom}"/>`;
+    }
+  }
+  pts.forEach(p=>{
+    const {cx,y,step,acc,bottom,i}=p, fin=i===last, hollow=fin;
+    let led='';
+    for(let k=10;k<=step;k+=2) led+=`<line class="st-led" x1="${cx-9}" x2="${cx+9}" y1="${bottom-k*sp/2}" y2="${bottom-k*sp/2}"/>`;
+    for(let k=-2;k>=step;k-=2) led+=`<line class="st-led" x1="${cx-9}" x2="${cx+9}" y1="${bottom-k*sp/2}" y2="${bottom-k*sp/2}"/>`;
+    svg+=`<g class="st-note${hollow?' hollow':''}" data-i="${i}">${led}${acc?`<text class="acc" x="${cx-17}" y="${y+5}">${acc}</text>`:''}<ellipse cx="${cx}" cy="${y}" rx="5.6" ry="4" transform="rotate(-20 ${cx} ${y})"/><text class="nm" x="${cx}" y="${bottom+66}">${pretty(ln[i].name)}</text></g>`;
+  });
+  if(labels) labels.forEach(l=>{const p=pts[l.i]; if(!p) return; const y0=p.bottom-4*sp;
+    svg+=`<text class="st-chord" x="${p.cx-7}" y="${y0-50}">${l.text}</text><text class="st-psub" x="${p.cx-7}" y="${y0-35}">${l.sub}</text>`;});
+  /* beams: every 4 eighths */
+  for(let g=0;g*4+3<last+0&&g*4+3<=last-1;g++){
+    const bm=pts.slice(g*4,g*4+4);
+    const avg=bm.reduce((s,p)=>s+p.step,0)/4, up=avg<4, sgn=up?-1:1;
+    const sx=p=>up?p.cx+hx:p.cx-hx, a=bm[0], b=bm[3];
+    let slope=((b.y-a.y))/(sx(b)-sx(a)||1); slope=Math.max(-0.18,Math.min(0.18,slope));
+    let c0=a.y+sgn*STEM; const lineY=p=>c0+slope*(sx(p)-sx(a));
+    bm.forEach(p=>{const len=(lineY(p)-p.y)*sgn; if(len<MINSTEM) c0+=sgn*(MINSTEM-len);});
+    bm.forEach(p=>{svg+=`<line class="st-stem" x1="${sx(p)}" x2="${sx(p)}" y1="${p.y}" y2="${lineY(p)}"/>`;});
+    const t=4.5*(up?1:-1);
+    svg+=`<polygon class="st-beam" points="${sx(a)-0.65},${lineY(a)} ${sx(b)+0.65},${lineY(b)} ${sx(b)+0.65},${lineY(b)+t} ${sx(a)-0.65},${lineY(a)+t}"/>`;
+  }
+  /* final note: whole note on beat 1, half note on beat 3 */
+  const f=pts[last];
+  if(last%8!==0){const u=f.step<4, x=u?f.cx+hx:f.cx-hx; svg+=`<line class="st-stem" x1="${x}" x2="${x}" y1="${f.y}" y2="${f.y+(u?-STEM:STEM)}"/>`;}
+  box.innerHTML=svg+'</svg>';
+}
+function renderStaff(){ drawStaff(document.getElementById('staff'),line); }
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{renderStaff();drawStaff(document.getElementById('p-staff'),pline,plabels);},120);});
+
+function updatePlayBtn(){ document.getElementById('l-play').textContent=playing==='lines'?'▶ 재생 중…':'▶ 재생'; const pb=document.getElementById('p-play'); if(pb) pb.textContent=playing==='prog'?'▶ 재생 중…':'▶ 재생'; }
+function playLine(){
+  if(!ac()) return; stopAll(); playing='lines'; updatePlayBtn();
+  const tempo=+document.getElementById('l-tempo').value, spb=60/tempo;
+  const swing=document.getElementById('l-swing').checked, clickOn=document.getElementById('l-click').checked;
+  const pat=RHY.e;
+  const pos=line.map((_,i)=>i*0.5), lastI=line.length-1;
+  const lastDur=(lastI%8===0)?4:2, nBars=Math.floor(lastI/8)+1;
+  const sw=b=>{if(!swing) return b; const f=b-Math.floor(b); return Math.abs(f-0.5)<1e-6?Math.floor(b)+2/3:b;};
+  const lead=clickOn?4:0, t0=ctx.currentTime+0.08;
+  const endBeat=lead+Math.ceil(nBars/4)*16;
+  if(clickOn) for(let b=0;b<endBeat;b++) click(t0+b*spb,b%4===0);
+  line.forEach((n,i)=>{
+    const start=sw(pos[i]+lead), next=i<lastI?sw(pos[i+1]+lead):start+lastDur;
+    const t=t0+start*spb, dur=Math.max(0.08,(next-start)*spb*0.92);
+    tone(n.midi,t,dur,0.24);
+    timers.push(setTimeout(()=>{
+      document.querySelectorAll('.st-note.on').forEach(e=>e.classList.remove('on'));
+      const el=document.querySelector(`#staff .st-note[data-i="${i}"]`); if(el) el.classList.add('on');
+    },Math.max(0,(t-ctx.currentTime)*1000)));
+  });
+  const endT=t0+endBeat*spb;
+  timers.push(setTimeout(()=>{
+    document.querySelectorAll('.st-note.on').forEach(e=>e.classList.remove('on'));
+    if(document.getElementById('l-loop').checked){
+      const mv=+document.getElementById('l-move').value;
+      if(mv){ L.root=mod(L.root+mv,12); renderLines(); save(); }
+      playLine();
+    } else { playing=false; updatePlayBtn(); }
+  },Math.max(0,(endT-ctx.currentTime)*1000)));
+}
+document.getElementById('l-play').onclick=playLine;
+document.getElementById('l-stop').onclick=stopAll;
+document.getElementById('l-random').onclick=()=>{L.rand=makeRandom();afterChange();};
+document.getElementById('l-round').onchange=e=>{L.round=e.target.checked;afterChange();};
+const tempoEl=document.getElementById('l-tempo');
+tempoEl.oninput=()=>{document.getElementById('l-tempo-out').textContent=tempoEl.value+' bpm';};
+
+/* ===== Tab 3: progression builder ===== */
+const CH=id=>CHORDS.find(c=>c.id===id);
+const mk=(r,t,o=0)=>({r,t,o});
+const PRESETS=[
+ {name:'II-V-I 메이저',bars:[[mk(2,'m7')],[mk(7,'7')],[mk(0,'maj7')],[mk(0,'maj7')],[mk(2,'m7')],[mk(7,'7alt')],[mk(0,'maj7')],[mk(0,'maj7')]]},
+ {name:'II-V-i 마이너',bars:[[mk(2,'m7b5')],[mk(7,'7alt')],[mk(0,'m6')],[mk(0,'m6')],[mk(2,'m7b5')],[mk(7,'7alt')],[mk(0,'m6')],[mk(0,'m6')]]},
+ {name:'I-VI-II-V',bars:[[mk(5,'maj7')],[mk(2,'7alt')],[mk(7,'m7')],[mk(0,'7')],[mk(9,'m7')],[mk(2,'7alt')],[mk(7,'m7'),mk(0,'7')],[mk(5,'maj7')]]},
+ {name:'8마디 블루스',bars:[[mk(5,'7')],[mk(10,'7')],[mk(5,'7')],[mk(2,'7alt')],[mk(7,'m7')],[mk(0,'7')],[mk(5,'7'),mk(2,'7alt')],[mk(7,'m7'),mk(0,'7')]]},
+ {name:'모달 (반음 이동)',bars:[[mk(2,'m7')],[mk(2,'m7')],[mk(2,'m7')],[mk(2,'m7')],[mk(3,'m7')],[mk(3,'m7')],[mk(2,'m7')],[mk(2,'m7')]]}
+];
+const clone=o=>JSON.parse(JSON.stringify(o));
+const P={bars:clone(PRESETS[0].bars),sel:[0,0],form:1,mix:false};
+let pline=[], plabels=[], psegs=[];
+const SHORT={min7:'−7',min6:'−6',majb6:'M♭6',m7b5:'−7♭5',majb2:'M♭2',wt:'홀톤'};
+const chordName=c=>pretty(ROOT[c.r])+CH(c.t).suf;
+const optOf=c=>{const ch=CH(c.t); return ch.opts[c.o]||ch.opts[0];};
+const pentOf=c=>{const o=optOf(c); return {pr:mod(c.r+o[0],12),type:o[1]};};
+const pentShort=c=>{const {pr,type}=pentOf(c); return pretty(spell(pr,PT[type].ints)[0])+SHORT[type];};
+
+function genProg(){
+  psegs=[];
+  P.bars.forEach((bar,b)=>bar.forEach((c,h)=>{
+    const len=bar.length>1?4:8, {pr,type}=pentOf(c), ints=PT[type].ints;
+    psegs.push({c,start:b*8+h*4,len,pr,ints,names:spell(pr,ints)});
+  }));
+  const segAt=e=>psegs.find(s=>e>=s.start&&e<s.start+s.len);
+  const mid=(s,i)=>12*Math.floor(i/5)+s.pr+s.ints[mod(i,5)];
+  const near=(s,m,dir,strict)=>{let best=null,bd=1e9;
+    for(let i=20;i<46;i++){const v=mid(s,i);
+      if(strict&&dir<0&&v>=m) continue; if(strict&&dir>0&&v<=m) continue;
+      const d=Math.abs(v-m); if(d<bd){bd=d;best=i;}}
+    return best;};
+  const LO=55,HI=86, out=v=>v<LO||v>HI;
+  let f=P.form; const dir=()=>f<=4?-1:1;
+  const pickMix=()=>{ if(P.mix){ const base=f<=4?1:5; f=base+Math.floor(Math.random()*4);} };
+  pline=[]; plabels=[];
+  let idx=0, prevSeg=null, prevMidi=0;
+  const push=(s,i)=>{const v=mid(s,i); pline.push({midi:v,name:s.names[mod(i,5)]}); prevMidi=v; idx=i;};
+  for(let g=0;g<16;g++){
+    const e0=g*4, s=segAt(e0);
+    if(s!==prevSeg) plabels.push({i:e0,text:chordName(s.c),sub:pentShort(s.c)});
+    if(g===15){
+      const ch=CH(s.c.t), vs=ch.voice.slice(0,4), tones=vs.map(v=>(s.c.r+v)%12), tn=spell(s.c.r,vs.map(v=>v%12));
+      let best=null,bd=1e9;
+      for(let m=LO;m<=HI;m++){const k=tones.indexOf(m%12); if(k<0||m===prevMidi) continue; const d=Math.abs(m-prevMidi); if(d<bd){bd=d;best={midi:m,name:tn[k]};}}
+      pline.push(best); break;
+    }
+    let i;
+    if(g===0) i=near(s,f<=4?79:62,0,false);
+    else if(s!==prevSeg){
+      pickMix(); i=near(s,prevMidi,dir(),true);
+      if(i===null||out(mid(s,i))){ f=mirror(f); i=near(s,prevMidi,dir(),true); }
+    } else {
+      i=idx+FORM[f][3]; if(out(mid(s,i))){ f=mirror(f); i=idx+FORM[f][3]; }
+    }
+    push(s,i);
+    for(let k=0;k<3;k++){ let ni=idx+FORM[f][k]; if(out(mid(s,ni))){ f=mirror(f); ni=idx+FORM[f][k]; } push(s,ni); }
+    prevSeg=s;
+  }
+}
+function renderProg(){
+  const pp=document.getElementById('p-presets'); pp.innerHTML='';
+  PRESETS.forEach(pr=>{const b=document.createElement('button');b.className='btn';b.textContent=pr.name;
+    b.onclick=()=>{P.bars=clone(pr.bars);P.sel=[0,0];progChanged();};pp.appendChild(b);});
+  const bars=document.getElementById('p-bars'); bars.innerHTML='';
+  P.bars.forEach((bar,b)=>{
+    const d=document.createElement('div'); d.className='bar';
+    d.innerHTML=`<div class="bar-head">${b+1}</div><div class="slots"></div>`;
+    const sl=d.querySelector('.slots');
+    bar.forEach((c,h)=>{const s=document.createElement('button');s.className='slot';
+      s.setAttribute('aria-pressed',P.sel[0]===b&&P.sel[1]===h);
+      s.innerHTML=`<b>${chordName(c)}</b><span>${pentShort(c)}</span>`;
+      s.onclick=()=>{P.sel=[b,h];renderProg();};sl.appendChild(s);});
+    bars.appendChild(d);
+  });
+  const [sb,sh]=P.sel, bar=P.bars[sb], c=bar[sh]||bar[0];
+  document.getElementById('p-sel').textContent=`${sb+1}마디`+(bar.length>1?(sh?' · 뒤 2박':' · 앞 2박'):'')+'  ·  '+chordName(c);
+  document.getElementById('p-split').textContent=bar.length>1?'한 코드로 합치기':'2박씩 나누기';
+  buildRootButtons(document.getElementById('p-roots'),()=>c.r,pc=>{c.r=pc;progChanged();});
+  const pt=document.getElementById('p-types'); pt.innerHTML='';
+  CHORDS.forEach(ch=>{const b=document.createElement('button');b.className='btn';b.textContent=pretty(ROOT[c.r])+ch.suf;
+    b.setAttribute('aria-pressed',c.t===ch.id);b.onclick=()=>{c.t=ch.id;c.o=0;progChanged();};pt.appendChild(b);});
+  const po=document.getElementById('p-opts'); po.innerHTML='';
+  CH(c.t).opts.forEach(([off,type,tag,desc],k)=>{const b=document.createElement('button');b.className='btn';
+    b.innerHTML=`${pentName(mod(c.r+off,12),type)} <small class="optag">${TAGS[tag]}</small>`;b.title=desc;
+    b.setAttribute('aria-pressed',(c.o||0)===k);b.onclick=()=>{c.o=k;progChanged();};po.appendChild(b);});
+  const pf=document.getElementById('p-forms'); pf.innerHTML='';
+  for(let n=1;n<=8;n++){const b=document.createElement('button');b.className='btn key';b.textContent=n;
+    b.title=FORM[n].map(m=>MV[m]).join(' ');b.setAttribute('aria-pressed',P.form===n);
+    b.onclick=()=>{P.form=n;progChanged();};pf.appendChild(b);}
+  document.getElementById('p-mix').checked=P.mix;
+  document.getElementById('p-sub').textContent=`공식 ${P.form}${dirOf(P.form)}${P.mix?' · 코드마다 공식 섞기':''} · 코드가 바뀌면 가장 가까운 음으로 이어감 · 4/4, 8마디`;
+  drawStaff(document.getElementById('p-staff'),pline,plabels);
+}
+function progChanged(){ const was=playing; stopAll(); genProg(); renderProg(); save(); if(was==='prog') playProg(); }
+function transpose(d){ P.bars.forEach(bar=>bar.forEach(c=>{c.r=mod(c.r+d,12);})); genProg(); renderProg(); save(); }
+function playProg(){
+  if(!ac()) return; stopAll(); playing='prog'; updatePlayBtn();
+  const tempo=+document.getElementById('p-tempo').value, spb=60/tempo;
+  const swing=document.getElementById('p-swing').checked, clickOn=document.getElementById('p-click').checked;
+  const lineOn=document.getElementById('p-line').checked, compOn=document.getElementById('p-comp').checked;
+  const sw=b=>{if(!swing) return b; const fr=b-Math.floor(b); return Math.abs(fr-0.5)<1e-6?Math.floor(b)+2/3:b;};
+  const lead=clickOn?4:0, t0=ctx.currentTime+0.08, endBeat=lead+32;
+  if(clickOn) for(let b=0;b<endBeat;b++) click(t0+b*spb,b%4===0);
+  if(compOn) psegs.forEach(s=>chordPad(s.c.r,CH(s.c.t).voice,t0+(s.start*0.5+lead)*spb,s.len*0.5*spb*0.95));
+  const box=document.getElementById('p-staff');
+  pline.forEach((n,i)=>{
+    const start=sw(i*0.5+lead), next=i<pline.length-1?sw((i+1)*0.5+lead):start+2, t=t0+start*spb;
+    if(lineOn) tone(n.midi,t,Math.max(0.08,(next-start)*spb*0.92),0.24);
+    timers.push(setTimeout(()=>{
+      box.querySelectorAll('.st-note.on').forEach(e=>e.classList.remove('on'));
+      const el=box.querySelector(`.st-note[data-i="${i}"]`); if(el) el.classList.add('on');
+    },Math.max(0,(t-ctx.currentTime)*1000)));
+  });
+  timers.push(setTimeout(()=>{
+    box.querySelectorAll('.st-note.on').forEach(e=>e.classList.remove('on'));
+    if(document.getElementById('p-loop').checked){
+      const mv=+document.getElementById('p-move').value; if(mv) transpose(mv); playProg();
+    } else { playing=false; updatePlayBtn(); }
+  },Math.max(0,(t0+endBeat*spb-ctx.currentTime)*1000)));
+}
+document.getElementById('p-play').onclick=playProg;
+document.getElementById('p-stop').onclick=stopAll;
+document.getElementById('p-up').onclick=()=>{stopAll();transpose(1);};
+document.getElementById('p-down').onclick=()=>{stopAll();transpose(-1);};
+document.getElementById('p-regen').onclick=()=>progChanged();
+document.getElementById('p-mix').onchange=e=>{P.mix=e.target.checked;progChanged();};
+document.getElementById('p-split').onclick=()=>{
+  const [sb]=P.sel, bar=P.bars[sb];
+  if(bar.length>1){P.bars[sb]=[bar[0]];P.sel=[sb,0];} else {P.bars[sb]=[bar[0],clone(bar[0])];P.sel=[sb,1];}
+  progChanged();
+};
+const pTempo=document.getElementById('p-tempo');
+pTempo.oninput=()=>{document.getElementById('p-tempo-out').textContent=pTempo.value+' bpm';};
+
+/* ===== persistence (per-viewer convenience only) ===== */
+function save(){ try{localStorage.setItem('pp-state',JSON.stringify({C,L:{...L,rand:null},P:{bars:P.bars,form:P.form,mix:P.mix}}));}catch(e){} }
+try{
+  const s=JSON.parse(localStorage.getItem('pp-state')||'null');
+  if(s){ Object.assign(C,s.C||{}); Object.assign(L,s.L||{}); L.rand=null; }
+  if(!CHORDS.find(c=>c.id===C.chord)) C.chord='7alt';
+  if(!PT[L.type]) L.type='min7';
+  if(s&&s.P&&Array.isArray(s.P.bars)&&s.P.bars.length===8&&s.P.bars.every(b=>b.length>=1&&b.length<=2&&b.every(c=>CH(c.t)&&c.r>=0&&c.r<12))){P.bars=s.P.bars;P.form=s.P.form||1;P.mix=!!s.P.mix;}
+}catch(e){}
+
+renderChords(); renderLines(); genProg(); renderProg();
+let startTab='chords';
+try{ startTab=localStorage.getItem('pp-tab')||'chords'; }catch(e){}
+if(location.hash==='#lines') startTab='lines';
+if(location.hash==='#chords') startTab='chords';
+if(location.hash==='#prog') startTab='prog';
+showTab(['lines','prog'].includes(startTab)?startTab:'chords');
+})();
+</script>
+
+</body></html>
