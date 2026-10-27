@@ -122,7 +122,7 @@ footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padd
 
 <header class="band">
   <div class="wrap">
-    <div class="brand">Basic Practice · Pentatonic</div>
+    <div class="brand">Jazz Lei · Pentatonic Practice</div>
     <h1>Pentatonic Practice</h1>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tab-chords" aria-selected="true" aria-controls="panel-chords">코드 → 펜타토닉</button>
@@ -368,9 +368,11 @@ function showTab(k){
   if(k==='prog') renderProg();
   try{localStorage.setItem('pp-tab',k);}catch(e){}
 }
-tabs.chords[0].onclick=()=>showTab('chords');
-tabs.lines[0].onclick=()=>showTab('lines');
-tabs.prog[0].onclick=()=>showTab('prog');
+/* 탭 = 주소의 #penta-chords / #penta-lines / #penta-prog (홈페이지 목록 항목과 같은 이름) */
+function go(k){ if(location.hash==='#penta-'+k) showTab(k); else location.hash='penta-'+k; }
+tabs.chords[0].onclick=()=>go('chords');
+tabs.lines[0].onclick=()=>go('lines');
+tabs.prog[0].onclick=()=>go('prog');
 
 /* ===== Tab 1 ===== */
 const C={root:7,chord:'7alt'};
@@ -420,7 +422,7 @@ function renderChords(){
       ${keyboard(pcs,C.root)}
       <div class="cardfoot"><button class="btn primary" data-act="play">▶ 듣기</button><button class="btn" data-act="line">라인 만들기 →</button></div>`;
     card.querySelector('[data-act=play]').onclick=()=>playOption(ch,pr,type);
-    card.querySelector('[data-act=line]').onclick=()=>{L.root=pr;L.type=type;L.rand=null;renderLines();showTab('lines');save();window.scrollTo({top:0,behavior:'smooth'});};
+    card.querySelector('[data-act=line]').onclick=()=>{L.root=pr;L.type=type;L.rand=null;renderLines();go('lines');save();window.scrollTo({top:0,behavior:'smooth'});};
     cards.appendChild(card);
   });
 }
@@ -514,7 +516,7 @@ function renderFits(){
     if(type!==L.type) return;
     const cr=mod(L.root-off,12);
     const b=document.createElement('button'); b.className='chip'; b.textContent=pretty(ROOT[cr])+ch.suf;
-    b.onclick=()=>{C.root=cr;C.chord=ch.id;renderChords();showTab('chords');save();window.scrollTo({top:0,behavior:'smooth'});};
+    b.onclick=()=>{C.root=cr;C.chord=ch.id;renderChords();go('chords');save();window.scrollTo({top:0,behavior:'smooth'});};
     el.appendChild(b);
   }));
 }
@@ -766,12 +768,11 @@ try{
 }catch(e){}
 
 renderChords(); renderLines(); genProg(); renderProg();
-let startTab='chords';
-try{ startTab=localStorage.getItem('pp-tab')||'chords'; }catch(e){}
-if(location.hash==='#lines') startTab='lines';
-if(location.hash==='#chords') startTab='chords';
-if(location.hash==='#prog') startTab='prog';
+const tabFromHash=()=>{const h=location.hash.slice(1).replace(/^penta-/,''); return ['chords','lines','prog'].includes(h)?h:null;};
+let startTab=tabFromHash();
+if(!startTab){ try{ startTab=localStorage.getItem('pp-tab'); }catch(e){} }
 showTab(['lines','prog'].includes(startTab)?startTab:'chords');
+addEventListener('hashchange',()=>{const t=tabFromHash(); if(t) showTab(t);});
 })();
 </script>
 

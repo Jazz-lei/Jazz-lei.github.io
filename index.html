@@ -64,6 +64,7 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
 
 /* sub menu */
 .subs{display:flex;flex-wrap:wrap;gap:6px}
+.subs[hidden]{display:none}
 .subs a{flex:none;display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);font-weight:500;font-size:14px;
   padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--paper);white-space:nowrap}
 .subs a:hover{color:var(--ink);border-color:var(--muted)}
@@ -110,6 +111,7 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
   <nav id="nav" aria-label="메뉴">
     <a href="#basic" data-cat="basic">Basic<span class="long"> Practice</span> <span class="badge" data-n="basic"></span></a>
     <a href="#song" data-cat="song">Song<span class="long"> Practice</span> <span class="badge" data-n="song"></span></a>
+    <a href="#penta" data-cat="penta">Pentatonic<span class="long"> Practice</span> <span class="badge" data-n="penta"></span></a>
   </nav>
 </header>
 
@@ -124,6 +126,7 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
       <div class="cats">
         <a class="cat" href="#basic"><b>Basic Practice</b><span class="badge" data-n="basic"></span></a>
         <a class="cat" href="#song"><b>Song Practice</b><span class="badge" data-n="song"></span></a>
+        <a class="cat" href="#penta"><b>Pentatonic Practice</b><span class="badge" data-n="penta"></span></a>
       </div>
     </div>
   </section>
@@ -153,18 +156,22 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
    Song Practice의 비밥 스케일 곡들은 practice/songs.js 에서 자동으로 불러와요 (곡 추가는 거기서).
    그 밖의 연습은 practice 폴더에 html 파일을 넣고 아래에 한 줄 추가하세요.
    id   : 주소 이름(영문·숫자·하이픈)
-   cat  : 'basic' 또는 'song'
-   sub  : 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure' | 'pentatonic'
+   cat  : 'basic' | 'song' | 'penta'
+   sub  : basic·song → 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure',  penta → 'tools'
    title: 목록에 보일 제목
    file : 파일 경로 */
 const PRACTICES=[
   {id:'two-five-one-bebop', cat:'basic', sub:'bebop', title:'II-V-I Be-bop Scale',  file:'practice/two-five-one-bebop.html'},
-  {id:'pentatonic',         cat:'basic', sub:'pentatonic', title:'Pentatonic Practice', file:'practice/pentatonic.html'},
+  {id:'penta-chords', cat:'penta', sub:'tools', title:'Chord → Pentatonic',  file:'practice/pentatonic.html#penta-chords'},
+  {id:'penta-lines',  cat:'penta', sub:'tools', title:'Pentatonic Line Generator', file:'practice/pentatonic.html#penta-lines'},
+  {id:'penta-prog',   cat:'penta', sub:'tools', title:'Progression Builder', file:'practice/pentatonic.html#penta-prog'},
   ...(window.SONGS||[]).flatMap(s=>(s.methods||['bebop']).map(m=>{ const id=m==='bebop'?s.id:s.id+'--'+m;
     return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
 ];
-const CATS={basic:'Basic Practice', song:'Song Practice'};
-const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice', pentatonic:'Pentatonic Practice'};
+const CATS={basic:'Basic Practice', song:'Song Practice', penta:'Pentatonic Practice'};
+const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice', tools:'Pentatonic Tools'};
+const FOUR=['chordtone','arpeggio','bebop','enclosure'];
+const CAT_SUBS={basic:FOUR, song:FOUR, penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
 
 const $=id=>document.getElementById(id);
 const count=(c,s)=>PRACTICES.filter(p=>p.cat===c&&(!s||p.sub===s)).length;
@@ -174,7 +181,8 @@ document.querySelectorAll('[data-n]').forEach(el=>setBadge(el,count(el.dataset.n
 let curCat=null, curSub=null;
 function renderSubs(){
   $('subs').innerHTML='';
-  for(const s in SUBS){
+  $('subs').hidden=CAT_SUBS[curCat].length<2;
+  for(const s of CAT_SUBS[curCat]){
     const a=document.createElement('a'); a.href='#'+curCat+'-'+s;
     a.append(SUBS[s]+' '); const b=document.createElement('span'); b.className='badge'; setBadge(b,count(curCat,s)); a.append(b);
     if(s===curSub) a.setAttribute('aria-current','true');
@@ -200,8 +208,8 @@ function parse(r){
   const p=PRACTICES.find(x=>x.id===r); if(p) return {view:'practice',p,cat:p.cat};
   const [c,s]=r.split('-');
   if(CATS[c]){
-    let sub=SUBS[s]?s:null;
-    if(!sub) sub=Object.keys(SUBS).find(k=>count(c,k)>0)||Object.keys(SUBS)[0]; // 기본: 연습이 있는 첫 세부 메뉴
+    let sub=CAT_SUBS[c].includes(s)?s:null;
+    if(!sub) sub=CAT_SUBS[c].find(k=>count(c,k)>0)||CAT_SUBS[c][0]; // 기본: 연습이 있는 첫 세부 메뉴
     return {view:'cat',cat:c,sub};
   }
   return {view:'home'};
@@ -214,10 +222,11 @@ function show(){
     if(curCat!==st.cat) $('q').value='';
     curCat=st.cat; curSub=st.sub;
     $('cat-title').textContent=CATS[curCat]; renderSubs(); renderList();
-    document.title=SUBS[curSub]+' · '+CATS[curCat]+' · Jazz Lei';
+    document.title=(CAT_SUBS[curCat].length<2?'':SUBS[curSub]+' · ')+CATS[curCat]+' · Jazz Lei';
   } else if(st.view==='practice'){
     const p=st.p;
-    $('back').href='#'+p.cat+'-'+p.sub; $('back-t').textContent=CATS[p.cat]+' · '+SUBS[p.sub];
+    const one=CAT_SUBS[p.cat].length<2;
+    $('back').href='#'+p.cat+(one?'':'-'+p.sub); $('back-t').textContent=CATS[p.cat]+(one?'':' · '+SUBS[p.sub]);
     $('p-title').textContent=p.title;
     if($('frame').getAttribute('src')!==p.file) $('frame').setAttribute('src',p.file);
     document.title=p.title+' · Jazz Lei';
