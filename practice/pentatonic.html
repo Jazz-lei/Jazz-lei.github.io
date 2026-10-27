@@ -136,7 +136,7 @@ footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padd
   <!-- ===== Tab 1 ===== -->
   <section id="panel-chords" role="tabpanel" aria-labelledby="tab-chords">
     <div class="wrap">
-      <p class="lead">코드를 고르면 그 위에서 쓸 수 있는 펜타토닉 후보가 나옵니다. 음 아래 숫자는 <b>코드 기준 텐션</b>이에요. 왜 그 스케일이 맞는지 바로 보입니다.</p>
+      <p class="lead">코드를 고르면 그 위에서 쓸 수 있는 펜타토닉 후보가 나옵니다. 음 아래 숫자는 <b>코드 기준 도수</b>예요. 왜 그 스케일이 맞는지 바로 보입니다.</p>
       <div class="ctl">
         <div class="row"><span class="lbl">Root</span><div class="seg" id="c-roots"></div></div>
         <div class="row"><span class="lbl">Chord</span><div class="seg" id="c-types"></div></div>
@@ -266,7 +266,7 @@ const CHORDS=[
    [0,'min7','base','루트 위. 가장 기본이 되는 소리'],
    [7,'min7','ext','5도 위. ♭3 대신 9th가 들어와 열린 소리'],
    [2,'min7','ext','2도 위. 9th·11th·13th 중심의 컬러']]},
- {id:'m6',suf:'−6',ko:'토닉 마이너 · −6 / −Δ',voice:[0,3,7,11,14],deg:{3:'♭3',9:'6'},opts:[
+ {id:'m6',suf:'−6',ko:'토닉 마이너 · −6 / −Δ',voice:[0,3,7,9,14],deg:{3:'♭3',9:'6'},opts:[
    [0,'min6','base','루트 위 −6'],
    [2,'min6','ext','온음 위. 7th·9th가 들어옴'],
    [7,'majb6','color','5도 위 major♭6 (멜로딕 마이너 사운드)'],
@@ -290,9 +290,9 @@ const CHORDS=[
    [6,'wt','color','♯11 위 홀톤 펜타']]},
  {id:'7b9',suf:'7(♭9,13)',ko:'디미니시 도미넌트 · Half-Whole',voice:[0,4,10,13,21],deg:{},opts:[
    [0,'majb2','dim','루트 위 major♭2'],
-   [3,'majb2','dim','단3도 위 major♭2'],
-   [6,'majb2','dim','♭5 위 major♭2'],
-   [9,'majb2','dim','장6도 위 major♭2']]},
+   [3,'majb2','dim','♯9 위 major♭2'],
+   [6,'majb2','dim','♯11 위 major♭2'],
+   [9,'majb2','dim','13th 위 major♭2']]},
  {id:'m7b5',suf:'ø',ko:'하프 디미니시 · Locrian',voice:[0,3,6,10,15],deg:{3:'♭3',6:'♭5'},opts:[
    [3,'min6','base','♭3 위 −6'],
    [0,'m7b5','base','루트 위 −7♭5'],
