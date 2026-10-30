@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
-/* Layout: slim top bar (brand + 2 categories) → category = searchable title list → practice = full-height frame */
+/* Layout: slim top bar (brand + 3 categories) → category = searchable title list → practice = full-height frame */
 :root{
   --bg:#eef1f4; --paper:#ffffff; --ink:#15202b; --muted:#5d6b78; --line:#d5dce3; --soft:#e4e9ee;
   --accent:#c9962b; --accent-ink:#15202b;
@@ -161,7 +161,7 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
    title: 목록에 보일 제목
    file : 파일 경로 */
 const PRACTICES=[
-  {id:'two-five-one-bebop', cat:'basic', sub:'bebop', title:'II-V-I Be-bop Scale',  file:'practice/two-five-one-bebop.html'},
+  /* II-V-I 비밥 스케일은 다른 연습과 같은 화면(song.html)으로: songs.js의 Major/Minor II-V-I */
   {id:'penta-chords', cat:'penta', sub:'tools', title:'Chord → Pentatonic',  file:'practice/pentatonic.html#penta-chords'},
   {id:'penta-lines',  cat:'penta', sub:'tools', title:'Pentatonic Line Generator', file:'practice/pentatonic.html#penta-lines'},
   {id:'penta-prog',   cat:'penta', sub:'tools', title:'Progression Builder', file:'practice/pentatonic.html#penta-prog'},
@@ -169,7 +169,7 @@ const PRACTICES=[
     return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
 ];
 const CATS={basic:'Basic Practice', song:'Song Practice', penta:'Pentatonic Practice'};
-const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Be-bop Scale Practice', enclosure:'Enclosure Approach Practice', tools:'Pentatonic Tools'};
+const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Bebop Scale Practice', enclosure:'Enclosure Approach Practice', tools:'Pentatonic Tools'};
 const FOUR=['chordtone','arpeggio','bebop','enclosure'];
 const CAT_SUBS={basic:FOUR, song:FOUR, penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
 

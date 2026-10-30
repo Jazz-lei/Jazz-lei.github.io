@@ -37,6 +37,12 @@ h1{font-size:26px;line-height:1.25;margin:0;font-weight:700;text-wrap:balance}
 .songnote{max-width:70ch;font-size:14px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--b);border-radius:8px;padding:10px 14px}
 .songnote p{margin:0}
 .songnote p+p{margin-top:6px}
+.score svg .abcjs-annotation{fill:var(--a);font-family:var(--sans)!important}
+.encsel{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.encsel span{font-size:13px;font-weight:600;color:var(--muted);margin-right:4px}
+.encsel button{font:600 14px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer}
+.encsel button:hover{border-color:var(--muted)}
+.encsel button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 details.rules{max-width:70ch;font-size:14px;color:var(--muted)}
 details.rules summary{cursor:pointer;color:var(--ink);font-weight:500;width:fit-content}
 details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
@@ -112,8 +118,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 .cycle h3.sub{margin:6px 0 -4px;font:600 14px var(--mono);color:var(--cc)}
 .cycle.A{--cc:var(--a);--cb:var(--a-bg)} .cycle.B{--cc:var(--b);--cb:var(--b-bg)} .cycle.C{--cc:var(--c);--cb:var(--c-bg)}
 .chorus{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;scroll-margin-top:140px}
-.chorus-h{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cb);border-bottom:1px solid var(--line)}
-.chorus-h .id{font:700 16px var(--mono);color:var(--cc)}
+.chorus-h{display:flex;align-items:center;flex-wrap:wrap;row-gap:6px;gap:10px;padding:10px 14px;background:var(--cb);border-bottom:1px solid var(--line)}
+.chorus-h .id{font:700 16px var(--mono);color:var(--cc);white-space:nowrap}
+.chorus-h .start{min-width:0;flex:1 1 12em}
+.chorus-h button{white-space:nowrap}
+@media (max-width:600px){.chorus-h .start{flex-basis:calc(100% - 4em)} .chorus-h .play1{margin-left:0}}
 .chorus-h .start{font-size:14px;font-weight:500}
 .chorus-h .loop1{font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer;margin-left:6px}
 .chorus-h .loop1:hover,.chorus-h .play1:hover{background:var(--cb)}
@@ -143,23 +152,24 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 
 <div class="wrap">
   <header>
-    <div class="eyebrow"><span class="kn"></span> · <span class="sg-bars"></span> bars · 8th notes</div>
+    <div class="eyebrow"><span class="kn"></span> · <span class="sg-bars"></span> bars · <span id="sg-kind">8th notes</span></div>
     <h1><span class="sg-name"></span> <span id="mname">비밥 스케일</span></h1>
     <p class="lead" id="lead">8분음표 비밥 스케일을 코러스마다 근음·3음·5음에서 시작해요. 세 가지 사이클로 같은 진행을 다르게 연결합니다.</p>
     <nav class="songnav" id="songnav" aria-label="곡 이동" hidden>
       <a id="prevs" href="#"><span>← 이전 곡</span><b></b></a>
       <a id="nexts" href="#"><span>다음 곡 →</span><b></b></a>
     </nav>
+    <div class="encsel" id="encsel" role="group" aria-label="엔클로저 목표음" hidden><span>목표음</span><button type="button" data-t="1" aria-pressed="false">근음</button><button type="button" data-t="3" aria-pressed="true">3음</button><button type="button" data-t="5" aria-pressed="false">5음</button></div>
     <div class="songnote" id="songnote" hidden></div>
     <details class="rules">
-      <summary>연결 규칙 자세히 보기</summary>
+      <summary id="rulesum">연결 규칙 자세히 보기</summary>
       <ul id="rules">
-        <li><b>사이클 A</b>는 코드가 바뀔 때마다 지정음에서 다시 시작해요.</li>
-        <li><b>사이클 B</b>는 앞 음에서 가장 가까운 코드톤으로 이어가요. 하행(B)과 상행(B↑) 두 가지가 있어요. 2마디 동안은 옥타브를 바꾸지 않고 한 흐름으로 이어가고, 프레이즈 끝 길게를 켜면 2마디 끝을 4분음표로 마치고 지정음에서 새로 시작해요. 옥타브는 2마디가 끝날 때만 필요하면 옮겨요. 프레이즈마다 가능한 한 8va 없이 읽을 수 있는 옥타브를 골라요.</li>
-        <li><b>사이클 C</b>는 한 마디는 하행, 다음 마디는 상행으로 바꾸면서 반음이나 온음으로만 이어져요.</li>
+        <li><b>사이클 A</b>는 코드가 바뀔 때마다 지정음에서 다시 시작해요. 한 마디에 코드가 둘이면 뒤 코드는 앞 코드에서 이어서 하행해요 (예: F7 F E E♭ D │ D7 C B♭ A).</li>
+        <li><b>사이클 B</b>는 앞 음에서 한 걸음(반음·온음)으로 이어가요. 2·4·6음에서 시작하게 되면 크로매틱(♭2 등)을 넣어 정박에 코드톤을 맞춰요 (예: B♭7 C B B♭ A A♭ G F). 하행(B)과 상행(B↑) 두 가지가 있어요. 2마디 동안은 옥타브를 바꾸지 않고 한 흐름으로 이어가고, 프레이즈 끝 길게를 켜면 2마디 끝을 4분음표로 마치고 지정음에서 새로 시작해요. 옥타브는 2마디가 끝날 때만 필요하면 옮겨요. 프레이즈마다 가능한 한 8va 없이 읽을 수 있는 옥타브를 골라요.</li>
+        <li><b>사이클 C</b>는 한 마디는 하행, 다음 마디는 상행으로 바꾸면서 반음이나 온음으로만 이어져요. 방향이 바뀌는 곳에서는 앞 마디 방향으로 한 걸음 더 간 뒤 꺾어요 (하행 뒤에는 아래 음에서 상행 시작).</li>
         <li>Related II-7은 V7의 비밥 스케일로 묶어 연주해요. 사이클 A에서는 시작음을 II-7의 1·3·5음으로 잡아요.</li>
         <li>한 마디 안에 II-V가 함께 있으면 V7 하나로 보고 연주해요. 예: G키의 Am7 D7 → D D♭ C B A G F♯ E.</li>
-        <li>코드별 스케일: 도미넌트 7 → 도미넌트 비밥, 7alt·m7(♭5) → b9·b13 도미넌트 비밥, Maj7·6 → 메이저 6 비밥, 토닉 마이너 → 마이너 6 비밥, m7 → 모두 Related II-7으로 보고 4도 위 V7 비밥 (마이너 곡의 토닉 m7은 마이너 6 비밥), 키의 III7·VI7·VII7 → ♭9·♭13 도미넌트 비밥, dim7 → 홀-하프 디미니시드, 7(#11)·반음 아래로 해결하는 도미넌트(트라이톤 서브) → 리디안 도미넌트 비밥.</li>
+        <li>코드별 스케일: 도미넌트 7 → 도미넌트 비밥, 7alt·m7(♭5) → ♭9·♭13 도미넌트 비밥, Maj7·6 → 메이저 6 비밥, 토닉 마이너 → 마이너 6 비밥, m7 → 모두 Related II-7으로 보고 4도 위 V7 비밥 (마이너 곡의 토닉 m7은 마이너 6 비밥), 키의 III7·VI7·VII7 → ♭9·♭13 도미넌트 비밥(이 스케일에서는 제자리 9·13음을 경과음으로 쓰지 않아요), dim7 → 홀-하프 디미니시드, 7(#11)·반음 아래로 해결하는 도미넌트(트라이톤 서브) → 리디안 도미넌트 비밥.</li>
         <li>C4 아래로 내려갈 것 같으면 마디(코드) 시작에서 옥타브를 올려서 하행이 끊기지 않게 해요.</li>
         <li>정박(다운비트)에는 코드톤이 오도록 해요. 코드톤이 아닌 음에서 시작해 한 칸 밀리면 크로매틱 음을 하나 넣어 다시 맞추고(예: A A♯ B, E E♭ D), 상행에서는 필요하면 비밥 경과음을 빼요.</li>
         <li>코드가 바뀔 때 앞 코드의 마지막 음이 비밥 경과음(예: F6의 D♭)이나 크로매틱이면, 그 음을 진행 방향으로 한 걸음 해결해서 다음 코드를 시작해요 (예: D♭ → E♭7의 C B B♭).</li>
@@ -213,7 +223,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
             <select id="loopn" aria-label="반복 횟수"><option value="0">계속 반복</option><option value="2">2번</option><option value="4">4번</option><option value="8">8번</option></select>
             <select id="loopt" aria-label="반복할 때마다 템포"><option value="0">템포 그대로</option><option value="2">반복마다 +2</option><option value="4">반복마다 +4</option><option value="8">반복마다 +8</option></select>
           </div></div>
-        <div class="field wide"><p class="hint">빈칸 마디는 악보가 가려지고 반주만 나와요. 그 자리를 직접 즉흥으로 채워 보세요. ‘반복할수록 늘리기’는 구간 반복이나 12키 순환으로 다시 돌아올 때마다 빈칸이 늘어나요.</p>
+        <div class="field wide"><p class="hint">빈칸 마디는 악보가 가려지고 반주만 나와요. 그 자리를 직접 즉흥으로 채워 보세요. ‘반복할수록 빈칸 늘리기’는 구간 반복이나 12키 순환으로 다시 돌아올 때마다 빈칸이 늘어나요.</p>
           <p class="hint">구간 반복(↻ 버튼)을 켜고 악보에서 시작 마디와 끝 마디를 차례로 누르면 그 구간만 반복해요. 한 마디를 두 번 누르면 그 마디만, 구간을 고르지 않으면 코러스 전체를 반복해요. 12키 순환도 켜면 반복할 때마다 다음 키로 넘어가요.</p></div>
         <div class="field wide"><label>옵션</label>
           <div class="toggles">
@@ -221,6 +231,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
             <label><input type="checkbox" id="comp" checked> 반주</label>
             <label><input type="checkbox" id="click"> 2·4박 클릭</label>
             <label><input type="checkbox" id="follow" checked> 악보 따라가기</label>
+            <label><input type="checkbox" id="degs"> 도수 표시</label>
             <label><input type="checkbox" id="space" checked> 프레이즈 끝 길게</label>
             <label><input type="checkbox" id="cyc"> 12키 순환</label>
             <label><input type="checkbox" id="loop"> 구간 반복</label>
