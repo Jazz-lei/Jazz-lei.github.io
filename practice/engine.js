@@ -525,12 +525,12 @@ const METHODS={
     groups:{A:['8분음표','코드톤을 8분음표로 이어요. 마디 끝은 다음 코드의 가이드톤(3·7음) 근처로 가요.'],
             B:['당김음 (싱코페이션)','4박 뒷박에서 다음 코드의 음을 미리 치고 붙임줄로 넘어가요.'],
             C:['16분음표 · 셋잇단','16분음표 엔클로저와 셋잇단 리듬으로 코드톤을 연주해요.']},
-    v:[{g:'A',title:'3-5-1-7',nofold:1,b3:1,split:{a:[N('3'),H,H,H],b:[B3,N('5','u'),N('1','u'),N('7','d')]},full:[N('3'),H,H,H,B3,N('5','u'),N('1','u'),N('7','d')],half:[N('3'),N('5','u'),N('1','u'),N('7','d')],win:[60,77]},
+    v:[{g:'A',title:'3-5-1-7',land:1,nofold:1,b3:1,split:{a:[N('3'),H,H,H],b:[B3,N('5','u'),N('1','u'),N('7','d')]},full:[N('3'),H,H,H,B3,N('5','u'),N('1','u'),N('7','d')],half:[N('3'),N('5','u'),N('1','u'),N('7','d')],win:[60,77]},
        {g:'A',title:'5-7-5-3-1',shape:1,full:[N('5'),N('7','u'),N('5','d'),N('3','d'),N('1','d'),H,H,H],half:[N('5'),N('7','u'),N('5','d'),N('3','d')],win:[64,81]},
-       {g:'B',title:'3-5-7 → 다음 3음',keepEnd:1,b3:1,nofold:1,tieDeg:'3',split:{a:[TIE,TIE,TIE,TIE],b:[B3,N('5','u'),N('7','u'),NX('3')]},full:[TIE,TIE,TIE,TIE,B3,N('5','u'),N('7','u'),NX('3')],half:[TIE,AP('da'),AP('cb'),NX('3')],win:[60,77]} /* 2박 코드: 들어온 목표음 → 다음 코드 목표음을 위·아래로 감싸 당김음으로 */,
+       {g:'B',title:'3-5-7 → 다음 3음',land:1,keepEnd:1,b3:1,nofold:1,tieDeg:'3',split:{a:[TIE,TIE,TIE,TIE],b:[B3,N('5','u'),N('7','u'),NX('3')]},full:[TIE,TIE,TIE,TIE,B3,N('5','u'),N('7','u'),NX('3')],half:[TIE,AP('da'),AP('cb'),NX('3')],win:[60,77]} /* 2박 코드: 들어온 목표음 → 다음 코드 목표음을 위·아래로 감싸 당김음으로 */,
        {g:'B',title:'5-7-5-3-1 → 다음 5음',shape:1,tieDeg:'5',split:{a:[TIE,N('7','u'),N('5','d'),N('3','d')],b:[N('5'),N('7','u'),N('5','d'),N('3','d')]},full:[TIE,N('7','u'),N('5','d'),N('3','d'),N('1','d'),H,H,NX('5')],first:[N('5'),N('7','u'),N('5','d'),N('3','d'),N('1','d'),H,H,NX('5')],
         half:[TIE,N('3','d'),N('1','d'),NX('5')],win:[64,81]},
-       {g:'C',title:'16분음표 3-5-1-7-1-7-5',nofold:1,b3:1,split:{a:[N('3'),H,H,NX('3')],b:[N('5','u'),N('1','u'),S(N('7','d'),N('1','u')),S(N('7','d'),N('5','d'))]},full:[N('3'),H,H,B3,N('5','u'),N('1','u'),S(N('7','d'),N('1','u')),S(N('7','d'),N('5','d'))],
+       {g:'C',title:'16분음표 3-5-1-7-1-7-5',land:1,nofold:1,b3:1,split:{a:[N('3'),H,H,NX('3')],b:[N('5','u'),N('1','u'),S(N('7','d'),N('1','u')),S(N('7','d'),N('5','d'))]},full:[N('3'),H,H,B3,N('5','u'),N('1','u'),S(N('7','d'),N('1','u')),S(N('7','d'),N('5','d'))],
         half:[N('3'),H,AP('da'),AP('cb')],win:[60,77]} /* 2박 코드: 목표음 4분음표 → 다음 코드 목표음을 위·아래로 감쌈 */,
        {g:'C',title:'셋잇단 1-3-5-7',line:1,full:[N('3'),H,H,H,R,N('1','d'),T3(N('3','u'),N('5','u'),N('7','u')),TC],half:[T3(N('1'),N('3','u'),N('5','u')),TC,N('7','u'),H],win:[60,77]},
        {g:'C',title:'셋잇단 1-3-1-3-5-3-5-7',line:1,full:[N('1'),H,T3(N('3','u'),N('1','d'),N('3','u')),TC,T3(N('5','u'),N('3','d'),N('5','u')),TC,N('7','u'),H],
@@ -647,6 +647,17 @@ function genMethod(meth){
       return pat; };
     // 앞 마디가 다음 음을 미리 치지 않고 끝나면(예: B-2의 2박 코드 마디), 붙임줄로 시작하는 마디는 그 음을 새로 쳐서 시작
     const PATS=[]; segs.forEach((_,i)=>{ let p=basePat(i); if(p[0].t==='tie'&&V.tieDeg&&i>0&&!PATS[i-1].some(leads)) p=[N(V.tieDeg),...p.slice(1)]; PATS.push(p); });
+    // 1박 해결음: 5도 하행이면 3음, 같은 코드 반복이면 5음, 그 외에는 앞 음에서 가장 가까운 코드톤(같은 음 제외)
+    if(V.land){ const DG=['3','5','7','1'], pcOf=(cx,d)=>((cx.pc(d)%12)+12)%12;
+      const lastDeg=pt=>{ for(let k=pt.length-1;k>=0;k--){ let x=pt[k]; while(x&&x.x) x=x.x[x.x.length-1]; if(x&&x.d&&x.t!=='nx') return x.d; } return null; };
+      const landDeg=(pc0,cp,cx)=>{ const same=['1','3','5','7'].every(d=>pcOf(cp,d)===pcOf(cx,d)); if(same) return pcOf(cx,'5')!==pc0?'5':'7'; /* 같은 코드 반복: 5음, 앞 음이 5음이면 7음 */
+        if((pcOf(cp,'1')-pcOf(cx,'1')+12)%12===7&&pcOf(cx,'3')!==pc0) return '3';
+        { const q=pcOf(cx,'3'); let dd=Math.abs(q-pc0)%12; dd=Math.min(dd,12-dd); if(dd>0&&dd<=2) return '3'; } /* 3음이 온음 안에 있으면 3음 우선 */
+        let best='3',bd=99; for(const d of DG){ const q=pcOf(cx,d); let dd=Math.abs(q-pc0)%12; dd=Math.min(dd,12-dd); if(dd===0) continue; if(dd<bd){ bd=dd; best=d; } } return best; };
+      const swap=(pt,k,d)=>{ const a=pt.slice(); a[k]=Object.assign({},a[k],{d}); return a; };
+      for(let i=1;i<segs.length;i++){ if(segs[i].si!==0||ctxs[i].to6) continue; const pt=PATS[i], cp=ctxs[i-1], cx=ctxs[i];
+        if(pt[0].t==='n'&&pt[0].d==='3'){ const ld=lastDeg(PATS[i-1]); if(ld) PATS[i]=swap(pt,0,landDeg(pcOf(cp,ld),cp,cx)); }
+        else if(pt[0].t==='tie'){ const pv=PATS[i-1], k=pv.length-1; if(pv[k]&&pv[k].t==='nx'&&pv[k].d==='3'){ const ld=lastDeg(pv); if(ld) PATS[i-1]=swap(pv,k,landDeg(pcOf(cp,ld),cp,cx)); } } } }
     const patOf=i=>PATS[i];
     // 목표음 m에서 시작하면 그 마디가 음역 안에 들어가는지
     const canFold=!V.shape&&!V.line&&!V.nofold&&meth!=='arpeggio'; // 코드톤(형태 연습 제외)·엔클로저: 이어지는 목표음을 옥타브 내리지 않음
@@ -675,7 +686,8 @@ function genMethod(meth){
           const r=run(V,pat,cx,nx,p,tie?fz:null,c,okAll,null,false,null,sh); if(r.lo<M_LO||r.hi>M_HI) continue;
           const nxt=go(i+1,r.last,r.nextF); if(!nxt) continue;
           const ms=r.notes.filter(x=>x.m!=null).map(x=>x.m), far=pat.some(leads)&&ms.length>1&&Math.abs(ms[ms.length-1]-ms[ms.length-2])>6?400:0; /* 다음 코드로 미리 들어가는 음이 앞 음 바로 옆이 아니면 */
-          const cost=k+far+(sh===-24?40:sh?3:0)+Math.abs((r.lo+r.hi)/2-72)*0.15+nxt.c;
+          const dup=!tie&&p!=null&&ms.length&&ms[0]===p?500:0; /* 앞 음과 같은 음으로 새로 시작하지 않음 */
+          const cost=k+far+dup+(sh===-24?40:sh?3:0)+Math.abs((r.lo+r.hi)/2-72)*0.15+nxt.c;
           if(!res||cost<res.c) res={c:cost,a:[{a:c,s:sh},...nxt.a]}; }
         memo.set(key,res); return res; };
       const g=go(0,prev,forced); if(g) plan=g.a; }
@@ -932,12 +944,43 @@ function click(t,acc){
   g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.08,t+.001); g.gain.exponentialRampToValueAtTime(.0001,t+.04);
   o.connect(g).connect(master); o.start(t); o.stop(t+.05);
 }
-function comp(t,tones,dur){
-  const r=tones[0], third=tones[1], sev=tones[3];
-  const bass=36+((r-36)%12+12)%12;
-  const v3=48+((third-48)%12+12)%12, v7=48+((sev-48)%12+12)%12;
-  tone(t,bass,dur,.13,'sine'); tone(t,v3,dur,.05,'sine'); tone(t,v7,dur,.05,'sine');
-}
+// ── 반주: 콘트라베이스 워킹 + 드럼(라이드·스네어 컴핑) — 실제 악기 샘플 (FluidR3 GM, MIT) ──
+let BASS_LAST=40, SMP=null, SMP_P=null;
+const BZ=[[29,29,2900],[30,36,3600],[37,41,4100],[42,46,4600],[47,50,5400],[51,54,5400]];
+function loadSamples(){
+  if(SMP_P) return SMP_P;
+  const get=f=>fetch(new URL('samples/'+f,document.baseURI)).then(r=>{ if(!r.ok) throw 0; return r.arrayBuffer(); }).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no)));
+  SMP_P=Promise.all([...BZ.map((_,i)=>get('bass'+(i+1)+'.mp3')),get('ride.mp3'),get('snare.mp3'),get('hat.mp3'),get('kick.mp3')])
+    .then(a=>{ SMP={bass:a.slice(0,6),ride:a[6],snare:a[7],hat:a[8],kick:a[9]}; }).catch(()=>{ SMP=null; SMP_P=null; });
+  return SMP_P; }
+function smp(buf,t,vol,rate,dur){ if(!buf) return; const src=ctx.createBufferSource(); src.buffer=buf; src.playbackRate.value=rate||1;
+  const g=ctx.createGain(); g.gain.setValueAtTime(vol,t); if(dur){ g.gain.setValueAtTime(vol,t+dur); g.gain.linearRampToValueAtTime(.0001,t+dur+.06); }
+  src.connect(g).connect(master); src.start(t); src.stop(t+(dur?dur+.1:buf.duration/(rate||1))); }
+function pluck(t,m,dur,vol){ if(!SMP) return; let zi=BZ.findIndex(z=>m>=z[0]&&m<=z[1]); if(zi<0) zi=m<29?0:5;
+  smp(SMP.bass[zi],t,vol,Math.pow(2,(m*100-BZ[zi][2])/1200),dur); }
+// 마디마다 스네어 컴핑 자리 (박, 뒷박 여부)
+const SNC=[[[1,1]],[[3,1]],[[1,1],[3,0]],[[2,1]],[],[[0,1],[3,1]],[[3,1]],[[1,0],[2,1]]];
+function drums(t,bt,spb,sw,P){ if(!SMP) return;
+  const beat=bt/2, off=t+sw*spb, bar=Math.floor(P/8);
+  smp(SMP.ride,t,beat%2?.22:.17); if(beat%2) smp(SMP.ride,off,.13); // 딩 딩-가 딩 딩-가
+  if(beat%2) smp(SMP.hat,t,.16); // 2·4박 하이햇
+  smp(SMP.kick,t,.06); // 아주 작은 킥
+  SNC[((bar*5+3)%SNC.length+SNC.length)%SNC.length].forEach(([b,f])=>{ if(b===beat) smp(SMP.snare,f?off:t,f?.1:.07); }); }
+// 워킹 베이스: 1박 근음, 사이는 코드톤·경과음, 마지막 박은 다음 근음으로 반음 어프로치
+const BLO=31, BHI=50, bnear=(pc,from)=>{ let m=from+((pc-from)%12+12)%12; if(m-from>6) m-=12; while(m<BLO) m+=12; while(m>BHI) m-=12; return m; };
+function walkLine(cp,nx){
+  const n=Math.max(1,Math.round(cp.dur/2)), tn=cp.tones, iv=k=>((tn[k]-tn[0])%12+12)%12, out=[];
+  const seed=((cp.P/2|0)*5+tn[0])%3;
+  for(let c=0;c<n;c+=4){ // 4박씩: 근음(또는 5음)에서 시작해 코드톤으로 걷기
+    const st=c===0?bnear(tn[0],BASS_LAST):bnear(tn[2],out[out.length-1]), up=st<=41;
+    const r=st-(c===0?0:iv(2));
+    const U=[[st,r+iv(1),r+iv(2),r+iv(3)],[st,r+2,r+iv(1),r+iv(2)],[st,r+iv(1),r+iv(2),r+12]];
+    const Dn=[[st,r-12+iv(3),r-12+iv(2),r-12+iv(1)],[st,r-12+iv(3),r-12+9,r-12+iv(2)],[st,r-12+iv(2),r-12+iv(1),r-12+2]];
+    const pat=(up?U:Dn)[seed].map(m=>{ while(m<BLO) m+=12; while(m>BHI) m-=12; return m; });
+    for(let k=0;k<4&&c+k<n;k++) out.push(pat[k]); }
+  if(nx&&n>1){ const pv=out[n-2], nr=bnear(nx.tones[0],pv); out[n-1]=nr>pv?nr-1:nr+1; } // 다음 근음으로 반음 어프로치
+  BASS_LAST=out[n-1]; return out; }
+function comp(t,cp,nx,T){ const line=walkLine(cp,nx); line.forEach((m,k)=>{ const t1=T(cp.P+k*2), t2=T(cp.P+k*2+2); pluck(t1,m,(t2-t1)*.92,.24); }); }
 // 위치(8분음표 단위) → 시간. 8분음표 뒷박에만 스윙을 주고, 셋잇단은 고르게
 function tmap(x,trip,sw){ const b=Math.floor(x/2+1e-9), f=x/2-b; if(trip||f<1e-9) return b+f; return b+(f<=.5?f*sw/.5:sw+(f-.5)*(1-sw)/.5); }
 function schedule(){
@@ -971,11 +1014,11 @@ function schedule(){
       continue;
     }
     const t=T(p, p===pe&&ev.trip); if(t>horizon) return;
-    if(p===pk){ const bt=((p%8)+8)%8; if($('click').checked&&(bt===2||bt===6)) click(t,false); clickP+=2; continue; }
-    if(p===pc){ cidx++; if($('comp').checked) comp(t,cp.tones,(T(cp.P+cp.dur)-t)*0.95); continue; }
+    if(p===pk){ const bt=((p%8)+8)%8; if($('click').checked&&(bt===2||bt===6)) click(t,false); if($('comp').checked) drums(t,bt,spb,sw,p); clickP+=2; continue; }
+    if(p===pc){ cidx++; if($('comp').checked) comp(t,cp,COMP[cidx]||null,T); continue; }
     idx++;
     const bl=isBlank(ev.chorus,ev.bar,reps);
-    if(!ev.rest&&!bl) tone(t,ev.m,(T(ev.P+ev.dur,ev.trip)-t)*0.9,.2);
+    if(!ev.rest&&!bl&&$('mel').checked) tone(t,ev.m,(T(ev.P+ev.dur,ev.trip)-t)*0.9,.2);
     q.push({t,n:ev,bl});
   }
 }
@@ -997,10 +1040,11 @@ function ui(){
   }
   requestAnimationFrame(ui);
 }
-function start(){
+async function start(){
   if(!FLAT.length) return;
   if(!ctx){ ctx=new (window.AudioContext||window.webkitAudioContext)(); }
   if(ctx.state==='suspended') ctx.resume();
+  if(!SMP){ if(start.busy) return; start.busy=true; $('playt').textContent='불러오는 중'; await loadSamples(); start.busy=false; $('playt').textContent='재생'; }
   master=ctx.createGain(); master.gain.value=1; master.connect(ctx.destination);
   // 시작 위치: 선택한 마디의 처음, 없으면 시작 코러스의 처음
   let startP, barP;
@@ -1016,10 +1060,10 @@ function start(){
   if($('ci').checked){ // 예비박은 시작 마디 바로 앞 마디에서 (못갖춘마디는 그 마디 끝에 겹쳐서)
     P0=barP-8; base=t0; clickP=barP; for(let k=0;k<4;k++){ click(t0+k*spb,k===0); q.push({t:t0+k*spb,count:k+1}); } }
   else { P0=barP-(startP<barP?8:0); base=t0-tmap(startP-P0,false,sw)*spb; clickP=Math.ceil((startP-1e-9)/2)*2; }
-  lastSpb=spb; playing=true;
+  lastSpb=spb; playing=true; BASS_LAST=40;
   // 코드 중간부터 시작하면 지금 코드를 남은 길이만큼 반주
   const cov=COMP.find(c=>c.P<startP-1e-9&&c.P+c.dur>startP+1e-9);
-  if(cov&&$('comp').checked) comp(base+tmap(startP-P0,false,sw)*spb,cov.tones,tmap(cov.P+cov.dur-startP,false,sw)*spb*0.95);
+  if(cov&&$('comp').checked){ const tt=base+tmap(startP-P0,false,sw)*spb; pluck(tt,bnear(cov.tones[0],BASS_LAST),spb*.92,.24); }
   schedule(); timer=setInterval(schedule,25); requestAnimationFrame(ui);
   $('playt').textContent='정지'; $('play').classList.add('on'); $('play').setAttribute('aria-label','정지'); curCh=-1;
   const f=FLAT[idx]; if($('follow').checked && f && f.el) f.el.scrollIntoView({block:'center'});
