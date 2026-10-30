@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Jazz Lei · Jazz Practice</title>
 <meta name="description" content="Jazz Lei의 즉흥연주 연습 페이지">
+<!-- 홈 화면 앱(PWA) -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Jazz Lei">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b2229" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -254,6 +264,8 @@ function show(){
 }
 $('q').addEventListener('input',renderList);
 addEventListener('hashchange',show); show();
+// 홈 화면 앱: 오프라인에서도 열리도록
+if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 // 연습 화면 안에서 이전·다음 곡으로 넘어가면 위쪽 메뉴·제목도 같이 바꿈
 $('frame').addEventListener('load',()=>{ try{ const w=$('frame').contentWindow;
   w.addEventListener('hashchange',()=>{ const h=w.location.hash.slice(1); if(h&&PRACTICES.some(p=>p.id===h)&&location.hash.slice(1)!==h){ location.hash=h; } }); }catch(e){} });
