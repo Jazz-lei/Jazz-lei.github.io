@@ -961,7 +961,7 @@ function pluck(t,m,dur,vol){ if(!SMP) return; let zi=BZ.findIndex(z=>m>=z[0]&&m<
 // 마디마다 스네어 컴핑 자리 (박, 뒷박 여부)
 const SNC=[[[1,1]],[[3,1]],[[1,1],[3,0]],[[2,1]],[],[[0,1],[3,1]],[[3,1]],[[1,0],[2,1]]];
 function drums(t,bt,spb,sw,P){ if(!SMP) return;
-  const beat=bt/2, off=t+sw*spb, bar=Math.floor(P/8);
+  const beat=bt/2, off=t+spb*2/3, bar=Math.floor(P/8); /* 드럼 뒷박은 셋잇단 스윙으로 고정 (멜로디 스윙 비율과 따로) */
   smp(SMP.ride,t,beat%2?.22:.17); if(beat%2) smp(SMP.ride,off,.13); // 딩 딩-가 딩 딩-가
   if(beat%2) smp(SMP.hat,t,.16); // 2·4박 하이햇
   smp(SMP.kick,t,.06); // 아주 작은 킥
