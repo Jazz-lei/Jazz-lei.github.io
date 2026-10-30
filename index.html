@@ -83,6 +83,15 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
 .list a:hover{border-color:var(--accent);color:var(--accent)}
 .empty{color:var(--muted);font-size:14px;margin:0;padding:20px;border:1px dashed var(--line);border-radius:10px;text-align:center}
 
+/* footer: home·category 화면 맨 아래 (연습 화면에는 안 보임) */
+.scroll>.inner{flex:1}
+.foot{margin-top:auto;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;font-size:13px;color:var(--muted)}
+.foot-links{display:flex;flex-wrap:wrap;gap:8px 20px}
+.foot a{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-weight:500}
+.foot a:hover{color:var(--ink)}
+.foot svg{width:16px;height:16px;flex:none}
+.foot small{font-family:var(--mono);font-size:12px}
+
 /* practice */
 .crumb{flex:none;display:flex;align-items:center;gap:10px;font-size:14px;
   padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bg)}
@@ -128,6 +137,17 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
         <a class="cat" href="#song"><b>Song Practice</b><span class="badge" data-n="song"></span></a>
         <a class="cat" href="#penta"><b>Pentatonic Practice</b><span class="badge" data-n="penta"></span></a>
       </div>
+      <footer class="foot" id="foot">
+        <div class="foot-links">
+          <a href="https://www.instagram.com/leigeuht_jazz/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+            @leigeuht_jazz</a>
+          <a href="mailto:contact@jazzlei.com">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
+            contact@jazzlei.com</a>
+        </div>
+        <small>© 2026 Jazz Lei</small>
+      </footer>
     </div>
   </section>
 
@@ -140,8 +160,7 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
       <div class="subs" id="subs" role="navigation" aria-label="세부 메뉴"></div>
       <p class="result" id="result" hidden></p>
       <ul class="list" id="list"></ul>
-      <p class="empty" id="empty" hidden></p>
-    </div>
+      <p class="empty" id="empty" hidden></p>    </div>
   </section>
 
   <section class="view" id="view-practice">
@@ -174,6 +193,7 @@ const FOUR=['chordtone','arpeggio','bebop','enclosure'];
 const CAT_SUBS={basic:FOUR, song:FOUR, penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
 
 const $=id=>document.getElementById(id);
+{ const f=$('foot').cloneNode(true); f.removeAttribute('id'); $('empty').after(f); } // 목록 화면에도 같은 footer
 const count=(c,s)=>PRACTICES.filter(p=>p.cat===c&&(!s||p.sub===s)).length;
 function setBadge(el,n){ el.textContent=n; el.classList.toggle('zero',n===0); el.setAttribute('aria-label',n+'개'); }
 document.querySelectorAll('[data-n]').forEach(el=>setBadge(el,count(el.dataset.n)));
