@@ -1242,4 +1242,6 @@ document.querySelectorAll('#encsel button').forEach(b=>b.onclick=()=>{ if(b.data
   document.querySelectorAll('#encsel button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.t===ENC_T))); SEL=null; PICK.clear(); render(); });
 let HEAD0=null;
 addEventListener('hashchange',loadSong);
+// 바깥 화면(메뉴)으로 나가면 재생 멈춤
+addEventListener('jl-stop',()=>{ if(playing) stop(); });
 loadSong();

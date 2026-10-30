@@ -409,6 +409,7 @@ const tabs={chords:[document.getElementById('tab-chords'),document.getElementByI
 let CURTAB='chords';
 document.getElementById('m-play').onclick=()=>{ if(playing) stopAll(); else if(CURTAB==='lines') playLine(); else if(CURTAB==='prog') playProg(); };
 function showTab(k){
+  stopAll(); // 다른 툴로 넘어가면 재생 멈춤
   Object.entries(tabs).forEach(([key,[t,p]])=>{const on=key===k; t.setAttribute('aria-selected',on); p.hidden=!on;});
   if(k==='lines') renderStaff();
   if(k==='prog') renderProg();
@@ -822,6 +823,7 @@ let startTab=tabFromHash();
 if(!startTab){ try{ startTab=localStorage.getItem('pp-tab'); }catch(e){} }
 showTab(['lines','prog'].includes(startTab)?startTab:'chords');
 addEventListener('hashchange',()=>{const t=tabFromHash(); if(t) showTab(t);});
+addEventListener('jl-stop',stopAll);
 })();
 </script>
 

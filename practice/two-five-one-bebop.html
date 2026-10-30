@@ -545,6 +545,7 @@ function start(){
   $('playt').textContent='정지'; $('play').classList.add('on'); $('play').setAttribute('aria-label','정지');
   if($('follow').checked && FLAT[idx].el) FLAT[idx].el.scrollIntoView({block:'center',inline:'nearest'});
 }
+addEventListener('jl-stop',()=>{ if(playing) stop(); });
 function stop(){
   playing=false; clearInterval(timer);
   if(master){ const m=master; m.gain.setTargetAtTime(0,ctx.currentTime,.02); setTimeout(()=>m.disconnect(),300); master=null; }

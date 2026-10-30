@@ -246,6 +246,8 @@ function parse(r){
 }
 function show(){
   const st=parse(location.hash.slice(1)||'home');
+  // 연습 화면을 떠나면(목록·홈) 재생 중인 소리를 멈춤
+  if(st.view!=='practice'){ try{ $('frame').contentWindow.dispatchEvent(new Event('jl-stop')); }catch(e){} }
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+st.view));
   document.querySelectorAll('#nav a').forEach(a=>a.dataset.cat===st.cat?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
   if(st.view==='cat'){
