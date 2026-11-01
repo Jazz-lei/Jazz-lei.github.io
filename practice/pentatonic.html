@@ -124,6 +124,8 @@ footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padd
 .mix label{display:flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;user-select:none;background:var(--panel)}
 .mix label:has(input:checked){background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .mix input{accent-color:var(--paper);margin:0}
+.fold{margin-left:auto;order:9}
+.mixbar.folded .mix{display:none}
 </style>
 
 <header class="band">
@@ -139,6 +141,7 @@ footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padd
 </header>
 <div class="mixbar" id="mixbar" hidden><div class="wrap">
   <button class="btn primary" id="m-play">▶ 재생</button>
+  <button class="btn ghost fold" id="m-fold" type="button" aria-expanded="true">접기</button>
   <div class="mix" role="group" aria-label="소리 켜고 끄기">
     <label><input type="checkbox" id="m-mel" checked> 멜로디</label>
     <label><input type="checkbox" id="m-comp" checked> 반주 (베이스·드럼)</label>
@@ -392,10 +395,10 @@ function tone(midi,t,dur,vel,bus){
 function click(t,acc){
   const o=ctx.createOscillator(), g=ctx.createGain();
   o.type='square'; o.frequency.value=acc?1800:1200;
-  g.gain.setValueAtTime(acc?0.08:0.05,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04);
+  g.gain.setValueAtTime(acc?0.3:0.24,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
   o.connect(g); g.connect(BUS.click||master); o.start(t); o.stop(t+0.05);
 }
-function countIn(t,acc){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=acc?1800:1200; g.gain.setValueAtTime(acc?0.08:0.05,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.04); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.05); }
+function countIn(t,acc){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=acc?1800:1200; g.gain.setValueAtTime(acc?0.3:0.24,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.05); }
 function chordPad(rootPc,voice,t,dur){
   const base=48+rootPc - (rootPc>5?12:0);
   tone(base-12,t,dur,0.10,master);
@@ -407,6 +410,8 @@ const tabs={chords:[document.getElementById('tab-chords'),document.getElementByI
             lines:[document.getElementById('tab-lines'),document.getElementById('panel-lines')],
             prog:[document.getElementById('tab-prog'),document.getElementById('panel-prog')]};
 let CURTAB='chords';
+(()=>{ const bar=document.getElementById('mixbar'), btn=document.getElementById('m-fold'); const set=f=>{ bar.classList.toggle('folded',f); btn.setAttribute('aria-expanded',String(!f)); btn.textContent=f?'펼치기':'접기'; try{localStorage.setItem('jl-fold',f?'1':'0');}catch(e){} };
+  let f0=false; try{ f0=localStorage.getItem('jl-fold')==='1'; }catch(e){} set(f0); btn.onclick=()=>set(!bar.classList.contains('folded')); })();
 document.getElementById('m-play').onclick=()=>{ if(playing) stopAll(); else if(CURTAB==='lines') playLine(); else if(CURTAB==='prog') playProg(); };
 function showTab(k){
   stopAll(); // 다른 툴로 넘어가면 재생 멈춤
@@ -642,9 +647,9 @@ async function playLine(){
   const pos=line.map((_,i)=>i*0.5), lastI=line.length-1;
   const lastDur=(lastI%8===0)?4:2, nBars=Math.floor(lastI/8)+1;
   const sw=b=>{ const f=b-Math.floor(b); return Math.abs(f-0.5)<1e-6?Math.floor(b)+swr:b; };
-  const lead=clickOn?4:0, t0=ctx.currentTime+0.08;
+  const lead=clickOn?8:0, t0=ctx.currentTime+0.08; /* 예비박 2마디 */
   const endBeat=lead+Math.ceil(nBars/4)*16;
-  for(let b=0;b<endBeat;b++){ if(b<lead) countIn(t0+b*spb,b===0); else { const bt=(b-lead)%4; if(bt%2) click(t0+b*spb,false); drums(t0+b*spb,bt,spb,2/3,Math.floor((b-lead)/4)); } } /* 라인 생성기는 코드가 정해져 있지 않아서 반주는 드럼만 */
+  for(let b=0;b<endBeat;b++){ if(b<lead){ if(b>=4||b%2===0) countIn(t0+b*spb,b===0||b===4); } else { const bt=(b-lead)%4; if(bt%2) click(t0+b*spb,false); drums(t0+b*spb,bt,spb,2/3,Math.floor((b-lead)/4)); } } /* 라인 생성기는 코드가 정해져 있지 않아서 반주는 드럼만 */
   line.forEach((n,i)=>{
     const start=sw(pos[i]+lead), next=i<lastI?sw(pos[i+1]+lead):start+lastDur;
     const t=t0+start*spb, dur=Math.max(0.08,(next-start)*spb*0.92);
@@ -772,8 +777,8 @@ async function playProg(){
   const tempo=+document.getElementById('p-tempo').value, spb=60/tempo;
   const swr=+document.getElementById('p-swing').value/100, clickOn=true, lineOn=true;
   const sw=b=>{ const fr=b-Math.floor(b); return Math.abs(fr-0.5)<1e-6?Math.floor(b)+swr:b; };
-  const lead=clickOn?4:0, t0=ctx.currentTime+0.08, endBeat=lead+32;
-  for(let b=0;b<endBeat;b++){ if(b<lead) countIn(t0+b*spb,b===0); else { const bt=(b-lead)%4; if(bt%2) click(t0+b*spb,false); drums(t0+b*spb,bt,spb,2/3,Math.floor((b-lead)/4)); } }
+  const lead=clickOn?8:0, t0=ctx.currentTime+0.08, endBeat=lead+32; /* 예비박 2마디 */
+  for(let b=0;b<endBeat;b++){ if(b<lead){ if(b>=4||b%2===0) countIn(t0+b*spb,b===0||b===4); } else { const bt=(b-lead)%4; if(bt%2) click(t0+b*spb,false); drums(t0+b*spb,bt,spb,2/3,Math.floor((b-lead)/4)); } }
   BASS_LAST=40; psegs.forEach((s,i)=>{ const nx=psegs[(i+1)%psegs.length], n=Math.max(1,Math.round(s.len/2));
     walkLine(s.c.r,s.c.t,n,nx.c.r,s.start).forEach((m,k)=>pluck(t0+(s.start*0.5+k+lead)*spb,m,spb*.92,.24)); });
   const box=document.getElementById('p-staff');

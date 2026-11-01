@@ -60,6 +60,16 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .hero h1{font-size:40px;line-height:1.15;margin:8px 0 12px;text-wrap:balance}
 .hero h1 em{font-style:normal;color:var(--accent)}
 .hero p{margin:0;color:var(--muted);max-width:56ch;font-size:16px}
+.bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.bk{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--ink)}
+.bk:hover{border-color:var(--muted)}
+.bk img{width:100%;aspect-ratio:210/297;object-fit:contain;display:block;background:var(--soft)}
+.bk div{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+.bk small{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+.bk b{font-size:16px}
+.bk p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.bk span{font-size:13px;font-weight:600;margin-top:4px}
+.bk-lede{color:var(--muted);margin:6px 0 0;max-width:62ch}
 .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .cat{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;text-decoration:none;color:var(--ink)}
 .cat:hover{border-color:var(--accent)}
@@ -120,8 +130,26 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
   .hero h1{font-size:30px}
   .scroll{padding-top:28px}
   .cats{grid-template-columns:1fr}
+  .bk-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .search{width:100%}
 }
+.guide{max-width:720px;display:flex;flex-direction:column;gap:28px}
+.guide h1{font-size:30px;line-height:1.2;margin:8px 0 6px}
+.guide>p.lede{color:var(--muted);margin:0}
+.guide section{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.guide h2{font-size:18px;margin:0 0 10px}
+.guide h3{font-size:15px;margin:14px 0 6px}
+.guide ul,.guide ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.guide li{line-height:1.55}
+.guide kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--bg)}
+.guide .toc{display:flex;flex-wrap:wrap;gap:6px}
+.guide .toc a{font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--paper)}
+nav .gq,nav .gs{display:none}
+nav a[data-cat="books"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+nav a[data-cat="books"]:hover{background:var(--accent);color:var(--accent-ink);filter:brightness(.95)}
+nav a[data-cat="books"][aria-current="page"]{box-shadow:inset 0 0 0 2px var(--accent-ink)}
+@media (max-width:380px){ .brand b{font-size:16px} nav a{padding:5px 5px!important} }
+@media (max-width:560px){ nav{gap:0} nav a{padding:6px 7px!important;font-size:13px!important} nav a .badge{display:none} nav .gl{display:none} nav .gs{display:inline} nav .gq{display:grid;place-items:center;width:22px;height:22px;border:1.5px solid currentColor;border-radius:50%;font-weight:700;font-size:13px} nav a[data-cat="guide"]{padding:5px 6px} .guide h1{font-size:24px} .guide section{padding:16px} }
 </style>
 </head>
 <body>
@@ -131,6 +159,8 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
     <a href="#basic" data-cat="basic">Basic<span class="long"> Practice</span> <span class="badge" data-n="basic"></span></a>
     <a href="#song" data-cat="song">Song<span class="long"> Practice</span> <span class="badge" data-n="song"></span></a>
     <a href="#penta" data-cat="penta">Pentatonic<span class="long"> Practice</span> <span class="badge" data-n="penta"></span></a>
+    <a href="#guide" data-cat="guide" aria-label="이용방법"><span class="gl">이용방법</span><span class="gq" aria-hidden="true">?</span></a>
+    <a href="#books" data-cat="books" aria-label="Practice Guide PDF"><span class="gl">Guide PDF</span><span class="gs" aria-hidden="true">PDF</span></a>
   </nav>
 </header>
 
@@ -171,6 +201,88 @@ nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accen
       <p class="result" id="result" hidden></p>
       <ul class="list" id="list"></ul>
       <p class="empty" id="empty" hidden></p>    </div>
+  </section>
+
+  <section class="view scroll" id="view-books">
+    <div class="inner guide" style="max-width:1000px">
+      <div>
+        <div class="eyebrow">Swing Solo Guide Book</div>
+        <h1>Practice Guide PDF</h1>
+        <p class="bk-lede">사이트의 연습법을 원리부터 12키 드릴, 예제곡까지 자세히 정리한 PDF예요. Gumroad에서 구매하면 이메일로 바로 받아요.</p>
+      </div>
+      <div class="bk-grid" id="bk-grid"></div>
+    </div>
+  </section>
+  <section class="view scroll" id="view-guide">
+    <div class="inner guide">
+      <div>
+        <div class="eyebrow">How to use</div>
+        <h1>이용방법</h1>
+        <p class="lede">Jazz Lei 연습 페이지를 쓰는 방법을 화면 순서대로 정리했어요.</p>
+      </div>
+      <nav class="toc" aria-label="이용방법 목차">
+        <a href="#guide" data-sec="g-start">시작하기</a><a href="#guide" data-sec="g-bar">위쪽 재생 바</a><a href="#guide" data-sec="g-score">악보 누르기</a><a href="#guide" data-sec="g-set">설정</a><a href="#guide" data-sec="g-penta">펜타토닉</a><a href="#guide" data-sec="g-keys">단축키</a><a href="#guide" data-sec="g-app">앱으로 저장</a>
+      </nav>
+      <section id="g-start"><h2>1. 시작하기</h2>
+        <ol>
+          <li>맨 위 메뉴에서 <b>Basic Practice</b>(II-V-I), <b>Song Practice</b>(스탠다드 곡), <b>Pentatonic Practice</b> 중 하나를 골라요.</li>
+          <li>연습법(코드톤 · 아르페지오 · 비밥 스케일 · 엔클로저)을 고르고 곡을 눌러요.</li>
+          <li><b>재생</b>을 누르면 예비박 2마디(첫 마디 1·3박, 둘째 마디 1·2·3·4박) 뒤에 연주가 시작돼요. 지금 치는 음은 악보에서 빨갛게 표시돼요.</li>
+        </ol></section>
+      <section id="g-bar"><h2>2. 위쪽 재생 바</h2>
+        <p>악보를 아래로 넘겨도 늘 위에 붙어 있어요.</p>
+        <ul>
+          <li><b>재생 / 정지</b>와 옆의 <b>지금 위치</b>(키 · 사이클 · 마디 · 코드)</li>
+          <li><b>접기 / 펼치기</b>(톱니바퀴 아래): 재생 버튼 아래 줄을 접어서 악보를 더 넓게 봐요. ‘펼치기’를 누르면 다시 펼쳐져요. 휴대폰에서 연주할 때 편해요.</li>
+          <li><b>키</b>: 12키 중에서 골라요.</li>
+          <li><b>템포</b>: −/+ 버튼이나 숫자를 눌러 직접 입력해요(60~350).</li>
+          <li><b>구간 반복(↻)</b>: 켜면 반복 구간을 고를 수 있어요. 아래 ‘악보 누르기’를 보세요.</li>
+          <li><b>설정(톱니바퀴)</b>: 자세한 설정을 열어요.</li>
+          <li><b>멜로디 · 반주(베이스·드럼) · 2·4박 클릭</b>: 재생 중에도 바로 켜고 꺼요. 멜로디를 끄면 반주만 나와서 직접 즉흥해 볼 수 있어요.</li>
+          <li><b>A1 · B1 · C1 …</b>: 그 사이클로 바로 이동해요.</li>
+        </ul></section>
+      <section id="g-score"><h2>3. 악보 누르기</h2>
+        <ul>
+          <li><b>마디를 누르면</b> 그 마디가 시작 위치가 되고, 재생하면 거기서부터 연주해요. 같은 마디를 다시 누르면 선택이 풀려요.</li>
+          <li><b>구간 반복</b>: ↻를 켜고 시작 마디와 끝 마디를 차례로 눌러요. 한 마디를 두 번 누르면 그 마디만, 구간을 고르지 않으면 코러스 전체를 반복해요.</li>
+          <li>각 사이클 오른쪽 위의 <b>여기서 재생</b>은 그 사이클부터, <b>반복</b>은 그 사이클만 반복해요.</li>
+          <li>엔클로저 연습에서는 위쪽에서 <b>목표음(1 · 3 · 5음)</b>을 골라요.</li>
+        </ul></section>
+      <section id="g-set"><h2>4. 설정</h2>
+        <ul>
+          <li><b>시작 코러스</b>: 어느 사이클부터 연주할지 골라요.</li>
+          <li><b>멜로디 스윙 비율</b>: 50%면 스트레이트, 클수록 스윙이 강해져요. 드럼은 늘 셋잇단 스윙이에요.</li>
+          <li><b>빈칸 모드</b>: 빈칸 마디는 악보가 가려지고 반주만 나와요. 그 자리를 직접 즉흥으로 채워 보세요.
+            <ul><li>2마디 연주 · 2마디 빈칸 / 2마디 빈칸 · 2마디 연주</li><li>반복할수록 빈칸 늘리기: 구간 반복이나 12키 순환으로 다시 돌아올 때마다 빈칸이 늘어나요.</li><li>전부 빈칸: 반주만 나와요.</li><li>직접 고르기: 악보에서 비울 마디를 눌러요.</li></ul></li>
+          <li><b>구간 반복 횟수와 템포</b>: 계속 · 2 · 4 · 8번 반복, 반복할 때마다 템포를 +2 · +4 · +8씩 올릴 수 있어요.</li>
+          <li><b>예비박</b>: 켜면 시작 전에 2마디를 세어 줘요.</li>
+          <li><b>악보 따라가기</b>: 연주하는 줄이 화면 밖으로 나가면 자동으로 넘겨 줘요.</li>
+          <li><b>도수 표시</b>: 음표 아래에 코드 기준 도수(1·3·5·7…)를 보여 줘요.</li>
+          <li><b>프레이즈 끝 길게</b>(비밥 스케일): A는 1마디, B는 2마디마다 마지막 음을 4분음표로 길게 끝내요. 끄면 쉬지 않고 이어서 연주해요.</li>
+          <li><b>12키 순환</b>: 시작 코러스 하나를 연주한 뒤 4도 위 키로 넘어가서, 12키를 모두 돌고 멈춰요.</li>
+        </ul></section>
+      <section id="g-penta"><h2>5. Pentatonic Practice</h2>
+        <ul>
+          <li><b>코드 → 펜타토닉</b>: 코드를 고르면 쓸 수 있는 펜타토닉과 코드 기준 도수를 보여 줘요.</li>
+          <li><b>라인 생성기</b>: 펜타토닉, 공식, 시작음을 골라 4음 그룹 라인을 만들어요. 반주는 드럼만 나와요.</li>
+          <li><b>진행 만들기</b>: 8마디 진행을 만들고 코드마다 펜타를 골라서 라인을 만들어요. 베이스·드럼 반주가 나와요.</li>
+          <li>위쪽 바의 재생 · 멜로디 · 반주 · 2·4박 클릭 버튼은 Song Practice와 같아요.</li>
+        </ul></section>
+      <section id="g-keys"><h2>6. 단축키 (키보드)</h2>
+        <ul>
+          <li><kbd>Space</kbd> 재생 · 정지</li>
+          <li><kbd>R</kbd> 구간 반복 켜기 · 끄기</li>
+          <li><kbd>N</kbd> / <kbd>P</kbd> 다음 곡 · 이전 곡</li>
+          <li><kbd>←</kbd> <kbd>→</kbd> 키 바꾸기</li>
+          <li><kbd>−</kbd> <kbd>+</kbd> 템포 내리기 · 올리기</li>
+        </ul></section>
+      <section id="g-app"><h2>7. 홈 화면에 앱처럼 저장하기</h2>
+        <ul>
+          <li><b>아이폰 · 아이패드 (Safari)</b>: 공유 버튼 → ‘홈 화면에 추가’</li>
+          <li><b>안드로이드 (Chrome)</b>: 오른쪽 위 메뉴(⋮) → ‘홈 화면에 추가’ 또는 ‘앱 설치’</li>
+          <li>한 번 열어 둔 페이지는 인터넷이 없어도 열려요. 화면이 예전 그대로면 앱을 완전히 닫았다가 다시 열어 주세요.</li>
+        </ul></section>
+    </div>
   </section>
 
   <section class="view" id="view-practice">
@@ -242,6 +354,8 @@ function parse(r){
     if(!sub) sub=CAT_SUBS[c].find(k=>count(c,k)>0)||CAT_SUBS[c][0]; // 기본: 연습이 있는 첫 세부 메뉴
     return {view:'cat',cat:c,sub};
   }
+  if(r==='guide') return {view:'guide',cat:'guide'};
+  if(r==='books') return {view:'books',cat:'books'};
   return {view:'home'};
 }
 function show(){
@@ -262,9 +376,13 @@ function show(){
     $('p-title').textContent=p.title;
     if($('frame').getAttribute('src')!==p.file) $('frame').setAttribute('src',p.file);
     document.title=p.title+' · Jazz Lei';
-  } else document.title='Jazz Lei · Jazz Practice';
+  } else if(st.view==='guide') document.title='이용방법 · Jazz Lei';
+  else if(st.view==='books') document.title='Practice Guide PDF · Jazz Lei';
+  else document.title='Jazz Lei · Jazz Practice';
 }
 $('q').addEventListener('input',renderList);
+$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="Chapter ${b.ch} ${b.name} 표지" loading="lazy"><div><small>CHAPTER ${b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>${b.price} · Gumroad →</span></div></a>`).join('');
+document.querySelectorAll('[data-sec]').forEach(x=>x.addEventListener('click',e=>{ e.preventDefault(); const t=document.getElementById(x.dataset.sec); if(t) t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}); }));
 addEventListener('hashchange',show); show();
 // 홈 화면 앱: 오프라인에서도 열리도록
 if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));

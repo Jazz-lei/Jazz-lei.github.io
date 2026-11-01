@@ -71,6 +71,13 @@ details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:c
 #gear{width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center}
 #loopb{width:38px;height:38px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--paper);color:var(--ink);cursor:pointer}
 #loopb:hover{background:var(--soft)}
+.mixrow{display:flex;align-items:center;gap:8px}
+#fold{margin-left:auto;flex:none;font:600 13px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--muted);border-radius:8px;padding:5px 12px;cursor:pointer}
+#fold:hover{background:var(--soft)}
+.bar.folded #fold{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bar.folded .mixrow{position:absolute;right:0;top:12px;height:46px}
+.bar.folded .row{padding-right:84px}
+.bar.folded .quick,.bar.folded .mix,.bar.folded .jump{display:none!important}
 #loopb[aria-pressed="true"]{background:var(--b);color:var(--paper);border-color:var(--b)}
 #gear[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .sheet{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgb(0 0 0 / .12);max-height:min(70vh,560px);overflow:auto}
@@ -202,10 +209,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
         </button>
       </div>
     </div>
+    <div class="mixrow">
     <div class="mix toggles" role="group" aria-label="소리 켜고 끄기">
       <label><input type="checkbox" id="mel" checked> 멜로디</label>
       <label><input type="checkbox" id="comp" checked> 반주 (베이스·드럼)</label>
       <label><input type="checkbox" id="click"> 2·4박 클릭</label>
+    </div>
+    <button id="fold" type="button" aria-expanded="true">접기</button>
     </div>
     <div class="jump" id="jump" aria-label="코러스로 이동"></div>
 
@@ -232,8 +242,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
             <select id="loopn" aria-label="반복 횟수"><option value="0">계속 반복</option><option value="2">2번</option><option value="4">4번</option><option value="8">8번</option></select>
             <select id="loopt" aria-label="반복할 때마다 템포"><option value="0">템포 그대로</option><option value="2">반복마다 +2</option><option value="4">반복마다 +4</option><option value="8">반복마다 +8</option></select>
           </div></div>
-        <div class="field wide"><p class="hint">빈칸 마디는 악보가 가려지고 반주만 나와요. 그 자리를 직접 즉흥으로 채워 보세요. ‘반복할수록 빈칸 늘리기’는 구간 반복이나 12키 순환으로 다시 돌아올 때마다 빈칸이 늘어나요.</p>
-          <p class="hint">구간 반복(↻ 버튼)을 켜고 악보에서 시작 마디와 끝 마디를 차례로 누르면 그 구간만 반복해요. 한 마디를 두 번 누르면 그 마디만, 구간을 고르지 않으면 코러스 전체를 반복해요. 12키 순환도 켜면 반복할 때마다 다음 키로 넘어가요.</p></div>
+
         <div class="field wide"><label>옵션</label>
           <div class="toggles">
             <label><input type="checkbox" id="ci" checked> 예비박</label>
@@ -243,14 +252,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
             <label><input type="checkbox" id="cyc"> 12키 순환</label>
             <label><input type="checkbox" id="loop"> 구간 반복</label>
           </div>
-          <p class="hint" id="spacehint">프레이즈 끝 길게를 켜면 A는 1마디, B는 2마디마다 마지막 음을 4박의 4분음표로 길게 끝내요. B는 2마디마다 지정음(1·3·5음)에서 새로 시작해요. 끄면 쉬지 않고 이어서 연주해요.</p>
-          <p class="hint">12키 순환을 켜면 시작 코러스 하나를 연주한 뒤 4도 위 키로 넘어가서, 12키를 모두 돌고 멈춰요.</p>
-          <p class="hint">단축키: 스페이스 재생·정지 · R 구간 반복 · N/P 다음·이전 곡 · ← → 키 바꾸기 · − + 템포. 위쪽 템포 숫자를 눌러 직접 입력할 수도 있어요.</p></div>
+          <p class="hint" id="spacehint" hidden>프레이즈 끝 길게를 켜면 A는 1마디, B는 2마디마다 마지막 음을 4박의 4분음표로 길게 끝내요. B는 2마디마다 지정음(1·3·5음)에서 새로 시작해요. 끄면 쉬지 않고 이어서 연주해요.</p>
+          <p class="hint">자세한 사용법은 맨 위 <b>이용방법</b> 메뉴에 있어요.</p></div>
       </div>
     </div>
   </div>
 
-  <div class="legend"><span class="dot"></span>악보의 마디를 누르면 그 마디가 시작 위치로 선택되고, 재생을 누르면 거기서부터 연주해요. 같은 마디를 다시 누르면 선택이 풀려요. 구간 반복(↻)을 켜면 시작 마디와 끝 마디를 차례로 눌러 반복 구간을 정해요. 재생 중인 음은 빨간색으로 표시되고, 멜로디·반주·2·4박 클릭은 위쪽 버튼으로 재생 중에도 켜고 끌 수 있어요. 멜로디는 합성음이라 실제 피아노와 다르게 들릴 수 있어요.</div>
+  <div class="legend" hidden><span class="dot"></span>악보의 마디를 누르면 그 마디가 시작 위치로 선택되고, 재생을 누르면 거기서부터 연주해요. 같은 마디를 다시 누르면 선택이 풀려요. 구간 반복(↻)을 켜면 시작 마디와 끝 마디를 차례로 눌러 반복 구간을 정해요. 재생 중인 음은 빨간색으로 표시되고, 멜로디·반주·2·4박 클릭은 위쪽 버튼으로 재생 중에도 켜고 끌 수 있어요. 멜로디는 합성음이라 실제 피아노와 다르게 들릴 수 있어요.</div>
   <div id="scores"></div>
 </div>
 

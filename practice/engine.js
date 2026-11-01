@@ -941,7 +941,7 @@ function tone(t,m,dur,vol,type){
 function click(t,acc){
   const o=ctx.createOscillator(), g=ctx.createGain();
   o.type='square'; o.frequency.value=acc?1500:1100;
-  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.08,t+.001); g.gain.exponentialRampToValueAtTime(.0001,t+.04);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(acc?.3:.24,t+.001); g.gain.exponentialRampToValueAtTime(.0001,t+.05);
   o.connect(g).connect(master); o.start(t); o.stop(t+.05);
 }
 // ── 반주: 콘트라베이스 워킹 + 드럼(라이드·스네어 컴핑) — 실제 악기 샘플 (FluidR3 GM, MIT) ──
@@ -1027,7 +1027,7 @@ function ui(){
   while(q.length && q[0].t<=ctx.currentTime){
     const e=q.shift();
     if(e.end){ stop(); return; }
-    if(e.count){ $('posk').textContent='예비박'; $('pos').textContent=e.count+' / 4'; continue; }
+    if(e.count){ $('posk').textContent='예비박'; $('pos').textContent=e.count; continue; }
     if(e.rep!==undefined){ BREP=e.rep; markBlank(); continue; }
     const n=e.n;
     document.querySelectorAll('.abcjs-note.cur').forEach(x=>x.classList.remove('cur'));
@@ -1057,8 +1057,8 @@ async function start(){
   keysDone=0;
   document.querySelectorAll('.abcjs-note.cur').forEach(e=>e.classList.remove('cur'));
   const spb=60/+$('bpm').value, sw=+$('swing').value/100, t0=ctx.currentTime+.08; q=[];
-  if($('ci').checked){ // 예비박은 시작 마디 바로 앞 마디에서 (못갖춘마디는 그 마디 끝에 겹쳐서)
-    P0=barP-8; base=t0; clickP=barP; for(let k=0;k<4;k++){ click(t0+k*spb,k===0); q.push({t:t0+k*spb,count:k+1}); } }
+  if($('ci').checked){ // 예비박 2마디: 첫 마디는 1·3박, 둘째 마디는 1·2·3·4박 (못갖춘마디는 둘째 마디 끝에 겹쳐서)
+    P0=barP-16; base=t0; clickP=barP; [0,2,4,5,6,7].forEach(k=>{ click(t0+k*spb,k===0||k===4); q.push({t:t0+k*spb,count:`${k<4?1:2}마디 · ${k%4+1}박`}); }); }
   else { P0=barP-(startP<barP?8:0); base=t0-tmap(startP-P0,false,sw)*spb; clickP=Math.ceil((startP-1e-9)/2)*2; }
   lastSpb=spb; playing=true; BASS_LAST=40;
   // 코드 중간부터 시작하면 지금 코드를 남은 길이만큼 반주
@@ -1226,7 +1226,7 @@ function loadSong(){
   if(!HEAD0) HEAD0={lead:$('lead').innerHTML,rules:$('rules').innerHTML};
   $('lead').innerHTML=M?M.lead:HEAD0.lead;
   $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝은 쉼표로 비워 둬요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
-  $('space').closest('label').hidden=!!M; $('spacehint').hidden=!!M;
+  $('space').closest('label').hidden=!!M;
   $('encsel').hidden=METHOD!=='enclosure'; document.querySelectorAll('#encsel button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===ENC_T)));
   // 같은 메뉴(Basic/Song · 연습법) 안에서 이전·다음 곡
   const list=(window.SONGS||[]).filter(x=>(x.cat||'song')===(s.cat||'song')&&(x.methods||['bebop']).includes(METHOD));
@@ -1241,6 +1241,8 @@ function loadSong(){
 document.querySelectorAll('#encsel button').forEach(b=>b.onclick=()=>{ if(b.dataset.t===ENC_T) return; ENC_T=b.dataset.t; try{ localStorage.setItem('jl-enc-t',ENC_T); }catch(e){}
   document.querySelectorAll('#encsel button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.t===ENC_T))); SEL=null; PICK.clear(); render(); });
 let HEAD0=null;
+(()=>{ const bar=document.querySelector('.bar'), btn=$('fold'); if(!btn) return; const set=f=>{ bar.classList.toggle('folded',f); btn.setAttribute('aria-expanded',String(!f)); btn.textContent=f?'펼치기':'접기'; try{localStorage.setItem('jl-fold',f?'1':'0');}catch(e){} };
+  let f0=false; try{ f0=localStorage.getItem('jl-fold')==='1'; }catch(e){} set(f0); btn.onclick=()=>set(!bar.classList.contains('folded')); })();
 addEventListener('hashchange',loadSong);
 // 바깥 화면(메뉴)으로 나가면 재생 멈춤
 addEventListener('jl-stop',()=>{ if(playing) stop(); });
