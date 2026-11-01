@@ -390,5 +390,7 @@ if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWo
 $('frame').addEventListener('load',()=>{ try{ const w=$('frame').contentWindow;
   w.addEventListener('hashchange',()=>{ const h=w.location.hash.slice(1); if(h&&PRACTICES.some(p=>p.id===h)&&location.hash.slice(1)!==h){ location.hash=h; } }); }catch(e){} });
 </script>
+<!-- 방문 통계: Cloudflare Web Analytics (쿠키 없음) -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "161657c9f7f1408796fe709d0298548e", "spa": true}'></script>
 </body>
 </html>
