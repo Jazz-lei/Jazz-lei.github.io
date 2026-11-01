@@ -80,6 +80,6 @@ window.SONGS=[
 window.BOOKS=[
   { ch:1, desc:'코드톤 솔로 전에 필요한 코드톤 훈련과 리듬·멜로디·테크닉, 예제곡', method:'chordtone', name:'Chord Tone Solo', price:'11,900원', url:'https://akoguy.gumroad.com/l/Solo1', img:'https://public-files.gumroad.com/lqt0umv90u2wjwjzvp1339owigou' },
   { ch:2, desc:'기본·변형 아르페지오 훈련, 12키 패턴, 예제 솔로', method:'arpeggio', name:'Arpeggio Solo', price:'11,900원', url:'https://akoguy.gumroad.com/l/mvfvtz', img:'https://public-files.gumroad.com/dp826n4awbky4f70q3hvsrxbcb6e' },
-  { ch:3, desc:'비밥 스케일과 확장형, 시작음별 12키 드릴, II-V-I 패턴, 예제곡', method:'bebop', name:'Bebop Scale Solo', price:'15,900원', url:'https://akoguy.gumroad.com/l/lfira', img:'https://public-files.gumroad.com/krnjk44toefbn9cqm2q8w44rcf16' },
+  { ch:3, desc:'비밥 스케일과 확장형, 시작음별 12키 드릴, II-V-I 패턴, 예제곡', method:'bebop', name:'Bebop Scale Solo', price:'13,900원', url:'https://akoguy.gumroad.com/l/lfira', img:'https://public-files.gumroad.com/krnjk44toefbn9cqm2q8w44rcf16' },
   { ch:4, desc:'엔클로저 어프로치 기본 드릴과 응용, 예제 솔로', method:'enclosure', name:'Approach Solo', price:'11,900원', url:'https://akoguy.gumroad.com/l/Approach', img:'https://public-files.gumroad.com/z2kpkr5z1ymar3789w4mlkpseyzk' }
 ];
