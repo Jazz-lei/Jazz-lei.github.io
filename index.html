@@ -377,11 +377,14 @@ function show(){
     if($('frame').getAttribute('src')!==p.file) $('frame').setAttribute('src',p.file);
     document.title=p.title+' · Jazz Lei';
   } else if(st.view==='guide') document.title='이용방법 · Jazz Lei';
-  else if(st.view==='books') document.title='Practice Guide PDF · Jazz Lei';
+  else if(st.view==='books'){ document.title='Practice Guide PDF · Jazz Lei'; track('books'); }
   else document.title='Jazz Lei · Jazz Practice';
 }
 $('q').addEventListener('input',renderList);
-$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="Chapter ${b.ch} ${b.name} 표지" loading="lazy"><div><small>CHAPTER ${b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>${b.price} · Gumroad →</span></div></a>`).join('');
+// 클릭 집계: 보이지 않는 작은 페이지를 열어 Cloudflare 통계에 /t/이름.html 조회로 남김
+function track(n){ try{ const f=document.createElement('iframe'); f.hidden=true; f.setAttribute('aria-hidden','true'); f.tabIndex=-1; f.src='/t/'+n+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),15000); }catch(e){} }
+$('bk-grid').addEventListener('click',e=>{ const a=e.target.closest('a.bk'); if(a&&a.dataset.ch) track('ch'+a.dataset.ch); });
+$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" data-ch="${b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="Chapter ${b.ch} ${b.name} 표지" loading="lazy"><div><small>CHAPTER ${b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>${b.price} · Gumroad →</span></div></a>`).join('');
 document.querySelectorAll('[data-sec]').forEach(x=>x.addEventListener('click',e=>{ e.preventDefault(); const t=document.getElementById(x.dataset.sec); if(t) t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}); }));
 addEventListener('hashchange',show); show();
 // 홈 화면 앱: 오프라인에서도 열리도록
