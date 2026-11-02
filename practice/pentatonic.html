@@ -333,9 +333,14 @@ const degLabel=(ch,semi)=> ch.deg[semi]!==undefined?ch.deg[semi]:BASE_DEG[semi];
 
 /* ===== Audio ===== */
 let ctx=null, master=null, timers=[];
+// 아이폰 무음(진동) 모드에서도 소리가 나게: 오디오 세션을 '재생'으로 바꾸고, 소리 없는 오디오를 같이 틀어 둠
+const IOSU=(()=>{ let el=null; return { on(){ try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
+  try{ if(!el){ el=new Audio('data:audio/wav;base64,UklGRsQPAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAPAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA'); el.loop=true; el.setAttribute('playsinline',''); } const p=el.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} },
+  off(){ try{ if(el) el.pause(); }catch(e){} } }; })();
 function ac(){
   if(!ctx){const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; ctx=new C(); newMaster();}
   if(ctx.state==='suspended') ctx.resume();
+  IOSU.on();
   return ctx;
 }
 let BUS={};
@@ -372,6 +377,7 @@ function walkLine(r0,type,n,nextR,seedP){
     for(let k=0;k<4&&c+k<n;k++) out.push(pat[k]); }
   if(nextR!=null&&n>1){ const pv=out[n-2], nr=bnear(nextR,pv); out[n-1]=nr>pv?nr-1:nr+1; }
   BASS_LAST=out[n-1]; return out; }
+function userStop(){ stopAll(); IOSU.off(); }
 function stopAll(){
   timers.forEach(clearTimeout); timers=[];
   if(ctx&&master){ try{master.disconnect();}catch(e){} newMaster(); }
@@ -412,7 +418,7 @@ const tabs={chords:[document.getElementById('tab-chords'),document.getElementByI
 let CURTAB='chords';
 (()=>{ const bar=document.getElementById('mixbar'), btn=document.getElementById('m-fold'); const set=f=>{ bar.classList.toggle('folded',f); btn.setAttribute('aria-expanded',String(!f)); btn.textContent=f?'펼치기':'접기'; try{localStorage.setItem('jl-fold',f?'1':'0');}catch(e){} };
   let f0=false; try{ f0=localStorage.getItem('jl-fold')==='1'; }catch(e){} set(f0); btn.onclick=()=>set(!bar.classList.contains('folded')); })();
-document.getElementById('m-play').onclick=()=>{ if(playing) stopAll(); else if(CURTAB==='lines') playLine(); else if(CURTAB==='prog') playProg(); };
+document.getElementById('m-play').onclick=()=>{ if(playing) userStop(); else if(CURTAB==='lines') playLine(); else if(CURTAB==='prog') playProg(); };
 function showTab(k){
   stopAll(); // 다른 툴로 넘어가면 재생 멈춤
   Object.entries(tabs).forEach(([key,[t,p]])=>{const on=key===k; t.setAttribute('aria-selected',on); p.hidden=!on;});
@@ -666,11 +672,11 @@ async function playLine(){
       const mv=+document.getElementById('l-move').value;
       if(mv){ L.root=mod(L.root+mv,12); renderLines(); save(); }
       playLine();
-    } else { playing=false; updatePlayBtn(); }
+    } else { playing=false; updatePlayBtn(); IOSU.off(); }
   },Math.max(0,(endT-ctx.currentTime)*1000)));
 }
 document.getElementById('l-play').onclick=playLine;
-document.getElementById('l-stop').onclick=stopAll;
+document.getElementById('l-stop').onclick=userStop;
 document.getElementById('l-random').onclick=()=>{L.rand=makeRandom();afterChange();};
 document.getElementById('l-round').onchange=e=>{L.round=e.target.checked;afterChange();};
 const tempoEl=document.getElementById('l-tempo');
@@ -794,12 +800,12 @@ async function playProg(){
     box.querySelectorAll('.st-note.on').forEach(e=>e.classList.remove('on'));
     if(document.getElementById('p-loop').checked){
       const mv=+document.getElementById('p-move').value; if(mv) transpose(mv); playProg();
-    } else { playing=false; updatePlayBtn(); }
+    } else { playing=false; updatePlayBtn(); IOSU.off(); }
   },Math.max(0,(t0+endBeat*spb-ctx.currentTime)*1000)));
 }
 document.getElementById('p-play').onclick=playProg;
 ['l','p'].forEach(k=>{ const el=document.getElementById(k+'-swing'); el.oninput=()=>{ document.getElementById(k+'-swing-out').textContent=el.value+'%'; }; });
-document.getElementById('p-stop').onclick=stopAll;
+document.getElementById('p-stop').onclick=userStop;
 document.getElementById('p-up').onclick=()=>{stopAll();transpose(1);};
 document.getElementById('p-down').onclick=()=>{stopAll();transpose(-1);};
 document.getElementById('p-regen').onclick=()=>progChanged();
@@ -828,7 +834,7 @@ let startTab=tabFromHash();
 if(!startTab){ try{ startTab=localStorage.getItem('pp-tab'); }catch(e){} }
 showTab(['lines','prog'].includes(startTab)?startTab:'chords');
 addEventListener('hashchange',()=>{const t=tabFromHash(); if(t) showTab(t);});
-addEventListener('jl-stop',stopAll);
+addEventListener('jl-stop',userStop);
 })();
 </script>
 
