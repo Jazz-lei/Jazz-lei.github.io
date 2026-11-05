@@ -14,11 +14,11 @@
            코드 표기 예: F7, Bb7, Cm7, Am7b5, D7alt, Eb7#11, Cmaj7, C6, Cm6, CmMaj7, Bdim7
            (반음 아래로 해결하는 도미넌트는 #11을 안 적어도 자동으로 #11 스케일) */
 window.SONGS=[
-  { id:'major-251', cat:'basic', methods:['bebop','chordtone','arpeggio','enclosure'], title:'Major II-V-I', name:'Major II-V-I', key:'C', bars:[
+  { id:'major-251', cat:'basic', methods:['bebop','chordtone','arpeggio','enclosure','combo'], title:'Major II-V-I', name:'Major II-V-I', key:'C', bars:[
     'Dm7', 'G7', 'Cmaj7', 'C6' ] },
-  { id:'minor-251', cat:'basic', methods:['bebop','chordtone','arpeggio','enclosure'], title:'Minor II-V-I', name:'Minor II-V-I', key:'Cm', bars:[
+  { id:'minor-251', cat:'basic', methods:['bebop','chordtone','arpeggio','enclosure','combo'], title:'Minor II-V-I', name:'Minor II-V-I', key:'Cm', bars:[
     'Dm7b5', 'G7alt', 'CmMaj7', 'Cm6' ] },
-  { id:'jazz-blues', methods:['bebop','chordtone','arpeggio','enclosure'], title:'Jazz Blues', name:'Jazz Blues', key:'F', bars:[
+  { id:'jazz-blues', methods:['bebop','chordtone','arpeggio','enclosure','combo'], title:'Jazz Blues', name:'Jazz Blues', key:'F', bars:[
     'F7', 'Bb7', 'F7', 'Cm7 F7',
     'Bb7', 'Bb7', 'F7', 'Am7b5 D7alt',
     'Gm7', 'C7', 'F7 D7alt', 'Gm7 C7' ] },
@@ -31,7 +31,7 @@ window.SONGS=[
     'Gm7', 'Gm7', 'Bbm6', 'Eb7#11',
     'Am7', 'Dm7', 'Bm7b5', 'Bb7',
     'Am7 D7alt', 'Gm7 C7', 'F6', 'Gm7 C7' ] },
-  { id:'rhythm-changes', methods:['bebop','chordtone','arpeggio','enclosure'], title:'Rhythm Changes', name:'Rhythm Changes', key:'Bb', bars:[
+  { id:'rhythm-changes', methods:['bebop','chordtone','arpeggio','enclosure','combo'], title:'Rhythm Changes', name:'Rhythm Changes', key:'Bb', bars:[
     'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Dm7 G7', 'Cm7 F7',
     'Bbmaj7 G7', 'Cm7 F7', 'Dm7 G7', 'Cm7 F7', 'Fm7 Bb7', 'Ebmaj7 Ebm6', 'Cm7 F7', 'Bb6',
     'D7!', 'D7!', 'G7!', 'G7!', 'C7', 'C7', 'F7', 'F7',

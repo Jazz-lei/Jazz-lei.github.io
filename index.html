@@ -310,9 +310,9 @@ const PRACTICES=[
     return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
 ];
 const CATS={basic:'Basic Practice', song:'Song Practice', penta:'Pentatonic Practice'};
-const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Bebop Scale Practice', enclosure:'Enclosure Approach Practice', tools:'Pentatonic Tools'};
+const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Bebop Scale Practice', enclosure:'Enclosure Approach Practice', combo:'Combination Practice', tools:'Pentatonic Tools'};
 const FOUR=['chordtone','arpeggio','bebop','enclosure'];
-const CAT_SUBS={basic:FOUR, song:FOUR, penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
+const CAT_SUBS={basic:[...FOUR,'combo'], song:[...FOUR,'combo'], penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
 
 const $=id=>document.getElementById(id);
 { const f=$('foot').cloneNode(true); f.removeAttribute('id'); $('empty').after(f); } // 목록 화면에도 같은 footer

@@ -6,17 +6,17 @@
 /* Layout: lead-sheet practice desk — sticky transport (play · now playing · chorus jump), compact settings, then choruses grouped by cycle on white staff paper */
 :root{
   --bg:#eef1f4; --paper:#ffffff; --ink:#15202b; --muted:#5d6b78; --line:#d5dce3; --soft:#e4e9ee;
-  --hot:#e0303f; --a:#2b62a3; --b:#b9581f; --c:#2e7d55;
+  --hot:#e0303f; --a:#2b62a3; --b:#b9581f; --c:#2e7d55; --d:#7a4fb0; --d-bg:#efe8f7;
   --a-bg:#e3ecf7; --b-bg:#f7e9df; --c-bg:#e0f0e7;
   --sans:"IBM Plex Sans KR",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
-  --hot:#ff6170; --a:#7fb1ea; --b:#f0a06a; --c:#7cd3a3;
+  --hot:#ff6170; --a:#7fb1ea; --b:#f0a06a; --c:#7cd3a3; --d:#c3a6ee; --d-bg:#2c2340;
   --a-bg:#1e2d40; --b-bg:#3a2a1f; --c-bg:#1d3329; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
-  --hot:#ff6170; --a:#7fb1ea; --b:#f0a06a; --c:#7cd3a3;
+  --hot:#ff6170; --a:#7fb1ea; --b:#f0a06a; --c:#7cd3a3; --d:#c3a6ee; --d-bg:#2c2340;
   --a-bg:#1e2d40; --b-bg:#3a2a1f; --c-bg:#1d3329; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
@@ -40,6 +40,7 @@ h1{font-size:26px;line-height:1.25;margin:0;font-weight:700;text-wrap:balance}
 .score svg .abcjs-annotation{fill:var(--a);font-family:var(--sans)!important}
 .encsel{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .encsel span{font-size:13px;font-weight:600;color:var(--muted);margin-right:4px}
+.encsel.in-cycle{margin-top:10px}
 .encsel button{font:600 14px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer}
 .encsel button:hover{border-color:var(--muted)}
 .encsel button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -93,11 +94,12 @@ details.rules ul{margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:c
 .score svg .blanklab{fill:var(--muted);font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.04em}
 .jump{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
 .jump button{font:600 13px var(--mono);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:5px 9px;cursor:pointer;flex:none;font-variant-numeric:tabular-nums}
-.jump button.A{color:var(--a)} .jump button.B{color:var(--b)} .jump button.C{color:var(--c)}
+.jump button.A{color:var(--a)} .jump button.B{color:var(--b)} .jump button.C{color:var(--c)} .jump button.D{color:var(--d)}
 .jump button.sel{outline:2px solid currentColor;outline-offset:-2px}
 .jump button.cur.A{background:var(--a);color:var(--paper);border-color:var(--a)}
 .jump button.cur.B{background:var(--b);color:var(--paper);border-color:var(--b)}
 .jump button.cur.C{background:var(--c);color:var(--paper);border-color:var(--c)}
+.jump button.cur.D{background:var(--d);color:var(--paper);border-color:var(--d)}
 .jump .sep{width:1px;background:var(--line);flex:none;margin:2px 2px}
 
 /* settings */
@@ -127,7 +129,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 .cycle-head h2{margin:0;font-size:18px;line-height:1.3}
 .cycle-head p{margin:2px 0 0;font-size:14px;color:var(--muted);max-width:62ch}
 .cycle h3.sub{margin:6px 0 -4px;font:600 14px var(--mono);color:var(--cc)}
-.cycle.A{--cc:var(--a);--cb:var(--a-bg)} .cycle.B{--cc:var(--b);--cb:var(--b-bg)} .cycle.C{--cc:var(--c);--cb:var(--c-bg)}
+.cycle.A{--cc:var(--a);--cb:var(--a-bg)} .cycle.B{--cc:var(--b);--cb:var(--b-bg)} .cycle.C{--cc:var(--c);--cb:var(--c-bg)} .cycle.D{--cc:var(--d);--cb:var(--d-bg)}
 .chorus{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;scroll-margin-top:140px}
 .chorus-h{display:flex;align-items:center;flex-wrap:wrap;row-gap:6px;gap:10px;padding:10px 14px;background:var(--cb);border-bottom:1px solid var(--line)}
 .chorus-h .id{font:700 16px var(--mono);color:var(--cc);white-space:nowrap}
