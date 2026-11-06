@@ -589,7 +589,7 @@ const METHODS={
         const R2=ks=>ks.length===2?[SD,H,R,R,R,R,...ks.map(AP)]:ks.length===3?[SD,R,R,R,R,...ks.map(AP)]:[SD,R,R,R,...ks.map(AP)]; /* 2마디 단위: 첫 마디 비밥 하행 → 둘째 마디 1박 착지 · 쉼표 · 엔클로저 */
         return [...[2,3,4].map(n=>{ const [nm,ks]=CK_PAT('A',n), b1=[N(t),SD,SD,SD,SD,SD,SD,SD], b2=R2(ks); return {g:'A',title:nm,target:t,pair:1,full:b1,rep:b2,win:[57,84],
             pairPat:(odd,si,two)=>{ const x=odd?b2:b1, y=two?(si===0?x.slice(0,4):x.slice(4)):x; return odd&&si===0?Object.assign(y.slice(),{landBar:1}):y; }}; }),
-          ...[['B',['1','3','5','7']],['C',['3','5','7','9']]].flatMap(([g,a])=>[2,3,4].map(n=>{ const [nm,ks]=CK_PAT(g,n); return mk(g,nm+' · '+a.join('-'),a[0],[N(a[0]),...a.slice(1).map(d=>N(d,'u'))],ks); })),
+          ...[['B',['1','3','5','7']],['C',['3','5','7','9']]].flatMap(([g,a])=>[2,3,4].map(n=>{ const [nm,ks]=CK_PAT(g,n), dg=a.map(d=>'r'+d); return mk(g,nm+' · '+a.join('-'),dg[0],[N(dg[0]),...dg.slice(1).map(d=>N(d,'u'))],ks); })),
           {g:'D',title:'코드별 아르페지오 · 비밥 ↓',fresh:1,alt:1,altSplit:1,full:[N('3')],win:[57,84]}]; }
       return [
        ...[2,3,4].map(n=>{ const [nm,ks]=CK_PAT('A',n); return {g:'A',title:nm,target:t,full:[N(t),SD,SD,SD,SD,SD,SD,SD],
@@ -614,7 +614,7 @@ function genMethod(meth,only){
   const segs=[]; FORM.forEach((bar,bi)=>bar.forEach((sg,si)=>segs.push({bi,si,sg})));
   const ctxOf=({sg})=>{ const c=sg.c, ch=C[sg.k], root=parse(simpRoot(tn(c.root))).pc, S8=SCALES[sg.k.split(':')[0]];
     const sroot=parse(ch.sym).pc, diat=S8.iv.filter((iv,i)=>i!==S8.x).map(iv=>(sroot+iv)%12).sort((a,b)=>a-b);
-    return {c,ch,root,diat,pc:d=>(root+DEG_IV(c.qual,d))%12, sp:m=>spOf(ch,m)}; };
+    return {c,ch,root,diat,pc:d=>{ if(d[0]==='r'){ d=d.slice(1); if(c.as&&c.as.qual==='dim') d={'1':'3','3':'5','5':'7','7':'9','9':'#11'}[d]; } return (root+(d==='#11'?6:DEG_IV(c.qual,d)))%12; }, sp:m=>spOf(ch,m)}; }; /* r1·r3…: 'F#dim7=D7alt'은 적힌 F♯°7의 1-3-5-7 */
   const ctxs=segs.map(ctxOf);
   // Cmaj7 → C6, CmMaj7 → Cm6처럼 같은 근음의 Maj7에서 6화음으로 갈 때: 3음(E)은 앞 코드와 같은 소리라, 6화음의 특징음인 6음(A)을 목표로 (코드톤·엔클로저)
   ctxs.forEach((c,i)=>{ const p=ctxs[i-1], m76=!!p&&p.root===c.root&&((c.c.qual==='maj6'&&p.c.qual==='maj7')||(c.c.qual==='m6'&&p.c.qual==='mmaj7'));
@@ -656,12 +656,12 @@ function genMethod(meth,only){
           const pos0=notes.length, pc=m=>((m%12)+12)%12, ch=cx.ch, ct=new Set([...ch.tones.map(t=>t.pc),...['1','3','5','7'].map(d=>pc(cx.pc(d)))]), inS=m=>ch.pcs.includes(pc(m));
           const step=c=>up?higher(ch,c):lower(ch,c); let best=null; const arr=[], kind=[];
           const land=!up&&pat.landNext&&k0+k===pat.length, nct=land?new Set([...nx.ch.tones.map(t=>t.pc),...['1','3','5','7'].map(d=>pc(nx.pc(d)))]):null;
-          (function rec(i,c,cost){ if(best&&cost>=best.cost) return; if(i===k){ if(land){ if(!nct.has(pc(c-1))&&!nct.has(pc(c-2))) cost+=3; if(best&&cost>=best.cost) return; } best={cost,arr:arr.slice(),kind:kind.slice()}; return; } /* 다음 코드 1박에 한 걸음으로 착지하도록 (3도 도약이면 마지막 음을 반음으로 끌어내림) */
+          (function rec(i,c,cost){ if(best&&cost>=best.cost) return; if(i===k){ if(land){ if(!nct.has(pc(c-1))&&!nct.has(pc(c-2))) cost+=3; if(best&&cost>=best.cost) return; } if(pat.avoidD&&k0+k===pat.length){ const ap=pc(nx.pc(pat.avoidD)); if(pc(c)===ap) cost+=4; else if(Math.min((pc(c)-ap+12)%12,(ap-pc(c)+12)%12)>2) cost+=0.5; if(best&&cost>=best.cost) return; } best={cost,arr:arr.slice(),kind:kind.slice()}; return; } /* 다음 코드 1박에 한 걸음으로 착지하도록 (3도 도약이면 마지막 음을 반음으로 끌어내림) */
             const s1=step(c), mv=[[s1,0,'s']]; const cr=up?c+1:c-1; if(!inS(cr)) mv.push([cr,1.5,'c']); if(land&&i>=k-2){ const sn=lower(nx.ch,c); if(sn!==s1&&c-sn<=2) mv.push([sn,1.2,'n']); } /* 다음 코드 비밥 스케일을 앞당겨 쓰기 */ if(ch.x!==null&&pc(s1)===ch.x) mv.push([step(s1),1.0,'s']); if(i===0&&!up){ let k2=c-1; while(!ct.has(pc(k2))) k2--; if(k2!==s1) mv.push([k2,2.0,'s']); } /* 첫 음만: 바로 아래 코드톤으로 건너뛰기 */ /* 조합 연습: 크로매틱보다 경과음 빼기를 먼저 */
             for(const [n,mc,kd] of mv){ const pen=((pos0+i)%2===0&&!ct.has(pc(n)))?MISS:0; arr.push(n); kind.push(kd); rec(i+1,n,cost+mc+pen); arr.pop(); kind.pop(); } })(0,cur==null?67:cur,0);
           best.arr.forEach((m,j)=>sdq.push({m,sp:best.kind[j]==='n'?nx.sp(m):best.kind[j]==='c'||(ch.x!==null&&pc(m)===ch.x)?chromSp(m,up):cx.sp(m)}));
           /* 2) 착지 마디 첫 음이 3도 도약이면: 익스텐디드 비밥(스케일 한 음 + 크로매틱)으로 2박째 코드톤에 착지 */
-          if(pat.landBar&&k===1&&!up&&cur!=null&&cur-best.arr[0]>2){ let ext=null, ec=1e9;
+          if(pat.landBar&&k===1&&!up&&cur!=null&&(cur-best.arr[0]>2||!ct.has(pc(best.arr[0])))){ let ext=null, ec=1e9;
             for(const a1 of [lower(ch,cur),cur-1,cur-2]) for(const a2 of [a1-1,a1-2]) for(const a3 of [a2-1,a2-2]){ if(a1>=cur||cur-a1>2||!ct.has(pc(a3))) continue; if(ct.has(pc(a1))) continue;
               const c0=(cur-a1)+(a1-a2)+(a2-a3)+(ch.pcs.includes(pc(a1))?0:2)+(a1-a2===1?0:0.5)+(a2-a3===1?0:0.5); if(c0<ec){ ec=c0; ext=[a1,a2,a3]; } }
             if(ext){ sdq.length=0; sdq.push({m:ext[0],sp:ch.pcs.includes(pc(ext[0]))?cx.sp(ext[0]):chromSp(ext[0],false)}); extQ=ext.slice(1).map(m=>({m,sp:ch.pcs.includes(pc(m))||ct.has(pc(m))?cx.sp(m):chromSp(m,false)})); } } }
@@ -702,6 +702,9 @@ function genMethod(meth,only){
       if(V.split&&len===4&&FORM[segs[i].bi].length===2) pat=segs[i].si===0?V.split.a:V.split.b;
       if(V.pair){ pat=V.pairPat(segs[i].bi%2===1,segs[i].si,FORM[segs[i].bi].length===2); const j=i+1; if(j<segs.length&&V.pairPat(segs[j].bi%2===1,segs[j].si,FORM[segs[j].bi].length===2)[0].t==='sd') pat=Object.assign(pat.slice(),{landNext:1,landBar:pat.landBar}); } /* 조합 A (곡): 마디 둘씩 묶어 비밥 → 착지·쉼표·엔클로저 */
       if(V.altSplit&&len===4&&FORM[segs[i].bi].length===2) pat=segs[i].si===0?qualPattern(ctxs[i].c.qual,true):[SD,SD,SD,SD]; /* 조합 D (곡): 코드 둘 마디 = 앞 아르페지오 · 뒤 비밥 */
+      if(V.altSplit&&pat.length&&pat[pat.length-1].t==='sd'&&i+1<segs.length){ const j=i+1, L=segs[j].sg.len, two=FORM[segs[j].bi].length===2;
+        const np=L===8?(segs[j].bi%2===0?qualPattern(ctxs[j].c.qual,false):null):(two&&segs[j].si===0?qualPattern(ctxs[j].c.qual,true):null);
+        if(np&&np[0].d) pat=Object.assign(pat.slice(),{avoidD:np[0].d}); } /* 비밥 끝음이 다음 아르페지오 첫 음과 같지 않게 */
       if(ctxs[i].to6&&!V.shape&&pat[0].t!=='tie'){ const fs=firstOf(pat); if(fs&&fs.d==='3'){ const sw=a=>a.map(x=>x===fs?N('7',x.dir):x.x?Object.assign({},x,{x:sw(x.x)}):x); pat=sw(pat); } } // C6 마디의 첫 음은 6음 (당김음으로 이미 들어온 음이 있으면 그대로)
       if(i===segs.length-1&&(V.shape||V.line||meth!=='chordtone'||(V.keepEnd&&len<8))){ if(hasPk&&!V.keepEnd) pat=Object.assign(pat.map(x=>leads(x)?R:x),{landBar:pat.landBar}); } // B-1은 마지막 8분음표도 다음 1마디 3음을 미리 치고 붙임줄 // 형태 연습·아르페지오는 마지막 마디도 패턴 그대로
       else if(i===segs.length-1){
@@ -769,12 +772,12 @@ function genMethod(meth,only){
             const r=run(V,pat,cx,nx,p,null,a,()=>2,null,false,tw); if(r.lo<M_LO||r.hi>M_HI) continue;
             const ms=r.notes.map(x=>x.m!=null?x:null).filter(Boolean); let lp=0; const k=r.notes.findIndex(x=>x.ap);
             if(k>=0){ const pv=r.notes.slice(0,k).filter(x=>x.m!=null).pop()||(p!=null?{m:p}:null); if(pv) lp=Math.abs(r.notes[k].m-pv.m); } /* 엔클로저 첫 음까지의 도약 (쉼표 앞 마디 끝 음부터) */
-            const jump=p!=null&&a!=null?Math.abs(a-p):0;
+            const jump=p!=null&&a!=null?Math.abs(a-p):0; let fold=0; if(V.g==='B'||V.g==='C'){ const q=r.notes.filter(x=>x.m!=null&&!x.ap).slice(0,4).map(x=>x.m); for(let j=1;j<q.length;j++) if(q[j]<=q[j-1]) fold+=40; } /* 아르페지오가 음역 때문에 꺾이지 않게 */
             const nxt=go(i+1,r.last,r.nextF); if(!nxt) continue;
-            const cost=ka+Math.max(0,lp-4)*3+Math.max(0,jump-7)*2+Math.abs((r.lo+r.hi)/2-71)*0.15+nxt.c;
+            const cost=fold+ka+(FORM2?Math.max(0,lp-4)*3:Math.max(0,lp-5)**2*0.6)+Math.max(0,jump-7)*2+Math.abs((r.lo+r.hi)/2-71)*0.15+nxt.c;
             if(!res||cost<res.c) res={c:cost,a:[{a,t:tw},...nxt.a]}; } }
         memo.set(key,res); return res; };
-      const g=go(0,prev,forced); if(g){ plan2=g.a; score+=g.c*4; } else score+=5000; }
+      const g=go(0,prev,forced); if(g){ plan2=g.a; score+=g.c*4; } else score+=1e7; } /* 계획이 없으면(음역 밖) 이 시작 옥타브는 쓰지 않음 */
     segs.forEach((s,i)=>{
       const cx=ctxs[i], nx=ctxs[(i+1)%segs.length];
       const pat=patOf(i), okN=okAt((i+1)%segs.length);
