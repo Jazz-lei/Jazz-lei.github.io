@@ -1,4 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.licksel{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:10px 0 4px}.licksel span{font-size:13px;font-weight:600;color:var(--muted)}
+#reshuf{font:600 14px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer}#reshuf:hover{border-color:var(--muted)}#reshuf:active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+</style></head><body>
 <title>비밥 스케일 연습</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -138,7 +140,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 @media (max-width:600px){.chorus-h .start{flex-basis:calc(100% - 4em)} .chorus-h .play1{margin-left:0}}
 .chorus-h .start{font-size:14px;font-weight:500}
 .chorus-h .loop1{font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer;margin-left:6px}
-.chorus-h .loop1:hover,.chorus-h .play1:hover{background:var(--cb)}
+.chorus-h .loop1:hover,.chorus-h .play1:hover{background:var(--cb)}.chorus-h .pdf1{font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer;margin-left:6px}.chorus-h .pdf1:hover{background:var(--cb)}.chorus-h .pdf1:disabled{opacity:.6;cursor:default}
 .chorus-h .play1{margin-left:auto;font:inherit;font-size:13px;font-weight:600;color:var(--cc);background:var(--paper);border:1px solid var(--cc);border-radius:999px;padding:4px 12px;cursor:pointer}
 .chorus.playing{border-color:var(--cc);box-shadow:0 0 0 2px var(--cc)}
 .score{padding:4px 2px 6px;overflow-x:auto}
@@ -172,6 +174,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <a id="prevs" href="#"><span>← 이전 곡</span><b></b></a>
       <a id="nexts" href="#"><span>다음 곡 →</span><b></b></a>
     </nav>
+    <div class="licksel" id="licksel" hidden><span>Jazz Lick 10 · m7 · 7 · 7alt · maj7 릭 각 10개</span><button type="button" id="reshuf">↻ 새로 섞기</button></div>
     <div class="encsel" id="encsel" role="group" aria-label="엔클로저 목표음" hidden><span>목표음</span><button type="button" data-t="1" aria-pressed="false">근음</button><button type="button" data-t="3" aria-pressed="true">3음</button><button type="button" data-t="5" aria-pressed="false">5음</button></div>
     <div class="songnote" id="songnote" hidden></div>
     <details class="rules">
@@ -236,7 +239,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
             <option value="alt">2마디 연주 · 2마디 빈칸</option>
             <option value="alt2">2마디 빈칸 · 2마디 연주</option>
             <option value="grow">반복할수록 빈칸 늘리기</option>
-            <option value="all">전부 빈칸 (반주만)</option>
+            <option class="phopt" value="ph25" hidden>릭 프레이즈 25% 가리기</option><option class="phopt" value="ph50" hidden>릭 프레이즈 50% 가리기</option><option class="phopt" value="ph75" hidden>릭 프레이즈 75% 가리기</option><option value="all">전부 빈칸 (반주만)</option>
             <option value="pick">직접 고르기 (마디를 눌러서)</option>
           </select></div>
         <div class="field"><label for="loopn">구간 반복</label>
@@ -266,6 +269,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 
 <script src="https://cdn.jsdelivr.net/npm/abcjs@6.5.2/dist/abcjs-basic-min.js"></script>
 <script src="songs.js"></script>
+<script src="licks.js"></script>
 <script src="engine.js"></script>
 <!-- 방문 통계: Cloudflare Web Analytics (쿠키 없음) -->
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "161657c9f7f1408796fe709d0298548e", "spa": true}'></script>

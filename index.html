@@ -298,7 +298,7 @@ nav a[data-cat="books"][aria-current="page"]{box-shadow:inset 0 0 0 2px var(--ac
    그 밖의 연습은 practice 폴더에 html 파일을 넣고 아래에 한 줄 추가하세요.
    id   : 주소 이름(영문·숫자·하이픈)
    cat  : 'basic' | 'song' | 'penta'
-   sub  : basic·song → 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure',  penta → 'tools'
+   sub  : basic·song → 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure' | 'combo' | 'lick',  penta → 'tools'
    title: 목록에 보일 제목
    file : 파일 경로 */
 const PRACTICES=[
@@ -310,9 +310,9 @@ const PRACTICES=[
     return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
 ];
 const CATS={basic:'Basic Practice', song:'Song Practice', penta:'Pentatonic Practice'};
-const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Bebop Scale Practice', enclosure:'Enclosure Approach Practice', combo:'Combination Practice', tools:'Pentatonic Tools'};
+const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Bebop Scale Practice', enclosure:'Enclosure Approach Practice', combo:'Combination Practice', lick:'Lick Practice', tools:'Pentatonic Tools'};
 const FOUR=['chordtone','arpeggio','bebop','enclosure'];
-const CAT_SUBS={basic:[...FOUR,'combo'], song:[...FOUR,'combo'], penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
+const CAT_SUBS={basic:[...FOUR,'combo'], song:[...FOUR,'combo','lick'], penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
 
 const $=id=>document.getElementById(id);
 { const f=$('foot').cloneNode(true); f.removeAttribute('id'); $('empty').after(f); } // 목록 화면에도 같은 footer

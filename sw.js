@@ -2,13 +2,13 @@
    - 사이트 파일: 인터넷이 되면 항상 최신으로 받아오고, 안 되면 저장해둔 걸 보여줘요.
    - 악보 라이브러리·글꼴(외부): 한 번 받으면 저장해두고 다시 써요.
    파일 구성이 크게 바뀌면 VERSION 숫자만 올려주세요. */
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = 'jazzlei-' + VERSION;
 const CORE = [
   '/', '/index.html', '/manifest.webmanifest',
   '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png',
   '/practice/song.html', '/practice/pentatonic.html', '/practice/two-five-one-bebop.html',
-  '/practice/songs.js', '/practice/engine.js',
+  '/practice/songs.js', '/practice/licks.js', '/practice/engine.js',
   ...['bass1','bass2','bass3','bass4','bass5','bass6','hat','kick','ride','snare'].map(n => `/practice/samples/${n}.mp3`),
 ];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
