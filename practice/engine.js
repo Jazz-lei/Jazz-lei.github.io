@@ -1446,7 +1446,7 @@ function loadSong(){
   $('lead').innerHTML=M?M.lead:HEAD0.lead;
   $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝은 쉼표로 비워 둬요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
   $('space').closest('label').hidden=!!M;
-  $('licksel').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick');
+  $('licksel').hidden=METHOD!=='lick'; $('lickpdf').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick');
   if(METHOD==='lick'&&!/^(ph|off$)/.test($('blank').value)) $('blank').value='off'; if(METHOD!=='lick'&&/^ph/.test($('blank').value)) $('blank').value='off';
   $('encsel').hidden=METHOD!=='enclosure'&&METHOD!=='combo'; document.querySelectorAll('#encsel button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===ENC_T)));
   // 같은 메뉴(Basic/Song · 연습법) 안에서 이전·다음 곡
@@ -1547,3 +1547,8 @@ async function saveFile(name,blob){
   if(window.claude&&window.claude.use){ try{ const dl=await window.claude.use('downloads'); if(dl){ try{ await dl.save({filename:name,data:blob}); }catch(e){ if(e&&e.code!=='declined') alertMsg('저장하지 못했어요.'); } return; } }catch(e){} }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
 }
+
+// 위쪽 "릭 악보 PDF" 버튼: 보통은 링크로 바로 다운로드, Claude 아티팩트 안에서는 저장 창으로
+{ const a=document.getElementById('lickpdf'); if(a) a.addEventListener('click',async e=>{
+  if(!(window.claude&&window.claude.use)) return; e.preventDefault();
+  try{ const blob=await (await fetch(a.href)).blob(); await saveFile(a.getAttribute('download')||'Jazz Lick 10.pdf',blob); }catch(x){ location.href=a.href; } }); }

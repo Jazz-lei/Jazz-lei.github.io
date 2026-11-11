@@ -26,7 +26,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15p
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 
-header{padding-top:24px;display:flex;flex-direction:column;gap:8px}
+header{padding-top:24px;display:flex;flex-direction:column;gap:8px}header{position:relative}@media (min-width:860px){.lickpdf{top:88px!important}}.lickpdf{position:absolute;top:14px;right:0;font:700 15px var(--sans);color:var(--paper);background:var(--a);border:0;border-radius:999px;padding:10px 20px;text-decoration:none;white-space:nowrap;box-shadow:0 2px 8px rgba(43,98,163,.25)}.lickpdf:hover{filter:brightness(1.08)}.lickpdf:active{transform:translateY(1px)}@media (max-width:859px){header:has(.lickpdf:not([hidden])) .eyebrow{padding-right:190px}}@media (max-width:600px){.lickpdf{font-size:14px;padding:8px 15px;top:12px}header:has(.lickpdf:not([hidden])) .eyebrow{padding-right:140px}}.lickpdf[hidden]{display:none}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
 h1{font-size:26px;line-height:1.25;margin:0;font-weight:700;text-wrap:balance}
 .lead{margin:0;color:var(--muted);max-width:62ch}
@@ -167,6 +167,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 
 <div class="wrap">
   <header>
+    <a class="lickpdf" id="lickpdf" href="files/jazz-lick-10.pdf" download="Jazz Lick 10.pdf" hidden>↓ 릭 악보 PDF</a>
     <div class="eyebrow"><span class="kn"></span> · <span class="sg-bars"></span> bars · <span id="sg-kind">8th notes</span></div>
     <h1><span class="sg-name"></span> <span id="mname">비밥 스케일</span></h1>
     <p class="lead" id="lead">8분음표 비밥 스케일을 코러스마다 근음·3음·5음에서 시작해요. 세 가지 사이클로 같은 진행을 다르게 연결합니다.</p>
