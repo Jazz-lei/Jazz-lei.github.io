@@ -458,17 +458,23 @@ function toABC(ch,barsPerLine,bpm,lab){
       for(let i=0;i<ns.length;){
         const n=ns[i];
         if(i%4===0 && i>0) out.push(' ');
+        else if(ch.beatBeam && i%2===0 && i>0){ const h=b=>[ns[b],ns[b+1]].some(x=>x&&x.six); if((h(i)||h(i-2)) && out[out.length-1]!==' ') out.push(' '); }  // 16분음표가 든 박은 박 단위로만 묶음
         const cs=seg.syms.find(s=>s.at===i), sym=(cs?'"'+cs.sym+'"':'')+(i===0&&seg.lab?'"^'+seg.lab+'"':'');
         let j=i+1;
         if(n.tc){ i++; continue; }
         if(n.rest){ // 이어지는 쉼표는 하나로 (코드가 바뀌는 자리에서는 나눔)
           while(j<ns.length&&ns[j].rest&&!seg.syms.some(s=>s.at===j)) j++;
-          out.push(sym+'z'+(j-i>1?j-i:'')); ch.toks.push({rest:true,d8:j-i,bar:bi,ev:n.ev}); i=j; continue;
+          // 쉼표를 박에 맞게 나눔: 엇박에서 시작하면 8분쉼표 먼저, 마디 가운데(3박)를 넘으면 거기서 끊음 (점2분쉼표처럼 보이지 않게)
+          const parts=[]; let a=i; if(a%2===1&&j-a>1){ parts.push(1); a++; } if(a>0&&a<4&&j>4){ parts.push(4-a); a=4; } if(j>a) parts.push(j-a);
+          let k=i; parts.forEach((len,pi)=>{ out.push((pi?'':sym)+'z'+(len>1?len:'')); ch.toks.push({rest:true,d8:len,bar:bi,ev:ns[k].ev}); k+=len; }); i=j; continue;
         }
         if(n.six){ out.push(sym+dl(n.six[0],i)+nm(n.six[0])+'/'+dl(n.six[1],i)+nm(n.six[1])+'/'); n.six.forEach(x=>ch.toks.push({d8:.5,bar:bi,ev:x.ev,rest:!!x.rest}));
           lastNote=n.six[1].rest?null:{oi:out.length-1,n:n.six[1]}; i++; continue; }
         if(n.trip){ /* 셋잇단은 앞뒤 음과 빔을 나눔 */ if(out.length&&out[out.length-1]!==' ') out.push(' ');
           if(n.trip[0].tie&&lastNote) out[lastNote.oi]+='-';
+          if(ch.tripMerge&&n.trip[2].tie&&!n.trip[1].rest&&!n.trip[1].tie){ /* 셋잇단 안에서 붙임줄로 이은 두 음은 4분음표 하나로 */
+            out.push('(3:2:2'+sym+nm(n.trip[0])+nm(n.trip[1])+'2'); ch.toks.push({d8:2/3,bar:bi,ev:n.trip[0].ev,rest:!!n.trip[0].rest},{d8:4/3,bar:bi,ev:n.trip[1].ev});
+            lastNote={oi:out.length-1,n:n.trip[1]}; out.push(' '); i+=2; continue; }
           out.push('(3'+sym+n.trip.map((x,k)=>(k&&x.tie?'-':'')+(x.tie?'':dl(x,i))+nm(x)).join('')); n.trip.forEach(x=>ch.toks.push({d8:2/3,bar:bi,ev:x.ev,tie:!!x.tie,rest:!!x.rest}));
           lastNote=n.trip[2].rest?null:{oi:out.length-1,n:n.trip[2]}; out.push(' '); i+=2; continue; }
         if(n.hold){ // 앞 마디에서 붙임줄로 이어지는 음
@@ -484,7 +490,7 @@ function toABC(ch,barsPerLine,bpm,lab){
           lastNote={oi:out.length-1,n}; i=sj; continue;
         }
         while(j<ns.length&&ns[j].hold) j++;
-        out.push(sym+dl(n,i)+nm(n)+(j-i>1?j-i:'')); ch.toks.push({d8:j-i,bar:bi,ev:n.ev}); lastNote={oi:out.length-1,n};
+        out.push(sym+dl(n,i)+(n.dbl?'['+nm(n.dbl)+nm(n)+']':nm(n))+(j-i>1?j-i:'')); ch.toks.push({d8:j-i,bar:bi,ev:n.ev}); lastNote={oi:out.length-1,n};
         i=j;
       }
       out.push(' ');
@@ -855,14 +861,16 @@ let DATA_PREV=[];
    곡의 II-V-I마다 Leigeuht의 릭(m7·7·7alt·maj7 각 10개)을 코드에 맞게 옮겨 넣고, 프레이즈 사이는 즉흥 칸으로 비워요.
    릭 데이터는 licks.js (음 = [근음에서 몇 글자, 몇 반음]) */
 METHODS.lick={name:'릭', book:'Jazz Lick 10',
-  lead:'곡의 코드에 맞게 Jazz Lick 10의 릭을 하나씩 넣었어요. 릭 하나 → 즉흥 2마디 순서로 이어지고, 즉흥 칸은 직접 채워요.',
-  rules:['m7 코드에는 Dm7 릭, 도미넌트에는 G7 릭(마이너로 해결하거나 alt 코드면 G7alt 릭. 단 키 기준 ♭II7·♭III7·IV7·♯IV7·♭VI7·♭VII7 같은 subV7에는 ♭9·♭13 릭을 쓰지 않아요), 메이저에는 Cmaj7 릭을 코드 근음에 맞게 옮겨요. 메이저 코드에는 6도 위 m7 릭(D♭maj7 위에 B♭m7 릭)을 쓰기도 해요.',
-    '릭은 하나씩만 넣고, 릭이 끝나면 다음 마디부터 적어도 2마디는 즉흥 칸이에요. 릭 뒤에 바로 다른 릭이 오지 않아요.',
-    '코러스마다 릭 자리와 릭이 다르게 나와요. 한 코러스 안에서 같은 릭은 다시 나오지 않고, 네 코러스 동안 30개 릭을 골고루 써요. ‘새로 섞기’를 누르면 다시 배치해요.',
-    '한 마디에 코드가 둘인 마디, m7(♭5)·디미니시드 마디는 즉흥 칸으로 두어요.'],
-  groups:{A:['II-V-I 릭','코러스마다 릭 배치가 달라요. 위에 적힌 이름이 Jazz Lick 10의 릭 번호예요.']}, v:[]};
-function genLick(){
-  const L=window.LICKS; if(!L) return [];
+  lead:'곡의 코드에 맞게 Jazz Lick 10의 릭을 넣었어요. 기본은 <b>릭 1마디 → 즉흥 2마디</b>가 되풀이되고, 즉흥 칸은 직접 채워요. 재생 바의 <b>✎ 직접 배치</b>를 켜고 마디를 누르면 원하는 릭을 골라 넣을 수 있어요.',
+  rules:['m7 코드에는 Dm7 릭, 도미넌트에는 G7 릭(마이너로 해결하거나 alt 코드면 G7alt 릭. 단 키 기준 ♭II7·♭III7·IV7·♯IV7·♭VI7·♭VII7 같은 subV7에는 ♭9·♭13이 들어간 릭(7alt 릭, 7 릭 6)을 쓰지 않아요), 메이저에는 Cmaj7 릭을 코드 근음에 맞게 옮겨요.',
+    '기본 배치는 릭 1마디 뒤에 즉흥 2마디예요. 릭이 들어갈 수 없는 마디(코드가 둘인 마디, m7(♭5)·디미니시드 마디)에 걸리면 다음 마디로 한 칸 밀려요.',
+    '✎ 직접 배치를 켜고 마디를 누르면 그 코드에 맞는 릭 번호가 나와요. 원하는 릭을 고르거나 ‘자동으로’, ‘즉흥 칸으로’를 누르세요. 코드가 둘인 마디는 마디 왼쪽을 누르면 앞 코드, 오른쪽을 누르면 뒤 코드에 맞춘 릭이 한 마디 전체에 들어가요. ‘새로 섞기’를 누르면 기본 배치로 다시 섞어요.',
+    '코러스마다 릭 자리와 릭이 다르게 나와요. 한 코러스 안에서 같은 릭은 다시 나오지 않고, 네 코러스 동안 30개 릭을 골고루 써요.'],
+  groups:{A:['II-V-I 릭','기본은 릭 1마디 → 즉흥 2마디예요. 위에 적힌 이름이 Jazz Lick 10의 릭 번호예요.']}, v:[]};
+const SUBV_NO=[6]; // subV7에서 빼는 7 릭 (♭9이 들어 있음)
+let LKIT=null;
+function lickKit(){
+  const L=window.LICKS; if(!L) return null;
   const save=METHOD; let base; try{ METHOD='chordtone'; base=genMethod('chordtone')[0]; } finally{ METHOD=save; }
   const nB=CHORDS.length, cl=x=>JSON.parse(JSON.stringify(x)), rnd=a=>a[Math.floor(Math.random()*a.length)];
   const restBar=b=>base.bars[b].map(sg=>Object.assign(cl(sg),{notes:sg.notes.map(()=>({rest:true})),lab:null}));
@@ -871,7 +879,6 @@ function genLick(){
   const one=b=>b>=0&&b<nB&&CHORDS[b].length===1?CHORDS[b][0]:null;
   const spell=(l,m)=>{ l=((l%7)+7)%7; const pc=((m%12)+12)%12; let a=((pc-LSEMI[l])%12+12)%12; if(a>6)a-=12; let p={l,a,pc}; if(p.a>=2) p=respell(p,1); if(p.a<=-2) p=respell(p,-1); return p; };
   const LO=53, HI=86;
-  // 릭 하나를 근음(글자 rl, 반음 rm)에 맞춰 엔진 음표로
   const mk=(bars,rl,rm)=>bars.map(sl=>sl.map(x=>{
     const N=([st,se])=>({m:rm+se,sp:spell(rl+st,rm+se)});
     if(x==='r') return {rest:true}; if(x==='h') return {hold:true}; if(x==='tc') return {tc:true};
@@ -881,74 +888,120 @@ function genLick(){
     return {rest:true}; }));
   const pitches=bars=>bars.flat().flatMap(n=>n.m!=null?[n.m]:(n.six||n.trip||[]).filter(e=>e.m!=null).map(e=>e.m));
   const firstNote=bars=>{ const n=bars[0][0]; if(!n) return null; if(n.m!=null) return n; const e=(n.six||n.trip||[])[0]; return e&&e.m!=null?e:null; };
-  const lastP=bars=>{ const p=pitches(bars); return p.length?p[p.length-1]:null; };
-  // 옥타브: 앞 음과 가깝게(없으면 가운데 음역), 음역 안에서
   const place=(lk,R,shift,prev)=>{ const rl=R.l+shift[0]; let best=null;
     for(let o=2;o<=6;o++){ const rm=12*(o+1)+((R.pc+shift[1])%12); const bars=mk(lk.bars,rl,rm), ps=pitches(bars); if(!ps.length) continue;
       if(Math.min(...ps)<LO||Math.max(...ps)>HI) continue;
       const fn=firstNote(bars), f=fn?fn.m:ps[0], sc=prev!=null?Math.abs(f-prev):Math.abs(ps.reduce((a,b)=>a+b,0)/ps.length-70);
       if(!best||sc<best.sc) best={sc,bars}; }
     return best&&best.bars; };
-  const tones=c=>{ const q=c.qual, t3=['m7','m6','mmaj7','m7b5','dim'].includes(q)?3:4, t5=['m7b5','dim'].includes(q)?6:7; return [[2,t3],[4,t5]]; };
-  const out=[], usedAll={}, cnt={}, posSets=[];
+  // 이 마디 코드에 맞는 릭 고르기. o = {used:Set, cnt, usedAll, one:true(한 마디 릭만)}
+  const pickLick=(b,o)=>{ const c=o.chord||one(b); if(!c) return null; let f=famOf(c); if(!f) return null;
+    const nx=o.chord?o.next:one(b+1); let shift=[0,0], pool;
+    // subV7(키 기준 ♭II7·♭III7·IV7·♯IV7·♭VI7·♭VII7)에는 ♭9·♭13이 들어간 릭(7alt 릭, 7 릭 6)을 쓰지 않음
+    const subV=(f==='dom'||f==='alt')&&[1,3,5,6,8,10].includes(((c.pc-parse(REF).pc)%12+12)%12);
+    if(subV) f='dom';
+    else if(f==='dom'){ const toMinor=nx&&((nx.pc-c.pc+12)%12===5)&&['m7','m6','mmaj7','m7b5'].includes(nx.qual), toI=nx&&((nx.pc-c.pc+12)%12===5);
+      f=toMinor?'alt':toI&&Math.random()<.35?'alt':'dom'; }
+    pool=f==='m7'?L.m7.map(x=>({fam:'m7',x})):f==='maj'?L.maj.map(x=>({fam:'maj',x})):L.dom.filter(x=>f==='alt'?x.alt:!x.alt&&!(subV&&SUBV_NO.includes(x.no))).map(x=>({fam:'dom',x}));
+    const two=!o.one&&nx&&nx.pc===c.pc&&nx.qual===c.qual; // 두 마디 릭(maj7 10번)은 같은 코드가 두 마디일 때만
+    pool=pool.filter(p=>p.x.bars.length===1||two);
+    let cand=pool.filter(p=>!o.used.has(p.fam+p.x.no)); if(!cand.length) cand=pool; if(!cand.length) return null;
+    const k=p=>((o.cnt||{})[p.fam+p.x.no]||0)*2+((o.usedAll||{})[p.fam+p.x.no+'@'+b]?3:0), mn=Math.min(...cand.map(k));
+    const P=rnd(cand.filter(p=>k(p)===mn)); return Object.assign({shift,c},P); };
+  // 고른 릭을 악보 마디로 (bars 배열에 바로 넣음)
+  const put=(bars,b,P)=>{ const lk=P.x, bb=place(lk,rootOf(P.c),P.shift,null); if(!bb) return 0;
+    bb.forEach((nts,k)=>{ const segs=cl(base.bars[b+k]); let i=0; segs.forEach((sg,j)=>{ const n=j===segs.length-1?nts.length-i:sg.notes.length; sg.notes=nts.slice(i,i+n); i+=n; sg.lid=P.fam+lk.no; }); // 코드가 둘인 마디도 릭은 한 마디 전체
+      if(k===0) segs[0].lab=(P.fam==='m7'?'m7':P.fam==='maj'?'maj7':lk.alt?'7alt':'7')+' 릭 '+lk.no+(P.sub?' (6도 위)':'')+(CHORDS[b].length===2?' · '+chordNm(P.c):''); bars[b+k]=segs; });
+    return bb.length; };
+  // 직접 배치에서 고를 수 있는 릭 (코드 종류·subV7 규칙에 맞는 것만)
+  const choices=(b,c,nx,twoOk)=>{ let f=famOf(c); if(!f) return [];
+    const subV=(f==='dom'||f==='alt')&&[1,3,5,6,8,10].includes(((c.pc-parse(REF).pc)%12+12)%12);
+    const toMinor=nx&&((nx.pc-c.pc+12)%12===5)&&['m7','m6','mmaj7','m7b5'].includes(nx.qual), toI=nx&&((nx.pc-c.pc+12)%12===5);
+    const gs=f==='m7'?['m7']:f==='maj'?['maj']:subV?['dom']:f==='alt'||toMinor?['alt']:toI?['dom','alt']:['dom'];
+    const nm={m7:'m7 릭',maj:'maj7 릭',dom:'7 릭',alt:'7alt 릭'};
+    return gs.map(g=>({name:nm[g],items:(g==='m7'?L.m7:g==='maj'?L.maj:L.dom.filter(x=>g==='alt'?x.alt:!x.alt&&!(subV&&SUBV_NO.includes(x.no)))).filter(x=>x.bars.length===1||twoOk).map(x=>({fam:g==='alt'?'dom':g,x}))})); };
+  const make=(b,o,ch)=>{ const c=o.chord||one(b); if(!c) return null; const x=(ch.fam==='m7'?L.m7:ch.fam==='maj'?L.maj:L.dom).find(x=>x.no===ch.no); return x?{shift:[0,0],c,fam:ch.fam,x}:null; };
+  return {nB,one,famOf,pickLick,put,restBar,choices,make};
+}
+function genLick(){
+  const K=lickKit(); LKIT=K; if(!K) return [];
+  const {nB,pickLick,put,restBar}=K, out=[], usedAll={}, cnt={};
+  // 코러스마다 시작 자리(0·1·2마디째)를 다르게: 릭 1마디 → 즉흥 2마디가 규칙적으로 되풀이
+  const ph=[0,1,2].sort(()=>Math.random()-.5); ph.push([0,1,2].filter(x=>x!==ph[2])[Math.floor(Math.random()*2)]);
   for(let ci=0;ci<4;ci++){
-    let plan=null, best=null;
-    // 릭 자리: 앞 코러스들과 최대한 겹치지 않는 배치를 여러 번 만들어 보고 고름
-    for(let t=0;t<150;t++){
-    const used=new Set(), pl=[]; let b=Math.floor(Math.random()*3), prevId=null;
-    const pickLick=(c,b2)=>{ let f=famOf(c); if(!f) return null;
-      const nx=one(b2+1); let shift=[0,0], pool;
-      // subV7(키 기준 ♭II7·♭III7·IV7·♯IV7·♭VI7·♭VII7)에는 ♭9·♭13(7alt) 릭을 쓰지 않음
-      const subV=(f==='dom'||f==='alt')&&[1,3,5,6,8,10].includes(((c.pc-parse(REF).pc)%12+12)%12);
-      if(subV) f='dom';
-      else if(f==='dom'){ const toMinor=nx&&((nx.pc-c.pc+12)%12===5)&&['m7','m6','mmaj7','m7b5'].includes(nx.qual), toI=nx&&((nx.pc-c.pc+12)%12===5);
-        f=toMinor?'alt':toI&&Math.random()<.35?'alt':'dom'; }
-      if(f==='maj'&&Math.random()<.3){ shift=[5,9]; pool=L.m7.map(x=>({fam:'m7',sub:1,x})); }
-      else pool=f==='m7'?L.m7.map(x=>({fam:'m7',x})):f==='maj'?L.maj.map(x=>({fam:'maj',x})):L.dom.filter(x=>f==='alt'?x.alt:!x.alt).map(x=>({fam:'dom',x}));
-      // 두 마디 릭(maj7 10번)은 같은 코드가 두 마디일 때만
-      const two=nx&&nx.pc===c.pc&&nx.qual===c.qual;
-      pool=pool.filter(p=>p.x.bars.length===1||two);
-      let cand=pool.filter(p=>!used.has(p.fam+p.x.no)&&p.fam+p.x.no!==prevId);
-      if(!cand.length) return null;
-      // 네 코러스 전체에서 덜 쓴 릭부터 (30개를 골고루)
-      const k=p=>(cnt[p.fam+p.x.no]||0)*2+(usedAll[p.fam+p.x.no+'@'+b2]?3:0), mn=Math.min(...cand.map(k));
-      const P=rnd(cand.filter(p=>k(p)===mn)); return Object.assign({shift},P); };
+    const bars=new Array(nB).fill(null), phr=[], gaps=new Set(), used=new Set();
+    let b=ph[ci];
     while(b<nB){
-      const c=one(b); if(!c||!famOf(c)){ b++; continue; }
-      if(Math.random()<.2&&b+1<nB){ b++; continue; } // 시작 자리를 랜덤하게 미룸
-      const P=pickLick(c,b); if(!P){ b++; continue; }
-      const items=[{b,c,P}]; used.add(P.fam+P.x.no); prevId=P.fam+P.x.no; b+=P.x.bars.length; // 릭 하나 → 즉흥 (릭 뒤에 바로 릭이 오지 않게)
-      pl.push({items});
-      b+=2; // 릭 하나마다 즉흥 칸 2마디 (코드가 맞지 않아 넘어가는 마디는 즉흥 칸이 더 길어짐)
+      const P=pickLick(b,{used,cnt,usedAll}); if(!P){ b++; continue; } // 릭이 못 들어가는 마디면 한 칸 밀기
+      const n=put(bars,b,P); if(!n){ b++; continue; }
+      const id=P.fam+P.x.no; used.add(id); cnt[id]=(cnt[id]||0)+1; usedAll[id+'@'+b]=1;
+      phr.push({a:b,z:b+n-1}); b+=n+2;
     }
-    const pos=new Set(pl.map(p=>p.items[0].b)); if(!pos.size) continue;
-    const lb=pl.reduce((x,p)=>x+p.items.reduce((y,it)=>y+it.P.x.bars.length,0),0), dr=Math.abs(lb/nB-1/3); // 릭 1마디 : 즉흥 2마디
-    const ov=posSets.length?Math.max(...posSets.map(S=>[...pos].filter(x=>S.has(x)).length/Math.max(1,Math.min(pos.size,S.size)))):0;
-    const same=posSets.some(S=>S.size===pos.size&&[...pos].every(x=>S.has(x))), sc=ov+dr*4+(same?3:0); if(!best||sc<best.sc) best={sc,pl,pos}; if(ov<=0.45&&dr<=0.04&&!same) break;
-    }
-    plan=best?best.pl:[]; if(best) posSets.push(best.pos);
-    plan.forEach(ph=>ph.items.forEach(it=>{ const id=it.P.fam+it.P.x.no; cnt[id]=(cnt[id]||0)+1; }));
-    // 음 만들기
-    const bars=[], phr=[], gaps=new Set(); for(let i=0;i<nB;i++) bars[i]=null;
-    let prev=null;
-    plan.forEach(ph=>{ prev=null; const a=ph.items[0].b; let z=a;
-      ph.items.forEach(it=>{ const R=rootOf(it.c), lk=it.P.x;
-        let bb=place(lk,R,it.P.shift,prev); if(!bb) bb=place(lk,R,it.P.shift,null); if(!bb) return;
-        it.bars=bb; bb.forEach((nts,k)=>{ const segs=cl(base.bars[it.b+k]); segs[0].notes=nts; if(k===0) segs[0].lab=(it.P.fam==='m7'?'m7':it.P.fam==='maj'?'maj7':lk.alt?'7alt':'7')+' 릭 '+lk.no+(it.P.sub?' (6도 위)':''); bars[it.b+k]=segs; z=it.b+k; });
-        usedAll[it.P.fam+lk.no+'@'+it.b]=1; prev=lastP(bb); });
-      // 릭 끝이 쉼표면 다음 음을 감싸 이음 (반음 위 · 온음 아래)
-      for(let k=a;k<z;k++){ const s=bars[k], nx=bars[k+1]; if(!s||!nx) continue; const ns=s[s.length-1].notes, t=nx[0].notes[0]; if(!t||t.m==null) continue;
-        const L2=ns.length; if(L2===8&&ns[6].rest&&ns[7].rest){ ns[6]={m:t.m+1,sp:spell(t.sp.l+1,t.m+1)}; ns[7]={m:t.m-2,sp:spell(t.sp.l-1,t.m-2)}; }
-        else if(ns[L2-1].rest&&!(ns[L2-2]&&ns[L2-2].hold)){ ns[L2-1]={m:t.m-1,sp:spell(t.sp.l-1,t.m-1)}; } }
-      phr.push({a,z}); });
     for(let i=0;i<nB;i++) if(!bars[i]){ bars[i]=restBar(i); gaps.add(i); }
     const blanks={}; [['ph25',.25],['ph50',.5],['ph75',.75]].forEach(([k,r])=>{ const n=Math.max(1,Math.round(phr.length*r)), pick=[...phr].sort(()=>Math.random()-.5).slice(0,n), set=new Set(gaps); pick.forEach(p=>{ for(let x=p.a;x<=p.z;x++) set.add(x); }); blanks[k]=set; });
     out.push({method:'lick',mode:'A',deg:ci,title:'릭 배치 '+(ci+1),bars,phr,gaps,blanks});
   }
   return out;
 }
+// ✎ 직접 배치: 마디를 누르면 릭 고르기 창 (원하는 릭 · 자동 · 즉흥 칸으로)
+const chordNm=c=>tsym(c.disp||c.sym).replace(/b(9|13|5)/g,'♭$1').replace(/#(9|11|5)/g,'♯$1').replace(/^([A-G])b/,'$1♭').replace(/^([A-G])#/,'$1♯');
+function lickClear(c,b){ const K=LKIT, ph=c.phr.find(p=>b>=p.a&&b<=p.z); if(!ph) return;
+  for(let x=ph.a;x<=ph.z;x++){ c.bars[x]=K.restBar(x); c.gaps.add(x); Object.values(c.blanks).forEach(s=>s.add(x)); } c.phr=c.phr.filter(p=>p!==ph); }
+function lickRedraw(){ if(playing) stop(); const y=scrollY; buildEv(); draw(); scrollTo(0,y); }
+function lickSet(ci,b,h,ch){ // ch: null=자동, {fam,no}
+  const c=DATA[ci], K=LKIT; if(!c||!K) return; const two=CHORDS[b]&&CHORDS[b].length===2;
+  const used=new Set(); c.bars.forEach(sg=>sg&&sg.forEach(x=>x.lid&&used.add(x.lid)));
+  lickClear(c,b); const o=two?{used,one:true,chord:CHORDS[b][h],next:h===0?CHORDS[b][1]:((CHORDS[b+1]||[])[0]||null)}:{used,one:!ch};
+  let P=ch?K.make(b,o,ch):K.pickLick(b,o); if(!P) return;
+  if(!two&&P.x.bars.length===2) lickClear(c,b+1);
+  const n=K.put(c.bars,b,P); if(!n){ lickMsg('이 릭은 이 자리 음역에 맞지 않아요. 다른 릭을 골라 보세요.'); return; }
+  for(let x=b;x<b+n;x++){ c.gaps.delete(x); Object.values(c.blanks).forEach(s=>s.delete(x)); }
+  c.phr.push({a:b,z:b+n-1}); c.phr.sort((x,y)=>x.a-y.a); lickRedraw();
+}
+function lickPopClose(){ const d=$('lkpop'); if(d) d.remove(); document.removeEventListener('pointerdown',lickPopOut,true); }
+function lickPopOut(e){ if(!e.target.closest('#lkpop')) lickPopClose(); }
+// 고르기 창의 작은 악보: 이 자리 코드에 옮긴 릭 그대로
+function lickPreview(b,h,two,it){ const K=LKIT, o=two?{chord:CHORDS[b][h],next:null,used:new Set(),one:true}:{used:new Set()};
+  const P=K.make(b,o,{fam:it.fam,no:it.x.no}); if(!P) return null; const tmp=[]; const n=K.put(tmp,b,P); if(!n) return null;
+  return toABC({method:'lick',bars:tmp.slice(b,b+n).map(sg=>sg.map(s=>Object.assign({},s,{lab:null})))},4,160,false).replace('M:4/4','M:none'); }
+// 누른 자리의 마디 찾기: 가장 가까운 줄에서, 마디 사이 가운데를 경계로
+function barAt(svg,x,y){ let best=null; svg.querySelectorAll('.abcjs-staff').forEach(st=>{ const r=st.getBoundingClientRect(), d=Math.abs(y-(r.top+r.bottom)/2), l=lineOf(st); if(!best||d<best.d) best={d,l}; });
+  if(!best) return null; const ex={}; svg.querySelectorAll('[data-bar]').forEach(e=>{ if(lineOf(e)!==best.l) return; const b=Math.max(0,+e.dataset.bar), r=e.getBoundingClientRect(); if(!r.width&&!r.height) return; const o=ex[b]||(ex[b]={l:1e9,r:-1e9}); o.l=Math.min(o.l,r.left); o.r=Math.max(o.r,r.right); });
+  const bs=Object.keys(ex).map(Number).sort((a,b)=>a-b); if(!bs.length) return null;
+  for(let k=0;k<bs.length;k++){ const o=ex[bs[k]], lo=k?(ex[bs[k-1]].r+o.l)/2:-1e9, hi=k<bs.length-1?(o.r+ex[bs[k+1]].l)/2:1e9; if(x>=lo&&x<hi) return {bar:bs[k],half:x>(o.l+o.r)/2}; }
+  return null; }
+function openLickPop(ci,b,half,x,y){
+  lickPopClose(); const c=DATA[ci], K=LKIT; if(!c||!K) return;
+  const two=CHORDS[b]&&CHORDS[b].length===2, h=two&&half?1:0, ch=two?CHORDS[b][h]:CHORDS[b][0];
+  const nx=two?(h===0?CHORDS[b][1]:((CHORDS[b+1]||[])[0]||null)):K.one(b+1);
+  const grp=K.choices(b,ch,nx,!two&&!!nx&&nx.pc===ch.pc&&nx.qual===ch.qual);
+  const segs=c.bars[b], cur=(segs[h]&&segs[h].lid)||(segs[0]&&segs[0].lid)||'', has=!c.gaps.has(b)||c.phr.some(p=>b>=p.a&&b<=p.z);
+  if(!grp.length&&!has){ lickMsg((b+1)+'마디 '+(two?(h?'뒤':'앞')+' 코드 ':'')+chordNm(ch)+'에는 릭을 넣을 수 없어요.'+(two&&K.choices(b,CHORDS[b][1-h],null,false).length?' '+(h?'앞':'뒤')+'쪽을 눌러 보세요.':'')); return; }
+  const usedAt={}; c.bars.forEach((sg,i)=>sg&&sg.forEach(s=>{ if(s.lid&&s.lid!==cur&&!(i===b)) usedAt[s.lid]=usedAt[s.lid]||i+1; }));
+  const d=document.createElement('div'); d.id='lkpop'; d.className='lkpop'; d.setAttribute('role','dialog'); const abcs=[];
+  d.innerHTML=`<div class="lkpop-h"><b>${b+1}마디 · ${chordNm(ch)}</b>${two?`<span>${h?'뒤':'앞'} 코드로 한 마디</span>`:''}<button type="button" class="lkx" aria-label="닫기">✕</button></div><div class="lkpop-body">`+
+    grp.map(g=>`<div class="lkpop-g"><span class="gn">${g.name}</span><div class="lkcards">`+g.items.map(it=>{ const id=it.fam+it.x.no, abc=lickPreview(b,h,two,it), u=usedAt[id];
+      if(abc) abcs.push(abc);
+      return `<button type="button" class="lkc${id===cur?' cur':u?' used':''}" data-f="${it.fam}" data-n="${it.x.no}" data-g="${g.name}"${u?` data-u="${u}"`:''}${abc?'':' disabled'}><span class="lkc-h"><b>${it.x.no}</b>${it.x.bars.length>1&&!two?'<i>2마디</i>':''}${id===cur?'<em>지금 들어 있음</em>':u?`<em>${u}마디에 이미 있음</em>`:''}${abc?'':'<em>음역 밖</em>'}</span>${abc?`<span class="mini" data-k="${abcs.length-1}"></span>`:''}</button>`; }).join('')+`</div></div>`).join('')+
+    `</div><div class="lkpop-f">${grp.length?'<button type="button" data-auto>🎲 자동으로</button>':''}${has?'<button type="button" data-clear>즉흥 칸으로</button>':''}</div>`;
+  document.body.appendChild(d); lickMsg('');
+  d.querySelectorAll('.mini').forEach(m=>{ try{ ABCJS.renderAbc(m,abcs[+m.dataset.k],{responsive:'resize',staffwidth:340,paddingtop:0,paddingbottom:0,paddingleft:0,paddingright:4}); }catch(e){} });
+  const W=d.offsetWidth, H=d.offsetHeight; d.style.left=Math.max(8,Math.min(innerWidth-W-8,x-W/2))+'px';
+  d.style.top=(y+14+H<innerHeight-8?y+14:y-14-H>8?y-14-H:Math.max(8,(innerHeight-H)/2))+'px';
+  d.onclick=e=>{ const t=e.target.closest('button'); if(!t||t.disabled) return; if(t.classList.contains('lkx')){ lickPopClose(); return; }
+    lickPopClose(); if(t.hasAttribute('data-clear')){ lickClear(c,b); lickRedraw(); return; }
+    lickSet(ci,b,h,t.hasAttribute('data-auto')?null:{fam:t.dataset.f,no:+t.dataset.n});
+    if(t.dataset.u) lickMsg(`${t.dataset.g} ${t.dataset.n}번은 이 코러스 ${t.dataset.u}마디에도 들어 있어요. 같은 릭이 두 번 나와요.`); };
+  setTimeout(()=>document.addEventListener('pointerdown',lickPopOut,true),0);
+}
+addEventListener('keydown',e=>{ if(e.key==='Escape') lickPopClose(); });
+function lickMsg(t){ const m=$('lickmsg'); if(!m) return; m.textContent=t; m.hidden=!t; clearTimeout(lickMsg.t); if(t) lickMsg.t=setTimeout(()=>{ m.hidden=true; },3500); }
 function build(){
   SPACE=$('space').checked; DATA=METHOD==='lick'?genLick():METHOD==='bebop'?generate():METHOD==='combo'&&FORM2?(()=>{ FORM=FORM2; const a=genMethod('combo',V=>!V.single); FORM=FORM1; const b=genMethod('combo',V=>!!V.single); FORM=FORM2; return [...a,...b]; })():genMethod(METHOD);
+  buildEv();
+}
+// 연주 이벤트 다시 만들기 (직접 배치로 마디를 바꿨을 때도)
+function buildEv(){
   // 연주 이벤트: 음표·쉼표(FLAT), 반주(COMP). 위치는 8분음표 단위 (마디 = 8)
   FLAT=[]; COMP=[]; CH_START=[]; let P=0;
   DATA.forEach((c,ci)=>{ CH_START[ci]=P; let last=null, cur=null;
@@ -1318,6 +1371,7 @@ document.addEventListener('keydown',e=>{
 });
 // 악보의 마디를 누르면 그 마디를 시작 위치로 선택 (재생 버튼을 누르면 거기서부터)
 $('scores').addEventListener('click',e=>{
+  if(METHOD==='lick'&&LEDIT){ const sc=e.target.closest('.score'), svg=sc&&sc.querySelector('svg'); if(!svg) return; const r=barAt(svg,e.clientX,e.clientY); if(r) openLickPop(+sc.id.slice(2),r.bar,r.half,e.clientX,e.clientY); return; } // ✎ 직접 배치
   let el=e.target.closest('.abcjs-note,.abcjs-rest');
   if(!el){ // 음표 사이를 눌러도 가장 가까운 음표로 (휴대폰에서 누르기 쉽게)
     const sc=e.target.closest('.score'); if(!sc) return; let bd=1e9;
@@ -1326,6 +1380,8 @@ $('scores').addEventListener('click',e=>{
     if(!el||bd>60) return; }
   if(el.dataset.bar===undefined) return;
   const nb={chorus:+el.dataset.ch,bar:Math.max(0,+el.dataset.bar)}; // 못갖춘마디를 누르면 1마디
+  if(METHOD==='lick'&&LEDIT){ const sv=el.closest('svg'), ln=lineOf(el), xs=[...sv.querySelectorAll('[data-bar="'+nb.bar+'"]')].filter(x=>lineOf(x)===ln).map(x=>x.getBoundingClientRect()), mid=xs.length?(Math.min(...xs.map(r=>r.left))+Math.max(...xs.map(r=>r.right)))/2:0;
+    openLickPop(nb.chorus,nb.bar,e.clientX>mid,e.clientX,e.clientY); return; } // ✎ 직접 배치: 릭 ↔ 즉흥
   if($('blank').value==='pick'){ const k=nb.chorus+':'+nb.bar; PICK.has(k)?PICK.delete(k):PICK.add(k); markBlank(); return; } // 빈칸 직접 고르기
   if($('loop').checked){ // 구간 반복: 시작 마디 → 끝 마디
     if(SEL&&!SEL.done&&SEL.chorus===nb.chorus) SEL={chorus:nb.chorus,bar:Math.min(SEL.bar,nb.bar),end:Math.max(SEL.bar,nb.bar),done:true};
@@ -1338,6 +1394,8 @@ $('swing').oninput=e=>$('swingv').textContent=e.target.value+'%';
 $('from').onchange=()=>{ SEL=null; markBar(); if(!playing) stop(); const el=$('ch'+$('from').value); el&&el.scrollIntoView({block:'start'}); };
 let curCh=-1, playFrom=0, keysDone=0, startIdx=0, SEL=null, PREG={sel:false,a:0,b:0}, reps=0, BREP=0;
 const PICK=new Set();
+let LEDIT=false;
+function setLedit(on){ LEDIT=on; const b=$('lickedit'); if(b){ b.setAttribute('aria-pressed',String(on)); b.textContent=on?'✓ 배치 끝내기':'✎ 직접 배치'; } document.body.classList.toggle('ledit',on); markBlank(); if(!on){ lickMsg(''); lickPopClose(); } else lickMsg('마디를 누르면 넣을 릭을 고를 수 있어요.'); }
 // 빈칸 마디인가 (못갖춘마디는 1마디를 따라감)
 function isBlank(ch,bar,rp){
   const mode=$('blank').value, b=Math.max(0,bar), n=DATA[ch]?DATA[ch].bars.length:0;
@@ -1376,14 +1434,18 @@ function markBlank(){
   if($('blank').value==='off'&&METHOD!=='lick') return;
   DATA.forEach((c,ci)=>blankOn(document.querySelector('#sc'+ci+' svg'),c,ci));
 }
+// 상자를 마디 앞·뒤 절반으로 나눔 (코드가 둘인 마디: 누르는 칸을 따로 보이게)
+function splitBox(made,halves){ const r=made[0], t=made[1]; if(!r) return; const svg=r.parentNode, x1=+r.getAttribute('x'), w=+r.getAttribute('width'), m=x1+w/2, g=4;
+  halves.forEach((h,k)=>{ const rr=k?r.cloneNode():r, tt=t?(k?t.cloneNode(true):t):null, a=h?m+g:x1, b=h?x1+w:m-g; rr.setAttribute('x',a); rr.setAttribute('width',b-a); if(tt) tt.setAttribute('x',(a+b)/2); if(k){ svg.insertBefore(rr,svg.firstChild); if(tt) svg.appendChild(tt); } }); }
 function blankOn(svg,c,ci){ if(!svg) return;
-    c.bars.forEach((_,bar)=>{
+    c.bars.forEach((segs,bar)=>{
+      if(METHOD==='lick'&&!isBlank(ci,bar)&&segs.length===2&&!!segs[0].lid!==!!segs[1].lid){ splitBox(boxes(svg,[bar],'blankbox','즉흥'),[segs[0].lid?1:0]); return; } // (예전 반 마디 릭)
       if(!isBlank(ci,bar)) return;
       const ids=bar===0&&c.pickup?[-1,0]:[bar];
       ids.forEach(id=>{ const lm=new Set(); svg.querySelectorAll('[data-bar="'+id+'"]').forEach(e=>lm.add(lineOf(e)+'_'+mOf(e)));
         lm.forEach(k=>{ const [l,m]=k.split('_'); svg.querySelectorAll('.abcjs-l'+l+'.abcjs-m'+m).forEach(e=>{ const cl=e.getAttribute('class')||'';
           if(!/abcjs-(chord|bar|staff|clef|key-signature|time-signature)/.test(cl)) e.classList.add('bl'); }); }); });
-      boxes(svg,ids,'blankbox','즉흥');
+      const made=boxes(svg,ids,'blankbox','즉흥'); if(METHOD==='lick'&&LEDIT&&CHORDS[bar]&&CHORDS[bar].length===2) splitBox(made,[0,1]);
     });
 }
 // 선택한 마디를 악보에 표시 (마디 뒤에 옅은 상자)
@@ -1447,7 +1509,7 @@ function loadSong(){
   $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝은 쉼표로 비워 둬요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
   $('space').closest('label').hidden=!!M;
   { const bk=(window.BOOKS||[]).find(b=>b.method===METHOD), bb=$('bookbtn'); if(bb){ const lk=METHOD==='lick'; bb.hidden=!bk&&!lk; if(lk){ bb.href='https://akoguy.gumroad.com/l/htaglb'; bb.textContent='Jazz Lick 10 PDF ↗'; bb.title='Jazz Lick 10 - 12 keys'; bb.dataset.ch='lick'; } else if(bk){ bb.href=bk.url; bb.textContent='Ch.'+bk.ch+' Guide PDF ↗'; bb.title=bk.name+' · '+bk.price; bb.dataset.ch=bk.ch; } } } /* 연습법별 챕터 PDF(검로드) 버튼 */
-  $('licksel').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick');
+  $('licksel').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick'); { const o=document.querySelector('#blank option[value=pick]'); if(o) o.hidden=METHOD==='lick'; } if(METHOD!=='lick'&&LEDIT) setLedit(false);
   if(METHOD==='lick'&&!/^(ph|off$)/.test($('blank').value)) $('blank').value='off'; if(METHOD!=='lick'&&/^ph/.test($('blank').value)) $('blank').value='off';
   $('encsel').hidden=METHOD!=='enclosure'&&METHOD!=='combo'; document.querySelectorAll('#encsel button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===ENC_T)));
   // 같은 메뉴(Basic/Song · 연습법) 안에서 이전·다음 곡
@@ -1465,6 +1527,7 @@ document.querySelectorAll('#encsel button').forEach(b=>b.onclick=()=>{ if(b.data
 document.addEventListener('click',e=>{ const b=e.target.closest('.cksel button'); if(!b) return; const g=b.dataset.g, k=b.dataset.k; if(CK[g]===k) return; CK[g]=k; try{ localStorage.setItem('jl-combo-k',JSON.stringify(CK)); }catch(err){} SEL=null; PICK.clear(); render(); });
 let HEAD0=null;
 { const r=$('reshuf'); if(r) r.onclick=()=>{ SEL=null; PICK.clear(); render(); }; }
+{ const r=$('lickedit'); if(r) r.onclick=()=>{ SEL=null; markBar(); setLedit(!LEDIT); }; }
 (()=>{ const bar=document.querySelector('.bar'), btn=$('fold'); if(!btn) return; const set=f=>{ bar.classList.toggle('folded',f); btn.setAttribute('aria-expanded',String(!f)); btn.textContent=f?'펼치기':'접기'; try{localStorage.setItem('jl-fold',f?'1':'0');}catch(e){} };
   let f0=false; try{ f0=localStorage.getItem('jl-fold')==='1'; }catch(e){} set(f0); btn.onclick=()=>set(!bar.classList.contains('folded')); })();
 addEventListener('hashchange',loadSong);

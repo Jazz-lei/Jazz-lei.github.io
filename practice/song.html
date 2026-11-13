@@ -1,5 +1,5 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.licksel{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:10px 0 4px}.licksel span{font-size:13px;font-weight:600;color:var(--muted)}
-#reshuf{font:600 14px var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer}#reshuf:hover{border-color:var(--muted)}#reshuf:active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+
 </style></head><body>
 <title>비밥 스케일 연습</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -41,6 +41,28 @@ h1{font-size:26px;line-height:1.25;margin:0;font-weight:700;text-wrap:balance}
 .songnote p{margin:0}
 .songnote p+p{margin-top:6px}
 .score svg .abcjs-annotation{fill:var(--a);font-family:var(--sans)!important}
+.licksel{display:flex;align-items:center;gap:6px}
+.licksel button{font:600 13px var(--sans);color:var(--paper);background:var(--ink);border:1px solid var(--ink);border-radius:8px;padding:5px 12px;cursor:pointer;white-space:nowrap}
+.licksel button:hover{opacity:.85}.licksel button:active{transform:translateY(1px)}
+#lickedit[aria-pressed=true]{background:var(--a);border-color:var(--a)}
+.bar.folded .licksel{display:none!important}
+.lkpop{position:fixed;z-index:70;width:min(620px,calc(100vw - 16px));max-height:min(78vh,720px);display:flex;flex-direction:column;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 32px rgba(0,0,0,.18);padding:12px 14px;font-family:var(--sans)}
+.lkpop-h{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}.lkpop-h b{font-size:15px}.lkpop-h span{font-size:12px;color:var(--muted)}
+.lkpop .lkx{margin-left:auto;border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 4px}
+.lkpop-body{overflow:auto;margin:0 -4px;padding:0 4px}
+.lkpop-g{margin-top:6px}.lkpop-g .gn{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.lkcards{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lkc{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0;text-align:left;font-family:var(--sans);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:6px 8px 4px;cursor:pointer}
+.lkc:hover{border-color:var(--ink)}.lkc:disabled{opacity:.45;cursor:default}
+.lkc-h{display:flex;align-items:center;gap:6px;font-size:12px}.lkc-h b{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:6px;background:var(--ink);color:var(--paper);font-size:13px}
+.lkc-h i{font-style:normal;color:var(--muted)}.lkc-h em{font-style:normal;font-weight:600;margin-left:auto;color:var(--muted)}
+.lkc.used{background:var(--soft)}.lkc.used .lkc-h b{background:var(--muted)}.lkc.used .lkc-h em{color:#b9581f}
+.lkc.cur{border-color:var(--a);box-shadow:inset 0 0 0 1px var(--a)}.lkc.cur .lkc-h b{background:var(--a)}.lkc.cur .lkc-h em{color:var(--a)}
+.lkc .mini{display:block;width:100%;overflow:hidden}.lkc .mini svg{display:block;width:100%;height:auto}
+.lkpop-f{display:flex;gap:6px;margin-top:10px}.lkpop-f button{flex:1;font:600 13px var(--sans);border-radius:8px;padding:8px 10px;cursor:pointer;color:var(--paper);background:var(--ink);border:1px solid var(--ink)}.lkpop-f button[data-clear]{color:var(--ink);background:var(--paper);border-color:var(--line)}
+@media (max-width:600px){.lkcards{grid-template-columns:1fr}.mixrow{flex-wrap:wrap}.mixrow .mix{flex-basis:100%}.licksel{order:2}#fold{order:3}}
+.licksel .lickmsg{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;width:max-content;max-width:calc(100% - 32px);margin:0;padding:12px 18px;border-radius:10px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:600;line-height:1.45;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+body.ledit .score{cursor:pointer;outline:2px dashed var(--a);outline-offset:4px;border-radius:6px}
 .encsel{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .encsel span{font-size:13px;font-weight:600;color:var(--muted);margin-right:4px}
 .encsel.in-cycle{margin-top:10px}
@@ -176,7 +198,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <a id="prevs" href="#"><span>← 이전 곡</span><b></b></a>
       <a id="nexts" href="#"><span>다음 곡 →</span><b></b></a>
     </nav>
-    <div class="licksel" id="licksel" hidden><span>Jazz Lick 10 · m7 · 7 · 7alt · maj7 릭 각 10개</span><button type="button" id="reshuf">↻ 새로 섞기</button></div>
+    
     <div class="encsel" id="encsel" role="group" aria-label="엔클로저 목표음" hidden><span>목표음</span><button type="button" data-t="1" aria-pressed="false">근음</button><button type="button" data-t="3" aria-pressed="true">3음</button><button type="button" data-t="5" aria-pressed="false">5음</button></div>
     <div class="songnote" id="songnote" hidden></div>
     <details class="rules">
@@ -222,6 +244,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
       <label><input type="checkbox" id="comp" checked> 반주 (베이스·드럼)</label>
       <label><input type="checkbox" id="click"> 2·4박 클릭</label>
     </div>
+    <div class="licksel" id="licksel" hidden><button type="button" id="reshuf">↻ 새로 섞기</button><button type="button" id="lickedit" aria-pressed="false">✎ 직접 배치</button><p class="lickmsg" id="lickmsg" role="status" hidden></p></div>
     <button id="fold" type="button" aria-expanded="true">접기</button>
     </div>
     <div class="jump" id="jump" aria-label="코러스로 이동"></div>
