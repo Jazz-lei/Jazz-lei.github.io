@@ -615,7 +615,7 @@ function genMethod(meth,only){
   const segs=[]; FORM.forEach((bar,bi)=>bar.forEach((sg,si)=>segs.push({bi,si,sg})));
   const ctxOf=({sg})=>{ const c=sg.c, ch=C[sg.k], root=parse(simpRoot(tn(c.root))).pc, S8=SCALES[sg.k.split(':')[0]];
     const sroot=parse(ch.sym).pc, diat=S8.iv.filter((iv,i)=>i!==S8.x).map(iv=>(sroot+iv)%12).sort((a,b)=>a-b);
-    return {c,ch,root,diat,pc:d=>{ if(d[0]==='r'){ d=d.slice(1); if(c.as&&c.as.qual==='dim') d={'1':'3','3':'5','5':'7','7':'9','9':'#11'}[d]; } return (root+(d==='#11'?6:DEG_IV(c.qual,d)))%12; }, sp:m=>spOf(ch,m)}; }; /* r1·r3…: 'F#dim7=D7alt'은 적힌 F♯°7의 1-3-5-7 */
+    return {c,ch,root,diat,pc:d=>{ if(d[0]==='r'){ d=d.slice(1); if(c.as) return (parse(simpRoot(tn(c.as.root))).pc+DEG_IV(c.as.qual,d))%12; } return (root+DEG_IV(c.qual,d))%12; }, sp:m=>spOf(ch,m)}; }; /* r1·r3…: 'F#dim7=D7alt'·'Cm7=Cm6'은 악보에 적힌 코드의 1-3-5-7 */
   const ctxs=segs.map(ctxOf);
   // Cmaj7 → C6, CmMaj7 → Cm6처럼 같은 근음의 Maj7에서 6화음으로 갈 때: 3음(E)은 앞 코드와 같은 소리라, 6화음의 특징음인 6음(A)을 목표로 (코드톤·엔클로저)
   ctxs.forEach((c,i)=>{ const p=ctxs[i-1], m76=!!p&&p.root===c.root&&((c.c.qual==='maj6'&&p.c.qual==='maj7')||(c.c.qual==='m6'&&p.c.qual==='mmaj7'));
@@ -765,7 +765,7 @@ function genMethod(meth,only){
       const go=(i,p,fz)=>{ if(i===n) return {c:0,a:[]}; const key=i+'_'+p+'_'+fz; if(memo.has(key)) return memo.get(key);
         const pat=patOf(i), fs=firstOf(pat), cx=ctxs[i], nx=ctxs[(i+1)%n]; let res=null;
         const from=p==null?ref:p, a0=fs?(fz!=null&&cx.pc(fs.d)%12===((fz%12)+12)%12?fz:pick(cx.pc(fs.d),from,'n')):null;
-        const rp=i>0&&segs[i].sg.syms[0][0]===segs[i-1].sg.syms[0][0], fr=V.fresh&&!rp, aopts=fz!=null||a0==null?[[a0,0]]:[[a0,0],[a0-12,fr?2:30],[a0+12,fr?2:30]];
+        const rp=i>0&&segs[i].sg.syms[0][0]===segs[i-1].sg.syms[0][0], fr=V.fresh&&!rp, aopts=fz!=null||a0==null?[[a0,0]]:[[a0,0],[a0-12,fr?2:30],[a0+12,fr?2:30],[a0-24,fr?4:60],[a0+24,fr?4:60]];
         const hasAp=pat.some(x=>x.t==='ap'), t0=hasAp?nx.pc(typeof V.target==='function'?V.target(nx.c.qual):(V.target||'3')):null;
         for(const [a,ka] of aopts){
           const tops=hasAp?[0,-12,12,-24,24].map(d=>pick(t0,a==null?from:a,'n')+d):[null];
@@ -775,7 +775,7 @@ function genMethod(meth,only){
             if(k>=0){ const pv=r.notes.slice(0,k).filter(x=>x.m!=null).pop()||(p!=null?{m:p}:null); if(pv) lp=Math.abs(r.notes[k].m-pv.m); } /* 엔클로저 첫 음까지의 도약 (쉼표 앞 마디 끝 음부터) */
             const jump=p!=null&&a!=null?Math.abs(a-p):0; let fold=0; if(V.g==='B'||V.g==='C'){ const q=r.notes.filter(x=>x.m!=null&&!x.ap).slice(0,4).map(x=>x.m); for(let j=1;j<q.length;j++) if(q[j]<=q[j-1]) fold+=40; } /* 아르페지오가 음역 때문에 꺾이지 않게 */
             const nxt=go(i+1,r.last,r.nextF); if(!nxt) continue;
-            const cost=fold+ka+(FORM2?Math.max(0,lp-4)*3:Math.max(0,lp-5)**2*0.6)+Math.max(0,jump-7)*2+Math.abs((r.lo+r.hi)/2-71)*0.15+nxt.c;
+            const rpt=(p!=null&&a!=null&&a===p&&pat[0]&&pat[0].t==='n')?8:0; const cost=rpt+fold+ka+(FORM2?Math.max(0,lp-4)*3:Math.max(0,lp-5)**2*0.6)+Math.max(0,jump-7)*2+Math.abs((r.lo+r.hi)/2-71)*0.15+nxt.c;
             if(!res||cost<res.c) res={c:cost,a:[{a,t:tw},...nxt.a]}; } }
         memo.set(key,res); return res; };
       const g=go(0,prev,forced); if(g){ plan2=g.a; score+=g.c*4; } else score+=1e7; } /* 계획이 없으면(음역 밖) 이 시작 옥타브는 쓰지 않음 */
@@ -1446,6 +1446,7 @@ function loadSong(){
   $('lead').innerHTML=M?M.lead:HEAD0.lead;
   $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝은 쉼표로 비워 둬요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
   $('space').closest('label').hidden=!!M;
+  { const bk=(window.BOOKS||[]).find(b=>b.method===METHOD), bb=$('bookbtn'); if(bb){ bb.hidden=!bk||METHOD==='lick'; if(bk){ bb.href=bk.url; bb.textContent='Ch.'+bk.ch+' Guide PDF ↗'; bb.title=bk.name+' · '+bk.price; bb.dataset.ch=bk.ch; } } } /* 연습법별 챕터 PDF(검로드) 버튼 */
   $('licksel').hidden=METHOD!=='lick'; $('lickpdf').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick');
   if(METHOD==='lick'&&!/^(ph|off$)/.test($('blank').value)) $('blank').value='off'; if(METHOD!=='lick'&&/^ph/.test($('blank').value)) $('blank').value='off';
   $('encsel').hidden=METHOD!=='enclosure'&&METHOD!=='combo'; document.querySelectorAll('#encsel button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===ENC_T)));
@@ -1552,3 +1553,5 @@ async function saveFile(name,blob){
 { const a=document.getElementById('lickpdf'); if(a) a.addEventListener('click',async e=>{
   if(!(window.claude&&window.claude.use)) return; e.preventDefault();
   try{ const blob=await (await fetch(a.href)).blob(); await saveFile(a.getAttribute('download')||'Jazz Lick 10.pdf',blob); }catch(x){ location.href=a.href; } }); }
+
+{ const b=document.getElementById('bookbtn'); if(b) b.addEventListener('click',()=>{ try{ const f=document.createElement('iframe'); f.hidden=true; f.tabIndex=-1; f.src='/t/ch'+b.dataset.ch+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),8000); }catch(e){} }); } // 클릭 집계
