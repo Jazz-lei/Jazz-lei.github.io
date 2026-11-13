@@ -855,9 +855,9 @@ let DATA_PREV=[];
    곡의 II-V-I마다 Leigeuht의 릭(m7·7·7alt·maj7 각 10개)을 코드에 맞게 옮겨 넣고, 프레이즈 사이는 즉흥 칸으로 비워요.
    릭 데이터는 licks.js (음 = [근음에서 몇 글자, 몇 반음]) */
 METHODS.lick={name:'릭', book:'Jazz Lick 10',
-  lead:'곡의 코드에 맞게 Jazz Lick 10의 릭을 하나씩 넣었어요. 릭 → 즉흥 칸 순서로 이어지고, 즉흥 칸은 직접 채워요. 대략 릭 40% · 즉흥 60%예요.',
+  lead:'곡의 코드에 맞게 Jazz Lick 10의 릭을 하나씩 넣었어요. 릭 하나 → 즉흥 2마디 순서로 이어지고, 즉흥 칸은 직접 채워요.',
   rules:['m7 코드에는 Dm7 릭, 도미넌트에는 G7 릭(마이너로 해결하거나 alt 코드면 G7alt 릭. 단 키 기준 ♭II7·♭III7·IV7·♯IV7·♭VI7·♭VII7 같은 subV7에는 ♭9·♭13 릭을 쓰지 않아요), 메이저에는 Cmaj7 릭을 코드 근음에 맞게 옮겨요. 메이저 코드에는 6도 위 m7 릭(D♭maj7 위에 B♭m7 릭)을 쓰기도 해요.',
-    '릭은 하나씩만 넣고, 릭이 끝나면 다음 마디부터 1~2마디 즉흥 칸이에요. 릭 뒤에 바로 다른 릭이 오지 않아요.',
+    '릭은 하나씩만 넣고, 릭이 끝나면 다음 마디부터 적어도 2마디는 즉흥 칸이에요. 릭 뒤에 바로 다른 릭이 오지 않아요.',
     '코러스마다 릭 자리와 릭이 다르게 나와요. 한 코러스 안에서 같은 릭은 다시 나오지 않고, 네 코러스 동안 30개 릭을 골고루 써요. ‘새로 섞기’를 누르면 다시 배치해요.',
     '한 마디에 코드가 둘인 마디, m7(♭5)·디미니시드 마디는 즉흥 칸으로 두어요.'],
   groups:{A:['II-V-I 릭','코러스마다 릭 배치가 달라요. 위에 적힌 이름이 Jazz Lick 10의 릭 번호예요.']}, v:[]};
@@ -919,10 +919,10 @@ function genLick(){
       const P=pickLick(c,b); if(!P){ b++; continue; }
       const items=[{b,c,P}]; used.add(P.fam+P.x.no); prevId=P.fam+P.x.no; b+=P.x.bars.length; // 릭 하나 → 즉흥 (릭 뒤에 바로 릭이 오지 않게)
       pl.push({items});
-      b+=Math.random()<.6?1:2; // 즉흥 칸 1~2마디
+      b+=2; // 릭 하나마다 즉흥 칸 2마디 (코드가 맞지 않아 넘어가는 마디는 즉흥 칸이 더 길어짐)
     }
     const pos=new Set(pl.map(p=>p.items[0].b)); if(!pos.size) continue;
-    const lb=pl.reduce((x,p)=>x+p.items.reduce((y,it)=>y+it.P.x.bars.length,0),0), dr=Math.abs(lb/nB-.4); // 릭 40% · 즉흥 60%
+    const lb=pl.reduce((x,p)=>x+p.items.reduce((y,it)=>y+it.P.x.bars.length,0),0), dr=Math.abs(lb/nB-1/3); // 릭 1마디 : 즉흥 2마디
     const ov=posSets.length?Math.max(...posSets.map(S=>[...pos].filter(x=>S.has(x)).length/Math.max(1,Math.min(pos.size,S.size)))):0;
     const same=posSets.some(S=>S.size===pos.size&&[...pos].every(x=>S.has(x))), sc=ov+dr*4+(same?3:0); if(!best||sc<best.sc) best={sc,pl,pos}; if(ov<=0.45&&dr<=0.04&&!same) break;
     }

@@ -60,7 +60,7 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .hero h1{font-size:40px;line-height:1.15;margin:8px 0 12px;text-wrap:balance}
 .hero h1 em{font-style:normal;color:var(--accent)}
 .hero p{margin:0;color:var(--muted);max-width:56ch;font-size:16px}
-.bk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.bk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}@media (max-width:1060px){.bk-grid{grid-template-columns:repeat(3,1fr)}}
 .bk{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--ink)}
 .bk:hover{border-color:var(--muted)}
 .bk img{width:100%;aspect-ratio:210/297;object-fit:contain;display:block;background:var(--soft)}
@@ -383,8 +383,8 @@ function show(){
 $('q').addEventListener('input',renderList);
 // 클릭 집계: 보이지 않는 작은 페이지를 열어 Cloudflare 통계에 /t/이름.html 조회로 남김
 function track(n){ try{ const f=document.createElement('iframe'); f.hidden=true; f.setAttribute('aria-hidden','true'); f.tabIndex=-1; f.src='/t/'+n+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),15000); }catch(e){} }
-$('bk-grid').addEventListener('click',e=>{ const a=e.target.closest('a.bk'); if(a&&a.dataset.ch) track('ch'+a.dataset.ch); });
-$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" data-ch="${b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="Chapter ${b.ch} ${b.name} 표지" loading="lazy"><div><small>CHAPTER ${b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>${b.price} · Gumroad →</span></div></a>`).join('');
+$('bk-grid').addEventListener('click',e=>{ const a=e.target.closest('a.bk'); if(a&&a.dataset.t) track(a.dataset.t); });
+$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" data-t="${b.t||'ch'+b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="${b.label||'Chapter '+b.ch} ${b.name} 표지" loading="lazy"><div><small>${b.label||'CHAPTER '+b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>${b.price} · Gumroad →</span></div></a>`).join('');
 document.querySelectorAll('[data-sec]').forEach(x=>x.addEventListener('click',e=>{ e.preventDefault(); const t=document.getElementById(x.dataset.sec); if(t) t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}); }));
 addEventListener('hashchange',show); show();
 // 홈 화면 앱: 오프라인에서도 열리도록
