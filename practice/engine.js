@@ -991,7 +991,7 @@ function draw(){
   const SUB=METHOD==='bebop'?{B:'하행',Bu:'상행'}:{};
   { const es=$('encsel'); if(!window.ES_HOME) window.ES_HOME={p:es.parentNode,n:es.nextSibling}; if(es.parentNode!==ES_HOME.p) ES_HOME.p.insertBefore(es,ES_HOME.n); es.classList.remove('in-cycle'); } // 목표음 창은 원래 자리로 돌려놓고 악보를 다시 그림
   $('scores').innerHTML=['A','B','C','D'].filter(m=>CY[m]).map(m=>`<section class="cycle ${m}"><div class="cycle-head"><span class="letter">${m}</span><div><h2>사이클 ${m} · ${CY[m][0]}</h2><p>${CY[m][1]}</p></div></div>`+
-    DATA.map((c,i)=>CLS(c.mode)!==m?'':(SUB[c.mode]&&(i===0||DATA[i-1].mode!==c.mode)?`<h3 class="sub">${LAB[c.mode]} · ${SUB[c.mode]}</h3>`:'')+`<article class="chorus" id="ch${i}"><div class="chorus-h"><span class="id">${cid(c)}</span><span class="start">${cstart(c)}${c.half==null?'':' · '+cfrom(c)}</span><button class="play1" data-i="${i}">여기서 재생</button><button class="loop1" data-loop="${i}" aria-label="이 코러스 반복 재생">↻ 반복</button>${METHOD==='lick'?`<button class="pdf1" data-pdf="${i}" aria-label="이 코러스 악보를 PDF로 저장">PDF</button>`:''}</div><div class="score" id="sc${i}"></div></article>`).join('')+`</section>`).join('');
+    DATA.map((c,i)=>CLS(c.mode)!==m?'':(SUB[c.mode]&&(i===0||DATA[i-1].mode!==c.mode)?`<h3 class="sub">${LAB[c.mode]} · ${SUB[c.mode]}</h3>`:'')+`<article class="chorus" id="ch${i}"><div class="chorus-h"><span class="id">${cid(c)}</span><span class="start">${cstart(c)}${c.half==null?'':' · '+cfrom(c)}</span><button class="play1" data-i="${i}">여기서 재생</button><button class="loop1" data-loop="${i}" aria-label="이 코러스 반복 재생">↻ 반복</button></div><div class="score" id="sc${i}"></div></article>`).join('')+`</section>`).join('');
   if(METHOD==='combo'){ const h=document.querySelector('.cycle.A .cycle-head > div'); if(h){ const es=$('encsel'); h.appendChild(es); es.classList.add('in-cycle'); }
     ['A','B','C'].forEach(g=>{ const h=document.querySelector('.cycle.'+g+' .cycle-head > div'); if(!h) return; const d=document.createElement('div'); d.className='encsel in-cycle cksel'; d.setAttribute('role','group'); d.setAttribute('aria-label','엔클로저 종류');
       d.innerHTML='<span>엔클로저</span>'+['1','2'].map(k=>`<button type="button" data-g="${g}" data-k="${k}" aria-pressed="${CK[g]===k}">${k}번</button>`).join(''); h.appendChild(d); }); } // 조합 연습: 목표음 선택은 사이클 A에서만, 엔클로저 1번·2번은 A·B·C 각각
@@ -1446,8 +1446,8 @@ function loadSong(){
   $('lead').innerHTML=M?M.lead:HEAD0.lead;
   $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝은 쉼표로 비워 둬요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
   $('space').closest('label').hidden=!!M;
-  { const bk=(window.BOOKS||[]).find(b=>b.method===METHOD), bb=$('bookbtn'); if(bb){ bb.hidden=!bk||METHOD==='lick'; if(bk){ bb.href=bk.url; bb.textContent='Ch.'+bk.ch+' Guide PDF ↗'; bb.title=bk.name+' · '+bk.price; bb.dataset.ch=bk.ch; } } } /* 연습법별 챕터 PDF(검로드) 버튼 */
-  $('licksel').hidden=METHOD!=='lick'; $('lickpdf').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick');
+  { const bk=(window.BOOKS||[]).find(b=>b.method===METHOD), bb=$('bookbtn'); if(bb){ const lk=METHOD==='lick'; bb.hidden=!bk&&!lk; if(lk){ bb.href='https://akoguy.gumroad.com/l/htaglb'; bb.textContent='Jazz Lick 10 PDF ↗'; bb.title='Jazz Lick 10 - 12 keys'; bb.dataset.ch='lick'; } else if(bk){ bb.href=bk.url; bb.textContent='Ch.'+bk.ch+' Guide PDF ↗'; bb.title=bk.name+' · '+bk.price; bb.dataset.ch=bk.ch; } } } /* 연습법별 챕터 PDF(검로드) 버튼 */
+  $('licksel').hidden=METHOD!=='lick'; document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=METHOD!=='lick');
   if(METHOD==='lick'&&!/^(ph|off$)/.test($('blank').value)) $('blank').value='off'; if(METHOD!=='lick'&&/^ph/.test($('blank').value)) $('blank').value='off';
   $('encsel').hidden=METHOD!=='enclosure'&&METHOD!=='combo'; document.querySelectorAll('#encsel button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===ENC_T)));
   // 같은 메뉴(Basic/Song · 연습법) 안에서 이전·다음 곡
@@ -1550,8 +1550,4 @@ async function saveFile(name,blob){
 }
 
 // 위쪽 "릭 악보 PDF" 버튼: 보통은 링크로 바로 다운로드, Claude 아티팩트 안에서는 저장 창으로
-{ const a=document.getElementById('lickpdf'); if(a) a.addEventListener('click',async e=>{
-  if(!(window.claude&&window.claude.use)) return; e.preventDefault();
-  try{ const blob=await (await fetch(a.href)).blob(); await saveFile(a.getAttribute('download')||'Jazz Lick 10.pdf',blob); }catch(x){ location.href=a.href; } }); }
-
-{ const b=document.getElementById('bookbtn'); if(b) b.addEventListener('click',()=>{ try{ const f=document.createElement('iframe'); f.hidden=true; f.tabIndex=-1; f.src='/t/ch'+b.dataset.ch+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),8000); }catch(e){} }); } // 클릭 집계
+{ const b=document.getElementById('bookbtn'); if(b) b.addEventListener('click',()=>{ try{ const f=document.createElement('iframe'); f.hidden=true; f.tabIndex=-1; f.src='/t/'+(b.dataset.ch==='lick'?'lick':'ch'+b.dataset.ch)+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),8000); }catch(e){} }); } // 클릭 집계
