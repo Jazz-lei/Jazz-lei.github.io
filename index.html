@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script src="/i18n.js"></script>
+<link rel="alternate" hreflang="ko" href="https://jazzlei.com/">
+<link rel="alternate" hreflang="en" href="https://jazzlei.com/?lang=en">
+<link rel="alternate" hreflang="zh-Hans" href="https://jazzlei.com/?lang=zh">
+<link rel="alternate" hreflang="ja" href="https://jazzlei.com/?lang=ja">
+<link rel="alternate" hreflang="x-default" href="https://jazzlei.com/">
 <title>Jazz Lei · Jazz Practice</title>
 <meta name="description" content="Jazz Lei의 즉흥연주 연습 페이지">
 <!-- 홈 화면 앱(PWA) -->
@@ -148,6 +154,14 @@ nav .gq,nav .gs{display:none}
 nav a[data-cat="books"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
 nav a[data-cat="books"]:hover{background:var(--accent);color:var(--accent-ink);filter:brightness(.95)}
 nav a[data-cat="books"][aria-current="page"]{box-shadow:inset 0 0 0 2px var(--accent-ink)}
+/* 언어 선택 (맨 위 오른쪽) */
+.lang{position:relative;flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font:500 13px var(--sans);background:var(--paper)}
+.lang:hover,.lang:focus-within{color:var(--ink);border-color:var(--muted)}
+.lang svg{width:15px;height:15px;flex:none}
+.lang select{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:16px;width:100%}
+.lang .ln-short{display:none}
+@media (max-width:560px){ .top{gap:8px} .lang{height:28px;min-width:30px;justify-content:center;padding:0 6px;font-weight:600;font-size:12px} .lang svg,.lang .ln-full{display:none} .lang .ln-short{display:inline} nav .tonic{display:none} }
+.lang-en body,.lang-ja body,.lang-zh body{word-break:normal;overflow-wrap:break-word}
 @media (max-width:380px){ .brand b{font-size:16px} nav a{padding:5px 5px!important} }
 @media (max-width:560px){ nav{gap:0} nav a{padding:6px 7px!important;font-size:13px!important} nav a .badge{display:none} nav .gl{display:none} nav .gs{display:inline} nav .gq{display:grid;place-items:center;width:22px;height:22px;border:1.5px solid currentColor;border-radius:50%;font-weight:700;font-size:13px} nav a[data-cat="guide"]{padding:5px 6px} .guide h1{font-size:24px} .guide section{padding:16px} }
 </style>
@@ -158,10 +172,15 @@ nav a[data-cat="books"][aria-current="page"]{box-shadow:inset 0 0 0 2px var(--ac
   <nav id="nav" aria-label="메뉴">
     <a href="#basic" data-cat="basic">Basic<span class="long"> Practice</span> <span class="badge" data-n="basic"></span></a>
     <a href="#song" data-cat="song">Song<span class="long"> Practice</span> <span class="badge" data-n="song"></span></a>
-    <a href="#penta" data-cat="penta">Pentatonic<span class="long"> Practice</span> <span class="badge" data-n="penta"></span></a>
+    <a href="#penta" data-cat="penta">Penta<span class="tonic">tonic</span><span class="long"> Practice</span> <span class="badge" data-n="penta"></span></a>
     <a href="#guide" data-cat="guide" aria-label="이용방법"><span class="gl">이용방법</span><span class="gq" aria-hidden="true">?</span></a>
     <a href="#books" data-cat="books" aria-label="Practice Guide PDF"><span class="gl">Guide PDF</span><span class="gs" aria-hidden="true">PDF</span></a>
   </nav>
+  <label class="lang" title="Language">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+    <span class="ln-full" id="ln-full"></span><span class="ln-short" id="ln-short"></span>
+    <select id="langsel" aria-label="Language"><option value="ko">한국어</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option></select>
+  </label>
 </header>
 
 <main>
@@ -381,6 +400,10 @@ function show(){
   else document.title='Jazz Lei · Jazz Practice';
 }
 $('q').addEventListener('input',renderList);
+// 언어 선택
+{ const L=window.JL||{lang:'ko',set(){}}; const sel=$('langsel'); sel.value=L.lang;
+  $('ln-full').textContent={ko:'한국어',en:'English',zh:'中文',ja:'日本語'}[L.lang]; $('ln-short').textContent={ko:'한',en:'EN',zh:'中',ja:'日'}[L.lang];
+  sel.addEventListener('change',()=>L.set(sel.value)); }
 // 클릭 집계: 보이지 않는 작은 페이지를 열어 Cloudflare 통계에 /t/이름.html 조회로 남김
 function track(n){ try{ const f=document.createElement('iframe'); f.hidden=true; f.setAttribute('aria-hidden','true'); f.tabIndex=-1; f.src='/t/'+n+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),15000); }catch(e){} }
 $('bk-grid').addEventListener('click',e=>{ const a=e.target.closest('a.bk'); if(a&&a.dataset.t) track(a.dataset.t); });
