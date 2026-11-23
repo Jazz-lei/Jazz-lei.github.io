@@ -108,10 +108,10 @@ h2{font-size:20px}
 .mtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .mtabs a{text-decoration:none;font-size:13px;font-weight:700;border-radius:999px;padding:6px 12px}
 /* practice */
-.crumb{flex:none;display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:14px}
-.crumb a{text-decoration:none;font-weight:500;flex:none}
-.crumb .sq{width:22px;height:22px;border-radius:5px;flex:none}
-.crumb b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.crumb{flex:none;display:flex;align-items:center;gap:14px;padding:calc(16px + env(safe-area-inset-top,0px)) 24px 16px;font-size:18px}
+.crumb a{text-decoration:none;font-weight:600;flex:none;display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:8px 16px}
+.crumb .sq{width:30px;height:30px;border-radius:7px;flex:none}
+.crumb b{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .frame{flex:1;min-height:0;border:0;width:100%;display:block;background:#fff}
 /* books / guide */
 .bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
@@ -131,16 +131,17 @@ h2{font-size:20px}
 .pagehead{padding-top:44px;display:flex;flex-direction:column;gap:8px}
 .pagehead h1{font-size:34px;font-weight:900;font-family:'Noto Sans KR',sans-serif}
 /* 연습 화면: 사이트 메뉴는 접어 두고 버튼으로 열기 */
-.cmenu{display:none;flex:none;width:34px;height:34px;border:0;border-radius:8px;place-items:center;cursor:pointer;background:transparent;color:inherit}
-body.prac .cmenu{display:grid}
+.cmenu{display:none;flex:none;align-items:center;gap:8px;height:46px;padding:0 16px 0 12px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:16px;font-weight:700}
+.cmenu svg{width:24px;height:24px}
+body.prac .cmenu{display:inline-flex}
 body.prac .side{position:fixed;z-index:30;top:0;bottom:0;left:0;transform:translateX(-105%);transition:transform .2s;box-shadow:0 0 40px rgba(0,0,0,.18)}
 body.prac .side.open{transform:none}
 body.prac .scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:29}
 body.prac .app{padding:0;gap:0}
 body.prac .main{border-radius:0}
 /* 휴대폰: 악보를 내리면 위쪽 메뉴·제목 줄을 숨김 */
-.mtop,.crumb{transition:margin-top .2s}
-@media (max-width:760px){ body.prac .cmenu{display:none} body.prac.hidetop .mtop{margin-top:-58px} body.prac.hidetop .crumb{margin-top:-44px} body.prac .mtop{position:relative;z-index:2} }
+.mtop,.crumb{max-height:220px;overflow:hidden;transition:max-height .2s,padding .2s}
+@media (max-width:760px){ body.prac .cmenu{display:none} body.prac.hidetop .mtop,body.prac.hidetop .crumb{max-height:0;padding-top:0;padding-bottom:0;border-bottom-width:0} }
 /* bottom bar (B) */
 .bar{display:none}
 /* mobile */
@@ -172,7 +173,11 @@ body.prac .main{border-radius:0}
   .tl a{grid-template-columns:24px minmax(0,1fr) 44px 30px;padding:9px 8px}
   .tl .b{display:none}
   .tl .p{opacity:1}
-  .crumb{padding:8px 12px}
+  .crumb{padding:10px 12px;font-size:16px;gap:10px}
+  .crumb b{font-size:16px}
+  .crumb a{padding:6px 12px}
+  .crumb .sq{width:24px;height:24px}
+  .mtop{padding-top:calc(10px + env(safe-area-inset-top,0px))}
 }
 body.sb{background:#fff;color:#37352f;font-family:'IBM Plex Sans KR',sans-serif;--focus:#2d5b86}
 .sb .side{width:250px;background:#f7f6f3;border-right:1px solid #ededeb;padding:16px 10px}
@@ -216,7 +221,10 @@ body.sb{background:#fff;color:#37352f;font-family:'IBM Plex Sans KR',sans-serif;
 .sb .tl a:hover{background:#f7f6f3}
 .sb .tl .n,.sb .tl .k,.sb .tl .b{color:#91918e}
 .sb .crumb{background:#fff;border-bottom:1px solid #ededeb}
-.sb .crumb a{color:#5f5e5b}
+.sb .crumb a{color:#37352f;background:#f1f1ef}
+.sb .crumb a:hover{background:#e4e2dd}
+.sb .cmenu{background:#37352f;color:#ffffff;border:0}
+.sb .cmenu:hover{background:#1f1e1b}
 .sb .bk{background:#fff;border:1px solid #ededeb;color:#37352f}
 .sb .bk:hover{border-color:#37352f}
 .sb .bk img{background:#f7f6f3}
@@ -389,7 +397,7 @@ body.sb{background:#fff;color:#37352f;font-family:'IBM Plex Sans KR',sans-serif;
       </section>
 
       <section class="view" id="view-practice">
-        <div class="crumb"><button type="button" class="cmenu" id="menu2" aria-label="메뉴 열기" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><span class="sq" id="psq"></span><a id="back" href="#">← <span id="back-t"></span></a><b id="p-title"></b></div>
+        <div class="crumb"><button type="button" class="cmenu" id="menu2" aria-label="메뉴 열기" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>메뉴</button><span class="sq" id="psq"></span><a id="back" href="#">← <span id="back-t"></span></a><b id="p-title"></b></div>
         <iframe class="frame" id="frame" title="연습 페이지" allow="autoplay"></iframe>
       </section>
     </main>
