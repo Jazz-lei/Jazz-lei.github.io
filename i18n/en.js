@@ -471,3 +471,19 @@ JL.add('en',{
   [/^스탠다드 (\d+)$/, 'Standards $1'],
   [/^툴 (\d+)개?$/, '$1 tools']
 ]);
+/* ===== 찰리 파커 릭 ===== */
+JL.add('en',{
+ "곡의 코드에 맞게 Charlie Parker 20 Chord Licks의 릭을 넣었어요. 기본은 <b>릭 → 즉흥 2마디</b>가 되풀이되고, 즉흥 칸은 직접 채워요. 재생 바의 <b>✎ 직접 배치</b>를 켜고 마디를 누르면 원하는 릭을 골라 넣을 수 있어요.": "Licks from Charlie Parker 20 Chord Licks are placed to fit the chords of the tune. By default <b>a lick → 2 bars of improv</b> repeats, and you fill the improv bars yourself. Turn on <b>✎ Place licks</b> in the play bar and tap a bar to choose the lick you want.",
+ "파커 릭은 원래 적힌 코드 진행이 곡과 맞는 자리에만 코드 근음에 맞게 옮겨 넣어요. m7 릭은 m7 코드, maj7 릭은 메이저 코드, 7alt 릭은 마이너로 해결하거나 alt인 도미넌트에 들어가요 (subV7에는 넣지 않아요).": "Parker licks go only where their original chord progression matches the tune, transposed to the chord root. m7 licks go on m7 chords, maj7 licks on major chords, and 7alt licks on dominants that resolve to minor or are altered (never on subV7).",
+ "II-V 릭(한 마디에 m7 · 7)은 곡에도 한 마디 안에 II-V가 있을 때 쓰고, 2번은 m7 한 마디나 7 한 마디, 7번은 7 한 마디, 18번(Gm7)은 C7 같은 도미넌트 한 마디 릭으로도 써요.": "II-V licks (m7 · 7 in one bar) are used where the tune also has a II-V within one bar. No. 2 also works as a one-bar m7 or 7 lick, No. 7 as a one-bar 7 lick, and No. 18 (Gm7) as a one-bar lick on a dominant such as C7.",
+ "다음 마디 첫 음에 안착하는 릭은 그 음이 다음 코드의 코드톤일 때만 들어가요.": "Licks that land on the first note of the next bar are used only when that note is a chord tone of the next chord.",
+ "✎ 직접 배치를 켜고 마디를 누르면 그 자리에 맞는 릭 번호가 나와요. 원하는 릭을 고르거나 ‘자동으로’, ‘즉흥 칸으로’를 누르세요. ‘새로 섞기’를 누르면 기본 배치로 다시 섞어요.": "Turn on ✎ Place licks and tap a bar to see the lick numbers that fit there. Choose a lick, or tap ‘Auto’ or ‘Make it improv’. ‘Reshuffle’ goes back to a fresh default layout.",
+ "기본은 릭 → 즉흥 2마디예요. 위에 적힌 이름이 Charlie Parker 20 Chord Licks의 릭 번호예요.": "By default: a lick → 2 bars of improv. The names above are the lick numbers in Charlie Parker 20 Chord Licks.",
+ "자세한 원리와 12키 드릴은 <b>Charlie Parker 20 Chord Licks</b>에서 다뤄요.": "All the licks are in <b>Charlie Parker 20 Chord Licks</b>.",
+ "찰리 파커의 코드별 릭 20개 (m7 · 7 · 7alt · maj7 · II-V)": "20 Charlie Parker licks by chord (m7 · 7 · 7alt · maj7 · II-V)",
+ "II-V 릭": "II-V Licks"
+},[
+  [/^(.+) 찰리 파커 릭$/, '$1 · Charlie Parker Licks'],
+  [/^파커 릭 (\d+)$/, 'Parker Lick $1'],
+  [/^파커 릭 (\d+) · (.+)$/, 'Parker Lick $1 · $2']
+]);
