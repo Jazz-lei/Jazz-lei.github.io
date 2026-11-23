@@ -11,7 +11,6 @@
 <link rel="alternate" hreflang="x-default" href="https://jazzlei.com/">
 <title>Jazz Lei · Jazz Practice</title>
 <meta name="description" content="Jazz Lei의 즉흥연주 연습 페이지">
-<!-- 홈 화면 앱(PWA) -->
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -19,246 +18,330 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Jazz Lei">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1b2229" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f7f6f3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
 <style>
-/* Layout: slim top bar (brand + 3 categories) → category = searchable title list → practice = full-height frame */
-:root{
-  --bg:#eef1f4; --paper:#ffffff; --ink:#15202b; --muted:#5d6b78; --line:#d5dce3; --soft:#e4e9ee;
-  --accent:#c9962b; --accent-ink:#15202b;
-  --sans:"IBM Plex Sans KR",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
-  --top:64px;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
-  --accent:#e0b04a; --accent-ink:#12171c; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#12171c; --paper:#1b2229; --ink:#e8edf2; --muted:#93a1ae; --line:#2e3943; --soft:#232c35;
-  --accent:#e0b04a; --accent-ink:#12171c; color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;word-break:keep-all;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;display:flex;flex-direction:column}
-
-/* top bar */
-.top{height:var(--top);flex:none;display:flex;align-items:center;gap:20px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:10}
-.brand{display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--ink);flex:none}
-.brand b{font:700 20px var(--mono);letter-spacing:-.01em}
-.brand span{font-size:12px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
-nav{display:flex;gap:4px;min-width:0}
-nav a{flex:none;text-decoration:none;color:var(--muted);font-weight:500;font-size:14px;padding:8px 12px;border-radius:8px;white-space:nowrap}
-nav a:hover{color:var(--ink);background:var(--soft)}
-nav a[aria-current="page"]{color:var(--accent-ink);background:var(--accent)}
-a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-
-/* views */
+body{margin:0;word-break:keep-all;font-size:15px;line-height:1.55}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
+.app{height:100%;display:flex}
+.side{flex:none;display:flex;flex-direction:column;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900;font-size:18px}
+.brand i{font-style:normal;display:grid;place-items:center;width:32px;height:32px;border-radius:8px;font-size:12px;font-weight:900;flex:none}
+.side .grp{font-size:12px;font-weight:700;letter-spacing:.04em;padding:16px 10px 6px}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side nav a{display:flex;align-items:center;gap:12px;text-decoration:none;border-radius:8px;padding:6px 8px}
+.side nav a .sq{flex:none;width:36px;height:36px;border-radius:6px;display:grid;place-items:center;font:900 11px 'Noto Sans KR',sans-serif}
+.side nav a b{display:block;font-weight:700;font-size:14px;line-height:1.3}
+.side nav a small{display:block;font-size:12px}
+.side .sfoot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:16px}
+.pill{display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;border-radius:999px;padding:9px 14px;font-weight:700;font-size:14px}
+.lang{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;height:36px;border-radius:999px;font-size:13px}
+.lang svg{width:15px;height:15px}
+.lang select{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:16px;width:100%}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.mtop{display:none}
 main{flex:1;min-height:0;display:flex;flex-direction:column}
 .view{display:none;flex:1;min-height:0}
 .view.on{display:flex;flex-direction:column}
-.scroll{overflow-y:auto;padding-top:40px;padding-bottom:64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.inner{max-width:880px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:28px}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
-
+.scroll{overflow-y:auto}
+.wrap{width:100%;max-width:960px;margin:0 auto;padding:0 40px 56px;display:flex;flex-direction:column;gap:22px}
+h1,h2{margin:0;line-height:1.2}
+h2{font-size:20px}
 /* home */
-.hero h1{font-size:40px;line-height:1.15;margin:8px 0 12px;text-wrap:balance}
-.hero h1 em{font-style:normal;color:var(--accent)}
-.hero p{margin:0;color:var(--muted);max-width:56ch;font-size:16px}
-.bk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}@media (max-width:1060px){.bk-grid{grid-template-columns:repeat(3,1fr)}}
-.bk{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--ink)}
-.bk:hover{border-color:var(--muted)}
-.bk img{width:100%;aspect-ratio:210/297;object-fit:contain;display:block;background:var(--soft)}
-.bk div{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
-.bk small{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
-.bk b{font-size:16px}
-.bk p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
-.bk span{font-size:13px;font-weight:600;margin-top:4px}
-.bk-lede{color:var(--muted);margin:6px 0 0;max-width:62ch}
-.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.cat{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px;text-decoration:none;color:var(--ink)}
-.cat:hover{border-color:var(--accent)}
-.cat b{font-size:17px}
-
-/* count badge: rounded rect, ink on paper (zero = muted) */
-.badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;border-radius:6px;
-  background:var(--ink);color:var(--paper);font:600 12px/1 var(--mono);font-variant-numeric:tabular-nums}
-.badge.zero{background:var(--soft);color:var(--muted)}
-nav a{display:inline-flex;align-items:center;gap:8px}
-nav a[aria-current="page"] .badge{background:var(--accent-ink);color:var(--accent)}
-
-/* sub menu */
-.subs{display:flex;flex-wrap:wrap;gap:6px}
-.subs[hidden]{display:none}
-.subs a{flex:none;display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--muted);font-weight:500;font-size:14px;
-  padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--paper);white-space:nowrap}
-.subs a:hover{color:var(--ink);border-color:var(--muted)}
-.subs a[aria-current="true"]{color:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-.subs[data-off] a[aria-current="true"]{box-shadow:none;border-color:var(--line);color:var(--muted)}
-.result{font-size:13px;color:var(--muted);margin:-12px 0 0}
-
-/* category list */
-.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.head h1{margin:4px 0 0;font-size:28px;line-height:1.2}
-.search{width:240px;max-width:100%;font:inherit;font-size:14px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
-.list:empty{display:none}
-.list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
-.list li{min-width:0}
-.list a{display:block;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-decoration:none;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.list a:hover{border-color:var(--accent);color:var(--accent)}
-.empty{color:var(--muted);font-size:14px;margin:0;padding:20px;border:1px dashed var(--line);border-radius:10px;text-align:center}
-
-/* footer: home·category 화면 맨 아래 (연습 화면에는 안 보임) */
-.scroll>.inner{flex:1}
-.foot{margin-top:auto;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;font-size:13px;color:var(--muted)}
-.foot-links{display:flex;flex-wrap:wrap;gap:8px 20px}
-.foot a{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-weight:500}
-.foot a:hover{color:var(--ink)}
-.foot svg{width:16px;height:16px;flex:none}
-.foot small{font-family:var(--mono);font-size:12px}
-
+.cover{height:150px;flex:none}
+.hicon{margin-top:-38px;width:76px;height:76px;border-radius:12px;display:grid;place-items:center;font:900 26px 'Noto Sans KR',sans-serif}
+.home h1{font-size:38px;font-weight:900;letter-spacing:-.02em;text-wrap:balance}
+.home h1 em{font-style:normal}
+.lede{margin:0;max-width:60ch}
+.callout{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;border-radius:8px;padding:14px 16px}
+.callout a{font-weight:700}
+.albums{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}@media (max-width:1180px){.albums{grid-template-columns:repeat(3,1fr)}}
+.album{text-decoration:none;display:flex;flex-direction:column;gap:8px;min-width:0}
+.album .art{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;justify-content:space-between;padding:14px;font-family:'Noto Sans KR',sans-serif;transition:transform .15s}
+.album:hover .art{transform:translateY(-3px)}
+.album .art small{font-size:11px;font-weight:700;letter-spacing:.08em}
+.album .art b{font-size:22px;font-weight:900;line-height:1.15}
+.album span{font-size:13px}
+.bkrow{display:flex;flex-wrap:wrap;align-items:center;gap:16px;border-radius:10px;padding:16px 18px;text-decoration:none}
+.bkrow img{width:44px;height:62px;object-fit:cover;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.bkrow .imgs{display:flex;gap:6px}
+.bkrow b{display:block;font-size:16px}
+.bkrow span{font-size:13px}
+.bkrow .go{margin-left:auto;font-weight:700}
+.foot{margin-top:20px;padding-top:20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;font-size:13px}
+.foot div{display:flex;flex-wrap:wrap;gap:8px 20px}
+.foot a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:500}
+.foot svg{width:16px;height:16px}
+/* method (album page) */
+.mhead{display:flex;flex-wrap:wrap;align-items:flex-end;gap:28px;padding:40px 40px 28px}
+.mart{flex:none;width:200px;height:200px;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;justify-content:space-between;padding:18px;font-family:'Noto Sans KR',sans-serif;overflow:hidden;position:relative}
+.mart small{font-size:12px;font-weight:700;letter-spacing:.08em}
+.mart b{font-size:30px;font-weight:900;line-height:1.1}
+.mart img{position:absolute;right:14px;bottom:14px;width:74px;border-radius:3px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.minfo{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.minfo .eb{font-size:13px;font-weight:700}
+.minfo h1{font-size:52px;font-weight:900;letter-spacing:-.03em;font-family:'Noto Sans KR',sans-serif}
+.minfo p{margin:0;max-width:60ch}
+.acts{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:0 40px 8px}
+.playbig{width:56px;height:56px;border-radius:999px;display:grid;place-items:center;text-decoration:none;flex:none}
+.playbig svg{width:22px;height:22px;margin-left:3px}
+.bookbtn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:14px}
+.msearch{margin-left:auto;width:220px;max-width:100%;font:inherit;font-size:14px;border-radius:999px;padding:9px 16px}
+.tracks{padding:8px 40px 56px;display:flex;flex-direction:column;gap:6px;max-width:1040px}
+.tracks h2{font-size:15px;padding:18px 12px 6px}
+.tl{list-style:none;margin:0;padding:0}
+.tl a{display:grid;grid-template-columns:32px minmax(0,1fr) 64px 70px 36px;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;text-decoration:none}
+.tl .n{font-variant-numeric:tabular-nums;text-align:right}
+.tl .t{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl .k,.tl .b{font-size:13px}
+.tl .p{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;opacity:0;transition:opacity .12s}
+.tl a:hover .p,.tl a:focus-visible .p{opacity:1}
+.tl .p svg{width:11px;height:11px;margin-left:2px}
+.none{padding:12px;font-size:14px}
+.subnav{display:flex;flex-direction:column;gap:1px;margin:0 0 4px 30px;padding-left:12px}
+.side .subnav a{padding:5px 8px;gap:8px;font-size:13px}
+.subnav i{width:8px;height:8px;border-radius:2px;flex:none}
+.mtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.mtabs a{text-decoration:none;font-size:13px;font-weight:700;border-radius:999px;padding:6px 12px}
 /* practice */
-.crumb{flex:none;display:flex;align-items:center;gap:10px;font-size:14px;
-  padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bg)}
-.crumb a{color:var(--muted);text-decoration:none;font-weight:500;flex:none}
-.crumb a:hover{color:var(--ink)}
+.crumb{flex:none;display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:14px}
+.crumb a{text-decoration:none;font-weight:500;flex:none}
+.crumb .sq{width:22px;height:22px;border-radius:5px;flex:none}
 .crumb b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.frame{flex:1;min-height:0;border:0;width:100%;background:var(--bg);display:block}
-
-@media (max-width:560px){
-  :root{--top:56px}
-  .top{gap:12px}
-  .brand span{display:none}
-  nav a{padding:7px 10px;font-size:14px}
-  nav .long{display:none}
-  .subs a{font-size:13px;padding:7px 10px}
-  .hero h1{font-size:30px}
-  .scroll{padding-top:28px}
-  .cats{grid-template-columns:1fr}
-  .bk-grid{grid-template-columns:repeat(2,1fr);gap:10px}
-  .search{width:100%}
-}
-.guide{max-width:720px;display:flex;flex-direction:column;gap:28px}
-.guide h1{font-size:30px;line-height:1.2;margin:8px 0 6px}
-.guide>p.lede{color:var(--muted);margin:0}
-.guide section{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.frame{flex:1;min-height:0;border:0;width:100%;display:block;background:#fff}
+/* books / guide */
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.bk{display:flex;flex-direction:column;border-radius:10px;overflow:hidden;text-decoration:none}
+.bk img{width:100%;aspect-ratio:210/297;object-fit:contain;display:block}
+.bk div{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+.bk small{font-size:11px;font-weight:700;letter-spacing:.06em}
+.bk b{font-size:15px}
+.bk p{margin:0;font-size:13px;line-height:1.5}
+.bk span{font-size:13px;font-weight:700;margin-top:4px}
+.guide section{border-radius:10px;padding:18px 20px}
 .guide h2{font-size:18px;margin:0 0 10px}
-.guide h3{font-size:15px;margin:14px 0 6px}
 .guide ul,.guide ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
-.guide li{line-height:1.55}
-.guide kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--bg)}
-.guide .toc{display:flex;flex-wrap:wrap;gap:6px}
-.guide .toc a{font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--paper)}
-nav .gq,nav .gs{display:none}
-nav a[data-cat="books"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
-nav a[data-cat="books"]:hover{background:var(--accent);color:var(--accent-ink);filter:brightness(.95)}
-nav a[data-cat="books"][aria-current="page"]{box-shadow:inset 0 0 0 2px var(--accent-ink)}
-/* 언어 선택 (맨 위 오른쪽) */
-.lang{position:relative;flex:none;margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font:500 13px var(--sans);background:var(--paper)}
-.lang:hover,.lang:focus-within{color:var(--ink);border-color:var(--muted)}
-.lang svg{width:15px;height:15px;flex:none}
-.lang select{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:16px;width:100%}
-.lang .ln-short{display:none}
-@media (max-width:560px){ .top{gap:8px} .lang{height:28px;min-width:30px;justify-content:center;padding:0 6px;font-weight:600;font-size:12px} .lang svg,.lang .ln-full{display:none} .lang .ln-short{display:inline} nav .tonic{display:none} }
-.lang-en body,.lang-ja body,.lang-zh body{word-break:normal;overflow-wrap:break-word}
-@media (max-width:380px){ .brand b{font-size:16px} nav a{padding:5px 5px!important} }
-@media (max-width:560px){ nav{gap:0} nav a{padding:6px 7px!important;font-size:13px!important} nav a .badge{display:none} nav .gl{display:none} nav .gs{display:inline} nav .gq{display:grid;place-items:center;width:22px;height:22px;border:1.5px solid currentColor;border-radius:50%;font-weight:700;font-size:13px} nav a[data-cat="guide"]{padding:5px 6px} .guide h1{font-size:24px} .guide section{padding:16px} }
+.guide kbd{font-size:12px;border:1px solid currentColor;border-radius:5px;padding:1px 6px;opacity:.85}
+.toc{display:flex;flex-wrap:wrap;gap:6px}
+.toc a{font-size:13px;text-decoration:none;border-radius:999px;padding:5px 11px}
+.pagehead{padding-top:44px;display:flex;flex-direction:column;gap:8px}
+.pagehead h1{font-size:34px;font-weight:900;font-family:'Noto Sans KR',sans-serif}
+/* 연습 화면: 사이트 메뉴는 접어 두고 버튼으로 열기 */
+.cmenu{display:none;flex:none;width:34px;height:34px;border:0;border-radius:8px;place-items:center;cursor:pointer;background:transparent;color:inherit}
+body.prac .cmenu{display:grid}
+body.prac .side{position:fixed;z-index:30;top:0;bottom:0;left:0;transform:translateX(-105%);transition:transform .2s;box-shadow:0 0 40px rgba(0,0,0,.18)}
+body.prac .side.open{transform:none}
+body.prac .scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:29}
+body.prac .app{padding:0;gap:0}
+body.prac .main{border-radius:0}
+/* 휴대폰: 악보를 내리면 위쪽 메뉴·제목 줄을 숨김 */
+.mtop,.crumb{transition:margin-top .2s}
+@media (max-width:760px){ body.prac .cmenu{display:none} body.prac.hidetop .mtop{margin-top:-58px} body.prac.hidetop .crumb{margin-top:-44px} body.prac .mtop{position:relative;z-index:2} }
+/* bottom bar (B) */
+.bar{display:none}
+/* mobile */
+.scrim{display:none}
+@media (max-width:760px){
+  .side{position:fixed;z-index:30;top:0;bottom:0;left:0;width:280px;transform:translateX(-105%);transition:transform .2s}
+  .side.open{transform:none}
+  .scrim.on{display:block;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:29}
+  .mtop{display:flex;flex:none;align-items:center;gap:10px;padding:10px 14px}
+  .mtop button{width:38px;height:38px;border:0;border-radius:8px;display:grid;place-items:center;cursor:pointer}
+  .mtop .pill{margin-left:auto;padding:6px 12px;font-size:13px}
+  .wrap{padding:0 18px 40px}
+  .cover{height:96px}
+  .hicon{width:58px;height:58px;margin-top:-29px;font-size:20px}
+  .home h1{font-size:28px}
+  .albums{grid-template-columns:repeat(3,1fr);gap:10px}
+  .album .art{padding:10px}
+  .album .art b{font-size:16px}
+  .album .art small{font-size:9px}
+  .album span{font-size:11px}
+  .mhead{padding:24px 18px 18px;gap:18px}
+  .mart{width:140px;height:140px;padding:12px}
+  .mart b{font-size:22px}
+  .mart img{width:50px;right:10px;bottom:10px}
+  .minfo h1{font-size:34px}
+  .acts{padding:0 18px 6px}
+  .msearch{margin-left:0;width:100%}
+  .tracks{padding:6px 8px 40px}
+  .tl a{grid-template-columns:24px minmax(0,1fr) 44px 30px;padding:9px 8px}
+  .tl .b{display:none}
+  .tl .p{opacity:1}
+  .crumb{padding:8px 12px}
+}
+body.sb{background:#fff;color:#37352f;font-family:'IBM Plex Sans KR',sans-serif;--focus:#2d5b86}
+.sb .side{width:250px;background:#f7f6f3;border-right:1px solid #ededeb;padding:16px 10px}
+.sb .brand{color:#37352f;padding:2px 8px 6px;font-size:17px}
+.sb .brand i{background:#37352f;color:#e8dcc0}
+.sb .side .grp{color:#91918e}
+.sb .side nav a{color:#37352f;padding:5px 8px}
+.sb .side nav a .sq{width:30px;height:30px;border-radius:5px;font-size:9px}
+.sb .side nav a small{color:#91918e}
+.sb .side nav a:hover{background:#ebeae7}
+.sb .side nav a[aria-current="page"]{background:#e4e2dd}
+.sb .sq-q{background:#e4e2dd;color:#37352f}
+.sb .pill.pdf{background:#d8a43f;color:#2b1d00}
+.sb .pill.pdf:hover{background:#e3b453}
+.sb .lang{border:1px solid #e0ddd5;color:#5f5e5b;background:#fff}
+.sb .main{background:#fff}
+.sb .cover{background:#e8dcc0}
+.sb .hicon{background:#37352f;color:#e8dcc0}
+.sb .home h1 em{color:#b8862b}
+.sb .lede{color:#5f5e5b}
+.sb .callout{background:#fbf3db}
+.sb .callout a{color:#8a5a00}
+.sb .callout.cont{background:#f1f1ef}
+.sb .album{color:#37352f}
+.sb .album span{color:#6f6e69}
+.sb .bkrow{background:#f7f6f3;color:#37352f}
+.sb .bkrow span{color:#6f6e69}
+.sb .bkrow .go{color:#8a5a00}
+.sb .foot{border-top:1px solid #ededeb;color:#91918e}
+.sb .foot a{color:#5f5e5b}
+.sb .mhead{background:#f7f6f3}
+.sb .minfo .eb{color:#91918e}
+.sb .minfo p{color:#5f5e5b}
+.sb .minfo .meta{color:#91918e;font-size:13px}
+.sb .acts{padding-top:20px}
+.sb .bookbtn{border:1.5px solid #37352f;color:#37352f}
+.sb .bookbtn:hover{background:#37352f;color:#fff}
+.sb .msearch{border:1px solid #e0ddd5;background:#fff;color:#37352f}
+.sb .tracks h2{color:#91918e;border-bottom:1px solid #ededeb}
+.sb .tl a{color:#37352f}
+.sb .tl a:hover{background:#f7f6f3}
+.sb .tl .n,.sb .tl .k,.sb .tl .b{color:#91918e}
+.sb .crumb{background:#fff;border-bottom:1px solid #ededeb}
+.sb .crumb a{color:#5f5e5b}
+.sb .bk{background:#fff;border:1px solid #ededeb;color:#37352f}
+.sb .bk:hover{border-color:#37352f}
+.sb .bk img{background:#f7f6f3}
+.sb .bk small{color:#91918e}
+.sb .bk p{color:#6f6e69}
+.sb .guide section{background:#fff;border:1px solid #ededeb}
+.sb .toc a{border:1px solid #e0ddd5;color:#37352f}
+.sb .pagehead .eb{color:#91918e;font-size:13px;font-weight:700}
+.sb .bar{display:flex;flex:none;align-items:center;gap:14px;border-top:1px solid #ededeb;background:#fff;padding:10px 20px}
+.sb .bsq{width:40px;height:40px;border-radius:4px;flex:none;display:grid;place-items:center;font:900 10px 'Noto Sans KR',sans-serif}
+.sb .btx{min-width:0;display:flex;flex-direction:column}
+.sb .btx b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb .btx small{font-size:12px;color:#91918e}
+.sb .bplay{width:40px;height:40px;border-radius:999px;background:#37352f;color:#fff;display:grid;place-items:center;flex:none}
+.sb .bplay svg{width:14px;height:14px;margin-left:2px}
+.sb .bstate{font-size:13px;color:#91918e}
+.sb .bbook{margin-left:auto;flex:none;text-decoration:none;border:1.5px solid #37352f;border-radius:999px;padding:7px 14px;color:#37352f;font-weight:700;font-size:13px}
+.sb .bbook:hover{background:#37352f;color:#fff}
+@media (max-width:760px){
+  .sb .side{border-right:0}
+  .sb .mtop{background:#f7f6f3;border-bottom:1px solid #ededeb}
+  .sb .mtop button{background:#ebeae7;color:#37352f}
+  .sb .mtop .brand{padding:0}
+  .sb .bar{padding:8px 12px;gap:10px}
+  .sb .bstate{display:none}
+  .sb .bbook{padding:6px 10px;font-size:12px}
+}
+.sb .subnav{border-left:1px solid #e0ddd5}
+.sb .side .subnav a{color:#5f5e5b}
+.sb .side .subnav a[aria-current="page"]{color:#37352f;background:#e4e2dd;font-weight:700}
+.sb .mtabs a{border:1px solid #e0ddd5;color:#5f5e5b;background:#fff}
+.sb .mtabs a[aria-current="page"]{background:#37352f;color:#fff;border-color:#37352f}
+
 </style>
 </head>
-<body>
-<header class="top">
-  <a class="brand" href="#home"><b>Jazz Lei</b><span>Jazz Practice</span></a>
-  <nav id="nav" aria-label="메뉴">
-    <a href="#basic" data-cat="basic">Basic<span class="long"> Practice</span> <span class="badge" data-n="basic"></span></a>
-    <a href="#song" data-cat="song">Song<span class="long"> Practice</span> <span class="badge" data-n="song"></span></a>
-    <a href="#penta" data-cat="penta">Penta<span class="tonic">tonic</span><span class="long"> Practice</span> <span class="badge" data-n="penta"></span></a>
-    <a href="#guide" data-cat="guide" aria-label="이용방법"><span class="gl">이용방법</span><span class="gq" aria-hidden="true">?</span></a>
-    <a href="#books" data-cat="books" aria-label="Practice Guide PDF"><span class="gl">Guide PDF</span><span class="gs" aria-hidden="true">PDF</span></a>
-  </nav>
-  <label class="lang" title="Language">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
-    <span class="ln-full" id="ln-full"></span><span class="ln-short" id="ln-short"></span>
-    <select id="langsel" aria-label="Language"><option value="ko">한국어</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option></select>
-  </label>
-</header>
-
-<main>
-  <section class="view scroll" id="view-home">
-    <div class="inner">
-      <div class="hero">
-        <div class="eyebrow">Jazz Improvisation · Practice Room</div>
-        <h1>재즈의 언어를 <em>12키</em>로 손에 익히는 연습실</h1>
-        <p>악보를 보며 반주에 맞춰 바로 연습할 수 있는 인터랙티브 연습 페이지예요.</p>
-      </div>
-      <div class="cats">
-        <a class="cat" href="#basic"><b>Basic Practice</b><span class="badge" data-n="basic"></span></a>
-        <a class="cat" href="#song"><b>Song Practice</b><span class="badge" data-n="song"></span></a>
-        <a class="cat" href="#penta"><b>Pentatonic Practice</b><span class="badge" data-n="penta"></span></a>
-      </div>
-      <footer class="foot" id="foot">
-        <div class="foot-links">
-          <a href="https://www.instagram.com/leigeuht_jazz/" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-            @leigeuht_jazz</a>
-          <a href="mailto:contact@jazzlei.com">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>
-            contact@jazzlei.com</a>
+<body class="sb">
+<div class="app">
+  <aside class="side" id="side">
+    <a class="brand" href="#home"><i>JL</i>Jazz Lei</a>
+    <div class="grp">연습법</div>
+    <nav id="nav" aria-label="연습법"></nav>
+    <div class="grp">도구</div>
+    <nav aria-label="도구">
+      <a href="#m-penta" data-m="penta"><span class="sq" style="background:#3c8c6e;color:#fff">PT</span><span><b>펜타토닉</b><small>툴 3개</small></span></a>
+      <a href="#guide" data-m="guide"><span class="sq sq-q">?</span><span><b>이용방법</b><small>화면 순서대로</small></span></a>
+    </nav>
+    <div class="sfoot">
+      <a class="pill pdf" href="#books" data-m="books">Guide PDF</a>
+      <label class="lang" title="Language">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+        <span id="ln"></span>
+        <select id="langsel" aria-label="Language"><option value="ko">한국어</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option></select>
+      </label>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="main">
+    <header class="mtop">
+      <button type="button" id="menu" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <a class="brand" href="#home"><i>JL</i>Jazz Lei</a>
+      <a class="pill pdf" href="#books">Guide PDF</a>
+    </header>
+    <main>
+      <section class="view scroll home" id="view-home">
+        <div class="cover"></div>
+        <div class="wrap">
+          <span class="hicon">JL</span>
+          <h1>재즈의 언어를 <em>12키</em>로 손에 익히는 연습실</h1>
+          <p class="lede">악보를 보며 반주에 맞춰 바로 연습하는 인터랙티브 연습 페이지예요.</p>
+          <div class="callout"><b>처음이라면</b><span>II-V-I 코드톤부터 시작해서 곡으로 넘어가세요.</span><a href="#major-251--chordtone">Major II-V-I 코드톤 →</a></div>
+          <div class="callout cont" id="cont" hidden></div>
+          <h2>연습법</h2>
+          <div class="albums" id="albums"></div>
+          <h2>Guide PDF</h2>
+          <a class="bkrow" href="#books"><span class="imgs" id="bkimgs"></span><span><b>연습법을 원리부터 정리한 PDF</b><span>챕터별 12키 드릴과 예제곡 · Gumroad</span></span><span class="go">보기 →</span></a>
+          <footer class="foot" id="foot">
+            <div>
+              <a href="https://www.instagram.com/leigeuht_jazz/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>@leigeuht_jazz</a>
+              <a href="mailto:contact@jazzlei.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>contact@jazzlei.com</a>
+            </div>
+            <small>© 2026 Jazz Lei</small>
+          </footer>
         </div>
-        <small>© 2026 Jazz Lei</small>
-      </footer>
-    </div>
-  </section>
+      </section>
 
-  <section class="view scroll" id="view-cat">
-    <div class="inner">
-      <div class="head">
-        <div><div class="eyebrow">Practice</div><h1 id="cat-title"></h1></div>
-        <input class="search" id="q" type="search" placeholder="제목 검색" aria-label="제목 검색">
-      </div>
-      <div class="subs" id="subs" role="navigation" aria-label="세부 메뉴"></div>
-      <p class="result" id="result" hidden></p>
-      <ul class="list" id="list"></ul>
-      <p class="empty" id="empty" hidden></p>    </div>
-  </section>
+      <section class="view scroll" id="view-m">
+        <div class="mhead" id="mhead">
+          <div class="mart" id="mart"></div>
+          <div class="minfo"><nav class="mtabs" id="mtabs" aria-label="릭 종류" hidden></nav><span class="eb" id="meb"></span><h1 id="mtitle"></h1><p id="mdesc"></p><span class="meta" id="mmeta"></span></div>
+        </div>
+        <div class="acts">
+          <a class="playbig" id="mplay" href="#" aria-label="첫 곡부터 연습"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></a>
+          <a class="bookbtn" id="mbook" href="#" target="_blank" rel="noopener"></a>
+          <input class="msearch" id="q" type="search" placeholder="곡 검색" aria-label="곡 검색">
+        </div>
+        <div class="tracks" id="tracks"></div>
+      </section>
 
-  <section class="view scroll" id="view-books">
-    <div class="inner guide" style="max-width:1000px">
-      <div>
-        <div class="eyebrow">Swing Solo Guide Book</div>
-        <h1>Practice Guide PDF</h1>
-        <p class="bk-lede">사이트의 연습법을 원리부터 12키 드릴, 예제곡까지 자세히 정리한 PDF예요. Gumroad에서 구매하면 이메일로 바로 받아요.</p>
-      </div>
-      <div class="bk-grid" id="bk-grid"></div>
-    </div>
-  </section>
-  <section class="view scroll" id="view-guide">
-    <div class="inner guide">
-      <div>
-        <div class="eyebrow">How to use</div>
-        <h1>이용방법</h1>
-        <p class="lede">Jazz Lei 연습 페이지를 쓰는 방법을 화면 순서대로 정리했어요.</p>
-      </div>
-      <nav class="toc" aria-label="이용방법 목차">
-        <a href="#guide" data-sec="g-start">시작하기</a><a href="#guide" data-sec="g-bar">위쪽 재생 바</a><a href="#guide" data-sec="g-score">악보 누르기</a><a href="#guide" data-sec="g-set">설정</a><a href="#guide" data-sec="g-penta">펜타토닉</a><a href="#guide" data-sec="g-keys">단축키</a><a href="#guide" data-sec="g-app">앱으로 저장</a>
-      </nav>
+      <section class="view scroll" id="view-books">
+        <div class="wrap">
+          <div class="pagehead"><span class="eb">Swing Solo Guide Book</span><h1>Practice Guide PDF</h1><p class="lede">사이트의 연습법을 원리부터 12키 드릴, 예제곡까지 자세히 정리한 PDF예요. Gumroad에서 구매하면 이메일로 바로 받아요.</p></div>
+          <div class="bk-grid" id="bk-grid"></div>
+        </div>
+      </section>
+
+      <section class="view scroll" id="view-guide">
+        <div class="wrap guide" style="max-width:760px">
+          <div class="pagehead"><span class="eb">How to use</span><h1>이용방법</h1><p class="lede">Jazz Lei 연습 페이지를 쓰는 방법을 화면 순서대로 정리했어요.</p></div>
+          <nav class="toc" aria-label="이용방법 목차"><a href="#guide" data-sec="g-start">시작하기</a><a href="#guide" data-sec="g-bar">아래쪽 재생 바</a><a href="#guide" data-sec="g-score">악보 누르기</a><a href="#guide" data-sec="g-set">설정</a><a href="#guide" data-sec="g-penta">펜타토닉</a><a href="#guide" data-sec="g-keys">단축키</a><a href="#guide" data-sec="g-app">앱으로 저장</a></nav>
       <section id="g-start"><h2>1. 시작하기</h2>
         <ol>
-          <li>맨 위 메뉴에서 <b>Basic Practice</b>(II-V-I), <b>Song Practice</b>(스탠다드 곡), <b>Pentatonic Practice</b> 중 하나를 골라요.</li>
-          <li>연습법(코드톤 · 아르페지오 · 비밥 스케일 · 엔클로저)을 고르고 곡을 눌러요.</li>
+          <li>왼쪽 메뉴에서 연습법(<b>코드톤 · 아르페지오 · 비밥 스케일 · 엔클로저 · 조합 · 릭</b>)이나 <b>펜타토닉</b>을 골라요. 휴대폰에서는 왼쪽 위 메뉴 버튼을 눌러요.</li>
+          <li>곡 목록에서 <b>II-V-I</b>나 <b>스탠다드</b> 곡을 눌러요. 큰 재생 버튼을 누르면 첫 곡부터 열려요.</li>
           <li><b>재생</b>을 누르면 예비박 2마디(첫 마디 1·3박, 둘째 마디 1·2·3·4박) 뒤에 연주가 시작돼요. 지금 치는 음은 악보에서 빨갛게 표시돼요.</li>
         </ol></section>
-      <section id="g-bar"><h2>2. 위쪽 재생 바</h2>
-        <p>악보를 아래로 넘겨도 늘 위에 붙어 있어요.</p>
+      <section id="g-bar"><h2>2. 아래쪽 재생 바</h2>
+        <p>악보를 넘겨도 화면 아래에 늘 붙어 있어요. 휴대폰에서는 악보를 내리는 동안 한 줄로 줄어들고, 위로 올리면 다시 펼쳐져요.</p>
         <ul>
           <li><b>재생 / 정지</b>와 옆의 <b>지금 위치</b>(키 · 사이클 · 마디 · 코드)</li>
-          <li><b>접기 / 펼치기</b>(톱니바퀴 아래): 재생 버튼 아래 줄을 접어서 악보를 더 넓게 봐요. ‘펼치기’를 누르면 다시 펼쳐져요. 휴대폰에서 연주할 때 편해요.</li>
+          <li><b>사이클 목차</b>: 왼쪽 목차에서 코러스(A-1 · B-1 …)를 누르면 그 악보로 가요. ▶는 거기서 재생, ↻는 그 코러스만 반복해요. 휴대폰에서는 재생 바 맨 위의 A1 · B1 … 버튼을 눌러요.</li>
           <li><b>키</b>: 12키 중에서 골라요.</li>
           <li><b>템포</b>: −/+ 버튼이나 숫자를 눌러 직접 입력해요(60~350).</li>
           <li><b>구간 반복(↻)</b>: 켜면 반복 구간을 고를 수 있어요. 아래 ‘악보 누르기’를 보세요.</li>
           <li><b>설정(톱니바퀴)</b>: 자세한 설정을 열어요.</li>
           <li><b>멜로디 · 반주(베이스·드럼) · 2·4박 클릭</b>: 재생 중에도 바로 켜고 꺼요. 멜로디를 끄면 반주만 나와서 직접 즉흥해 볼 수 있어요.</li>
-          <li><b>A1 · B1 · C1 …</b>: 그 사이클로 바로 이동해요.</li>
         </ul></section>
       <section id="g-score"><h2>3. 악보 누르기</h2>
         <ul>
@@ -301,122 +384,154 @@ nav a[data-cat="books"][aria-current="page"]{box-shadow:inset 0 0 0 2px var(--ac
           <li><b>안드로이드 (Chrome)</b>: 오른쪽 위 메뉴(⋮) → ‘홈 화면에 추가’ 또는 ‘앱 설치’</li>
           <li>한 번 열어 둔 페이지는 인터넷이 없어도 열려요. 화면이 예전 그대로면 앱을 완전히 닫았다가 다시 열어 주세요.</li>
         </ul></section>
-    </div>
-  </section>
 
-  <section class="view" id="view-practice">
-    <div class="crumb"><a id="back" href="#">← <span id="back-t"></span></a><b id="p-title"></b></div>
-    <iframe class="frame" id="frame" title="연습 페이지" allow="autoplay"></iframe>
-  </section>
-</main>
+        </div>
+      </section>
+
+      <section class="view" id="view-practice">
+        <div class="crumb"><button type="button" class="cmenu" id="menu2" aria-label="메뉴 열기" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><span class="sq" id="psq"></span><a id="back" href="#">← <span id="back-t"></span></a><b id="p-title"></b></div>
+        <iframe class="frame" id="frame" title="연습 페이지" allow="autoplay"></iframe>
+      </section>
+    </main>
+    <div class="bar" id="bar" hidden>
+      <span class="bsq" id="bsq"></span>
+      <span class="btx"><b id="bt"></b><small id="bs"></small></span>
+      <a class="bplay" id="bplay" href="#" aria-label="이어서 연습"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg></a>
+      <span class="bstate" id="bstate"></span>
+      <a class="bbook" id="bbook" href="#" target="_blank" rel="noopener"></a>
+    </div>
+  </div>
+</div>
 
 <script src="practice/songs.js"></script>
 <script>
-/* ===== 연습 목록 =====
-   Song Practice의 비밥 스케일 곡들은 practice/songs.js 에서 자동으로 불러와요 (곡 추가는 거기서).
-   그 밖의 연습은 practice 폴더에 html 파일을 넣고 아래에 한 줄 추가하세요.
-   id   : 주소 이름(영문·숫자·하이픈)
-   cat  : 'basic' | 'song' | 'penta'
-   sub  : basic·song → 'chordtone' | 'arpeggio' | 'bebop' | 'enclosure' | 'combo' | 'lick',  penta → 'tools'
-   title: 목록에 보일 제목
-   file : 파일 경로 */
-const PRACTICES=[
-  /* II-V-I 비밥 스케일은 다른 연습과 같은 화면(song.html)으로: songs.js의 Major/Minor II-V-I */
-  {id:'penta-chords', cat:'penta', sub:'tools', title:'Chord → Pentatonic',  file:'practice/pentatonic.html#penta-chords'},
-  {id:'penta-lines',  cat:'penta', sub:'tools', title:'Pentatonic Line Generator', file:'practice/pentatonic.html#penta-lines'},
-  {id:'penta-prog',   cat:'penta', sub:'tools', title:'Progression Builder', file:'practice/pentatonic.html#penta-prog'},
-  ...(window.SONGS||[]).flatMap(s=>(s.methods||['bebop']).map(m=>{ const id=m==='bebop'?s.id:s.id+'--'+m;
-    return {id, cat:s.cat||'song', sub:m==='chordtone'?'chordtone':m, title:s.title, file:'practice/song.html#'+id}; })),
+const M={
+  chordtone:{n:'코드톤',en:'Chord Tone',ch:1,c:'#2b2b30',f:'#f3ecdc',d:'코드의 1·3·5·7음으로 목표음을 잡고 다음 코드로 해결하는 연습'},
+  arpeggio:{n:'아르페지오',en:'Arpeggio',ch:2,c:'#e9e4d8',f:'#2b2b30',d:'기본·변형 아르페지오를 코드마다 12키로'},
+  bebop:{n:'비밥 스케일',en:'Bebop Scale',ch:3,c:'#d8a43f',f:'#2b1d00',d:'코드톤이 정박에 오도록 경과음을 넣은 8음 스케일로 라인 만들기'},
+  enclosure:{n:'엔클로저',en:'Enclosure Approach',ch:4,c:'#2d5b86',f:'#ffffff',d:'목표음을 위아래에서 감싸 안착하는 2Note · 3Note · 4Note 어프로치'},
+  combo:{n:'조합',en:'Combination',c:'#7a3a52',f:'#ffffff',d:'두 챕터를 조합해서 연습하는 Combination Practice · A–D 4 사이클'},
+  lick:{n:'기초 릭',en:'Basic Lick · Jazz Lick 10',c:'#1d3557',f:'#f2c14e',art:'JAZZ LICK 10',d:'코드별 기초 재즈 릭 10개 · 릭 하나 뒤에 즉흥 두 마디, 마디를 눌러 릭을 직접 배치',grp:'lick'},
+  parker:{n:'찰리 파커 릭',en:'Charlie Parker Lick',c:'#6b3a1f',f:'#f3e3c3',art:'CHARLIE PARKER',d:'찰리 파커 솔로에서 고른 릭으로 곡을 연습해요.',grp:'lick'},
+  penta:{n:'펜타토닉',en:'Pentatonic',c:'#3c8c6e',f:'#ffffff',d:'코드 → 펜타토닉, 라인 생성기, 진행 만들기'},
+};
+const EN=(window.JL&&JL.lang)==='en';
+const BARW={en:' bars',zh:' 小节',ja:'小節'}[(window.JL&&JL.lang)]||'마디';
+const ORDER=['chordtone','arpeggio','bebop','enclosure','combo','lick'];
+const TOOLS=[
+  {id:'penta-chords',title:'Chord → Pentatonic',file:'practice/pentatonic.html#penta-chords'},
+  {id:'penta-lines',title:'Pentatonic Line Generator',file:'practice/pentatonic.html#penta-lines'},
+  {id:'penta-prog',title:'Progression Builder',file:'practice/pentatonic.html#penta-prog'},
 ];
-const CATS={basic:'Basic Practice', song:'Song Practice', penta:'Pentatonic Practice'};
-const SUBS={chordtone:'Chord Tone Practice', arpeggio:'Arpeggio Practice', bebop:'Bebop Scale Practice', enclosure:'Enclosure Approach Practice', combo:'Combination Practice', lick:'Lick Practice', tools:'Pentatonic Tools'};
-const FOUR=['chordtone','arpeggio','bebop','enclosure'];
-const CAT_SUBS={basic:[...FOUR,'combo'], song:[...FOUR,'combo','lick'], penta:['tools']}; // 세부 메뉴가 하나뿐인 카테고리는 세부 메뉴 줄을 숨김
-
+const SB=document.body.classList.contains('sb'), SKIN='';
+const KEY=k=>String(k||'').replace(/b/g,'♭').replace(/#/g,'♯');
+const BARS=s=>Array.isArray(s.bars)?s.bars.length:(s.bars||'');
+const P=[...TOOLS.map(t=>({...t,file:SKIN?t.file.replace('#',SKIN+'#'):t.file,m:'penta',grp:'툴'})),
+  ...(window.SONGS||[]).flatMap(s=>(s.methods||['bebop']).map(m=>{ const id=m==='bebop'?s.id:s.id+'--'+m;
+    return {id,m,grp:s.cat==='basic'?'II-V-I':'스탠다드',title:s.title,key:KEY(s.open||s.key),bars:BARS(s),file:'practice/song.html'+SKIN+'#'+id}; }))];
+const BOOK=m=>(window.BOOKS||[]).find(b=>b.method===m);
 const $=id=>document.getElementById(id);
-{ const f=$('foot').cloneNode(true); f.removeAttribute('id'); $('empty').after(f); } // 목록 화면에도 같은 footer
-const count=(c,s)=>PRACTICES.filter(p=>p.cat===c&&(!s||p.sub===s)).length;
-function setBadge(el,n){ el.textContent=n; el.classList.toggle('zero',n===0); el.setAttribute('aria-label',n+'개'); }
-document.querySelectorAll('[data-n]').forEach(el=>setBadge(el,count(el.dataset.n)));
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-let curCat=null, curSub=null;
-function renderSubs(){
-  $('subs').innerHTML='';
-  $('subs').hidden=CAT_SUBS[curCat].length<2;
-  for(const s of CAT_SUBS[curCat]){
-    const a=document.createElement('a'); a.href='#'+curCat+'-'+s;
-    a.append(SUBS[s]+' '); const b=document.createElement('span'); b.className='badge'; setBadge(b,count(curCat,s)); a.append(b);
-    if(s===curSub) a.setAttribute('aria-current','true');
-    $('subs').append(a);
-  }
-}
-function renderList(){
-  const q=$('q').value.trim().toLowerCase();
-  // 검색어가 있으면 세부 메뉴와 상관없이 카테고리 전체에서 찾음
-  const items=PRACTICES.filter(p=>p.cat===curCat&&(q?p.title.toLowerCase().includes(q):p.sub===curSub));
-  $('subs').toggleAttribute('data-off',!!q);
-  $('result').hidden=!q; $('result').textContent=CATS[curCat]+' 전체에서 '+items.length+'개 찾음';
-  $('list').innerHTML='';
-  for(const p of items){
-    const li=document.createElement('li'), a=document.createElement('a');
-    a.href='#'+p.id; a.textContent=p.title; a.title=p.title; li.append(a); $('list').append(li);
-  }
-  $('empty').hidden=items.length>0;
-  $('empty').textContent=q?'검색 결과가 없어요.':'곧 추가될 예정이에요.';
-}
+$('nav').innerHTML=ORDER.map(m=>m==='lick'
+  ?`<a href="#m-lick" data-m="lickgrp"><span class="sq" style="background:${M.lick.c};color:${M.lick.f}">LICK</span><span><b>릭</b><small>기초 · 찰리 파커</small></span></a><div class="subnav">${['lick','parker'].map(k=>`<a href="#m-${k}" data-m="${k}" data-sub><i style="background:${M[k].c}"></i>${M[k].n}</a>`).join('')}</div>`
+  :`<a href="#m-${m}" data-m="${m}"><span class="sq" style="background:${M[m].c};color:${M[m].f}">${M[m].ch?'CH.'+M[m].ch:'MIX'}</span><span><b>${M[m].n}</b>${EN?'':`<small>${M[m].en}</small>`}</span></a>`).join('');
+$('albums').innerHTML=ORDER.map(m=>m==='lick'
+  ?`<a class="album" href="#m-lick"><span class="art" style="background:${M.lick.c};color:${M.lick.f}"><small>LICK</small><b>릭</b></span><span>기초 릭 · 찰리 파커 릭</span></a>`
+  :`<a class="album" href="#m-${m}"><span class="art" style="background:${M[m].c};color:${M[m].f}"><small>${M[m].ch?'CHAPTER '+M[m].ch:'COMBINATION'}</small><b>${M[m].n}</b></span><span>${M[m].en} · ${P.filter(p=>p.m===m).length}곡</span></a>`).join('');
+$('bkimgs').innerHTML=(window.BOOKS||[]).map(b=>`<img src="${b.img}" alt="" loading="lazy">`).join('');
 
+let curM=null;
+function renderM(m){
+  const x=M[m], b=BOOK(m), items=P.filter(p=>p.m===m);
+  $('mhead').style.setProperty('--mc',x.c);
+  $('mart').style.background=x.c; $('mart').style.color=x.f;
+  $('mart').innerHTML=`<small>${x.ch?'CHAPTER '+x.ch:m==='combo'?'COMBINATION':x.art||'TOOLS'}</small><b>${x.n}</b>`+(b?`<img src="${b.img}" alt="">`:'');
+  $('meb').textContent=(x.grp?'연습법 · 릭':'연습법'+(x.ch?' · Chapter '+x.ch:''))+' · '+x.en;
+  $('mtabs').hidden=!x.grp; $('mtabs').innerHTML=x.grp?['lick','parker'].map(k=>`<a href="#m-${k}"${k===m?' aria-current="page"':''}>${M[k].n}</a>`).join(''):'';
+  $('mtitle').textContent=x.n; $('mdesc').textContent=x.d;
+  const g={}; items.forEach(p=>(g[p.grp]=g[p.grp]||[]).push(p));
+  $('mmeta').textContent=Object.entries(g).map(([k,v])=>k+' '+v.length).join(' · ')||'준비 중';
+  $('mplay').hidden=!items.length; $('q').hidden=!items.length;
+  $('mplay').href='#'+(items[0]?items[0].id:'');
+  $('mplay').style.background=x.c==='#e9e4d8'?'#2b2b30':x.c; $('mplay').style.color=x.c==='#e9e4d8'?'#fff':x.f;
+  if(b){ $('mbook').hidden=false; $('mbook').href=b.url; $('mbook').dataset.t=b.t||'ch'+b.ch; $('mbook').innerHTML='PDF로 보기 ↗'; } else $('mbook').hidden=true;
+  renderTracks();
+}
+function renderTracks(){
+  const q=$('q').value.trim().toLowerCase(), items=P.filter(p=>p.m===curM&&(!q||p.title.toLowerCase().includes(q)));
+  const g={}; items.forEach(p=>(g[p.grp]=g[p.grp]||[]).push(p));
+  let n=0;
+  $('tracks').innerHTML=Object.entries(g).map(([k,v])=>`<h2>${k}</h2><ol class="tl">`+v.map(p=>`<li><a href="#${p.id}"><span class="n">${++n}</span><span class="t">${esc(p.title)}</span><span class="k">${p.key||''}</span><span class="b">${p.bars?p.bars+BARW:''}</span><span class="p" style="background:${M[curM].c==='#e9e4d8'?'#2b2b30':M[curM].c};color:${M[curM].c==='#e9e4d8'?'#fff':M[curM].f}">${PLAY}</span></a></li>`).join('')+'</ol>').join('')||`<p class="none">${q?'검색 결과가 없어요.':'곧 추가될 예정이에요.'}</p>`;
+}
+$('q').addEventListener('input',renderTracks);
+
+const LEG={basic:'chordtone',song:'chordtone',penta:'penta'};
 function parse(r){
-  const p=PRACTICES.find(x=>x.id===r); if(p) return {view:'practice',p,cat:p.cat};
-  const [c,s]=r.split('-');
-  if(CATS[c]){
-    let sub=CAT_SUBS[c].includes(s)?s:null;
-    if(!sub) sub=CAT_SUBS[c].find(k=>count(c,k)>0)||CAT_SUBS[c][0]; // 기본: 연습이 있는 첫 세부 메뉴
-    return {view:'cat',cat:c,sub};
-  }
-  if(r==='guide') return {view:'guide',cat:'guide'};
-  if(r==='books') return {view:'books',cat:'books'};
+  const p=P.find(x=>x.id===r); if(p) return {view:'practice',p,m:p.m};
+  if(r.startsWith('m-')&&M[r.slice(2)]) return {view:'m',m:r.slice(2)};
+  const [c,s]=r.split('-'); // 예전 주소(#basic-bebop, #song-enclosure …)도 그대로 열리게
+  if(LEG[c]) return {view:'m',m:M[s]?s:LEG[c]};
+  if(r==='guide'||r==='books') return {view:r,m:r};
   return {view:'home'};
 }
+function last(){ try{ return JSON.parse(localStorage.getItem('jl-last')||'null'); }catch(e){ return null; } }
 function show(){
   const st=parse(location.hash.slice(1)||'home');
-  // 연습 화면을 떠나면(목록·홈) 재생 중인 소리를 멈춤
   if(st.view!=='practice'){ try{ $('frame').contentWindow.dispatchEvent(new Event('jl-stop')); }catch(e){} }
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+st.view));
-  document.querySelectorAll('#nav a').forEach(a=>a.dataset.cat===st.cat?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
-  if(st.view==='cat'){
-    if(curCat!==st.cat) $('q').value='';
-    curCat=st.cat; curSub=st.sub;
-    $('cat-title').textContent=CATS[curCat]; renderSubs(); renderList();
-    document.title=(CAT_SUBS[curCat].length<2?'':SUBS[curSub]+' · ')+CATS[curCat]+' · Jazz Lei';
-  } else if(st.view==='practice'){
-    const p=st.p;
-    const one=CAT_SUBS[p.cat].length<2;
-    $('back').href='#'+p.cat+(one?'':'-'+p.sub); $('back-t').textContent=CATS[p.cat]+(one?'':' · '+SUBS[p.sub]);
-    $('p-title').textContent=p.title;
-    if($('frame').getAttribute('src')!==p.file) $('frame').setAttribute('src',p.file);
-    document.title=p.title+' · Jazz Lei';
-  } else if(st.view==='guide') document.title='이용방법 · Jazz Lei';
+  document.querySelectorAll('.side a[data-m]').forEach(a=>(a.dataset.m===st.m||(a.dataset.m==='lickgrp'&&M[st.m]&&M[st.m].grp))?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+  closeMenu(); document.body.classList.toggle('prac',st.view==='practice'); if(st.view!=='practice') document.body.classList.remove('hidetop');
+  if(st.view==='m'){ if(curM!==st.m){ $('q').value=''; curM=st.m; renderM(st.m); } $('view-m').scrollTop=0; document.title=M[st.m].n+' · Jazz Lei'; }
+  else if(st.view==='practice'){
+    const p=st.p, x=M[p.m];
+    $('back').href='#m-'+p.m; $('back-t').textContent=x.n; $('p-title').textContent=p.title+(p.key?' · '+p.key:''); $('psq').style.background=x.c;
+    // 같은 연습 페이지 안에서 곡·툴만 바뀌면 새로 불러오지 않고 주소(#)만 바꿈
+    let same=false; try{ const w=$('frame').contentWindow, u=new URL(p.file,location.href);
+      if(w.location.pathname===u.pathname&&w.location.search===u.search){ same=true; if(w.location.hash!==u.hash) w.location.hash=u.hash; } }catch(e){}
+    if(!same&&$('frame').getAttribute('src')!==p.file) $('frame').setAttribute('src',p.file);
+    document.title=p.title+' · '+x.n+' · Jazz Lei';
+    try{ localStorage.setItem('jl-last',JSON.stringify({id:p.id})); }catch(e){}
+  }
   else if(st.view==='books'){ document.title='Practice Guide PDF · Jazz Lei'; track('books'); }
+  else if(st.view==='guide') document.title='이용방법 · Jazz Lei';
   else document.title='Jazz Lei · Jazz Practice';
+  renderCont(st);
 }
-$('q').addEventListener('input',renderList);
-// 언어 선택
-{ const L=window.JL||{lang:'ko',set(){}}; const sel=$('langsel'); sel.value=L.lang;
-  $('ln-full').textContent={ko:'한국어',en:'English',zh:'中文',ja:'日本語'}[L.lang]; $('ln-short').textContent={ko:'한',en:'EN',zh:'中',ja:'日'}[L.lang];
-  sel.addEventListener('change',()=>L.set(sel.value)); }
-// 클릭 집계: 보이지 않는 작은 페이지를 열어 Cloudflare 통계에 /t/이름.html 조회로 남김
+function renderCont(st){
+  const l=last(), p=l&&P.find(x=>x.id===l.id);
+  $('cont').hidden=!p;
+  if(p) $('cont').innerHTML=`<b>이어서</b><span>${esc(p.title)} · ${M[p.m].n}</span><a href="#${p.id}">이어서 연습 →</a>`;
+  const bar=$('bar'); bar.hidden=!p||(SB&&st.view==='practice'); if(!p) return;
+  const x=M[p.m], b=BOOK(p.m), now=st.view==='practice';
+  $('bsq').style.background=x.c; $('bsq').style.color=x.f; $('bsq').textContent=x.ch?'CH.'+x.ch:'';
+  $('bt').textContent=p.title; $('bs').textContent=x.n+(p.key?' · '+p.key:'');
+  $('bplay').href='#'+p.id; $('bplay').hidden=now;
+  $('bstate').textContent=now?'지금 연습 중':'마지막으로 연습한 곡';
+  if(b){ $('bbook').hidden=false; $('bbook').href=b.url; $('bbook').dataset.t=b.t||'ch'+b.ch; $('bbook').textContent=(x.ch?'Ch.'+x.ch+' ':'')+'Guide PDF ↗'; } else $('bbook').hidden=true;
+}
+// 모바일 메뉴
+function closeMenu(){ $('side').classList.remove('open'); $('scrim').classList.remove('on'); $('menu').setAttribute('aria-expanded','false'); $('menu2').setAttribute('aria-expanded','false'); }
+function openMenu(b){ $('side').classList.add('open'); $('scrim').classList.add('on'); b.setAttribute('aria-expanded','true'); }
+$('menu').addEventListener('click',()=>openMenu($('menu')));
+$('menu2').addEventListener('click',()=>openMenu($('menu2')));
+addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenu(); });
+$('scrim').addEventListener('click',closeMenu);
+// 언어
+{ const L=window.JL||{lang:'ko',set(){}}; const sel=$('langsel'); sel.value=L.lang; $('ln').textContent={ko:'한국어',en:'English',zh:'中文',ja:'日本語'}[L.lang]; sel.addEventListener('change',()=>L.set(sel.value)); }
+// 클릭 집계
 function track(n){ try{ const f=document.createElement('iframe'); f.hidden=true; f.setAttribute('aria-hidden','true'); f.tabIndex=-1; f.src='/t/'+n+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),15000); }catch(e){} }
-$('bk-grid').addEventListener('click',e=>{ const a=e.target.closest('a.bk'); if(a&&a.dataset.t) track(a.dataset.t); });
-$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" data-t="${b.t||'ch'+b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="${b.label||'Chapter '+b.ch} ${b.name} 표지" loading="lazy"><div><small>${b.label||'CHAPTER '+b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>${b.price} · Gumroad →</span></div></a>`).join('');
-document.querySelectorAll('[data-sec]').forEach(x=>x.addEventListener('click',e=>{ e.preventDefault(); const t=document.getElementById(x.dataset.sec); if(t) t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}); }));
+document.addEventListener('click',e=>{ const a=e.target.closest('a[data-t]'); if(a) track(a.dataset.t); });
+$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" data-t="${b.t||'ch'+b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="${b.label||'Chapter '+b.ch} ${b.name} 표지" loading="lazy"><div><small>${b.label||'CHAPTER '+b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>Gumroad →</span></div></a>`).join('');
+document.querySelectorAll('[data-sec]').forEach(x=>x.addEventListener('click',e=>{ e.preventDefault(); const t=document.getElementById(x.dataset.sec); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }));
 addEventListener('hashchange',show); show();
-// 홈 화면 앱: 오프라인에서도 열리도록
 if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
-// 연습 화면 안에서 이전·다음 곡으로 넘어가면 위쪽 메뉴·제목도 같이 바꿈
-$('frame').addEventListener('load',()=>{ try{ const w=$('frame').contentWindow;
-  w.addEventListener('hashchange',()=>{ const h=w.location.hash.slice(1); if(h&&PRACTICES.some(p=>p.id===h)&&location.hash.slice(1)!==h){ location.hash=h; } }); }catch(e){} });
+// 연습 화면: 밝은 화면으로 맞추고, 안에서 이전·다음 곡으로 넘어가면 메뉴도 같이 바꿈
+$('frame').addEventListener('load',()=>{ try{ const w=$('frame').contentWindow; try{ w.document.documentElement.dataset.theme='light'; }catch(e){}
+  let ly=0; w.addEventListener('scroll',()=>{ const y=w.scrollY, d=y-ly; if(Math.abs(d)<6) return; document.body.classList.toggle('hidetop',d>0&&y>60); ly=y; },{passive:true});
+  w.addEventListener('hashchange',()=>{ const h=w.location.hash.slice(1); if(h&&P.some(p=>p.id===h)&&location.hash.slice(1)!==h) location.hash=h; }); }catch(e){} });
 </script>
-<!-- 방문 통계: Cloudflare Web Analytics (쿠키 없음) -->
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "161657c9f7f1408796fe709d0298548e", "spa": true}'></script>
 </body>
 </html>

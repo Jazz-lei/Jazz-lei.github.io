@@ -1,0 +1,93 @@
+/* B안 연습 화면: 왼쪽 사이클 목차 + 아래쪽 재생 바 (song.html?skin=b) */
+html.skin-b{--bg:#ffffff;--paper:#ffffff;--ink:#37352f;--muted:#8c8b87;--line:#e9e8e4;--soft:#f4f3f0;--hot:#d9452b;--ol:220px;--bh:104px;color-scheme:light}
+html.skin-b body{padding-left:calc(var(--ol) + 40px);padding-right:40px;padding-bottom:calc(var(--bh) + 40px)}
+html.skin-b .wrap{max-width:920px}
+html.skin-b header{padding-top:28px}
+html.skin-b h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+html.skin-b .eyebrow{font-family:var(--sans);letter-spacing:.04em;text-transform:none;font-weight:600}
+html.skin-b .lickpdf.bookbtn{background:#ffffff;color:#37352f;border:1.5px solid #37352f;box-shadow:none;font-size:14px;padding:8px 16px}
+html.skin-b .lickpdf.bookbtn:hover{background:#37352f;color:#ffffff}
+html.skin-b .songnav a{border-radius:8px;background:#ffffff}
+html.skin-b .songnote{border-left-color:#d8a43f;background:#fbf3db;border-color:#f1e4bd}
+html.skin-b .encsel button{font-size:13px;padding:5px 14px}
+html.skin-b .chorus{border-radius:8px;scroll-margin-top:24px}
+html.skin-b .chorus-h{background:#fbfaf7}
+html.skin-b .cycle-head{border-top-width:1px}
+
+/* 왼쪽 사이클 목차 */
+.sk-out{position:fixed;z-index:6;left:0;top:0;bottom:0;width:var(--ol);background:#f7f6f3;border-right:1px solid #ededeb;overflow-y:auto;padding:20px 10px calc(var(--bh) + 16px);display:flex;flex-direction:column;gap:2px;font-family:var(--sans);color:#37352f}
+.sk-song{padding:2px 8px 14px}
+.sk-song b{display:block;font-size:17px;line-height:1.3}
+.sk-song span{font-size:12px;color:#91918e}
+.sk-g{font-size:12px;font-weight:700;color:#91918e;padding:12px 8px 4px;display:flex;align-items:center;gap:6px}
+.sk-g i{width:8px;height:8px;border-radius:2px;background:var(--cc,#91918e);flex:none}
+.sk-i{display:flex;align-items:center;gap:2px;border-radius:6px}
+.sk-i:hover{background:#ebeae7}
+.sk-i.cur{background:#e4e2dd}
+.sk-i.sel .sk-go b{color:var(--cc)}
+.sk-go{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;text-align:left;font:500 13px var(--sans);color:#37352f;background:none;border:0;padding:6px 8px;cursor:pointer}
+.sk-go b{font-family:var(--mono);font-weight:600;flex:none}
+.sk-go small{color:#91918e;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sk-i.cur .sk-go{font-weight:700}
+.sk-a{flex:none;width:26px;height:26px;border:0;border-radius:5px;background:none;color:#91918e;cursor:pointer;font-size:12px;opacity:0}
+.sk-i:hover .sk-a,.sk-i.cur .sk-a,.sk-a:focus-visible{opacity:1}
+.sk-a:hover{background:#dcdad5;color:#37352f}
+
+/* 아래쪽 재생 바 */
+html.skin-b .bar{position:fixed;z-index:7;top:auto;bottom:0;left:var(--ol);right:0;min-height:var(--bh);background:#f7f6f3;border-top:1px solid #ededeb;border-bottom:0;padding:10px 24px calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px 20px}
+html.skin-b .bar .row,html.skin-b .bar .mixrow,html.skin-b .bar .quick{display:contents}
+html.skin-b #fold{display:none}
+html.skin-b .jump{display:none}
+.sk-info{grid-column:1;display:flex;align-items:center;gap:12px;min-width:0}
+.sk-cov{width:48px;height:48px;border-radius:5px;flex:none;display:grid;place-items:center;font:700 11px var(--mono);color:#ffffff;background:#37352f}
+html.skin-b .now{min-width:0}
+html.skin-b .now .k{font-size:12px}
+html.skin-b .now .v{font-size:15px}
+.sk-ctr{grid-column:2;display:flex;flex-direction:column;align-items:center;gap:6px}
+.sk-tr{display:flex;align-items:center;gap:12px}
+html.skin-b #play{width:52px;height:52px;padding:0;justify-content:center;border-radius:999px}
+html.skin-b #play #playt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+html.skin-b #play .ico{margin-left:3px}
+html.skin-b #play.on .ico{margin-left:0}
+.sk-nav{width:36px;height:36px;border:0;border-radius:999px;background:none;color:#37352f;display:grid;place-items:center;cursor:pointer}
+.sk-nav:hover{background:#ebeae7}
+.sk-nav[disabled]{opacity:.3;cursor:default}
+html.skin-b #loopb,html.skin-b #gear{width:36px;height:36px;border-radius:999px;border:0;background:none}
+html.skin-b #loopb:hover,html.skin-b #gear:hover{background:#ebeae7}
+html.skin-b #loopb[aria-pressed="true"]{background:#37352f;color:#ffffff}
+html.skin-b #gear[aria-expanded="true"]{background:#37352f;color:#ffffff}
+.sk-right{grid-column:3;display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:0}
+.sk-row{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px}
+html.skin-b .sk-ctr .mix{flex-wrap:nowrap;justify-content:center;gap:4px}
+html.skin-b .sk-ctr .mix label{font-size:12px;padding:3px 9px;white-space:nowrap}
+html.skin-b .mix label{background:#ffffff}
+html.skin-b .mix label:has(input:checked){background:#37352f;border-color:#37352f;color:#ffffff}
+html.skin-b #key{width:auto;padding:6px 8px;font-size:14px;font-weight:600}
+html.skin-b .tempo{border-radius:8px}
+html.skin-b .tempo button{height:34px}
+html.skin-b .licksel{justify-content:center}
+html.skin-b .sheet{position:absolute;right:16px;bottom:calc(100% + 8px);width:min(560px,calc(100vw - var(--ol) - 32px))}
+
+@media (max-width:1000px){ .sk-cov{display:none} html.skin-b .bar{padding-inline:14px;column-gap:12px} }
+@media (max-width:760px){
+  html.skin-b{--ol:0px;--bh:200px}
+  html.skin-b body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .sk-out{display:none}
+  html.skin-b .bar{grid-template-columns:minmax(0,1fr) auto;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));gap:8px 10px}
+  html.skin-b .jump{display:flex;grid-column:1/-1;grid-row:1}
+  .sk-info{grid-column:1;grid-row:2}
+  .sk-cov{display:none}
+  .sk-ctr{display:contents}
+  .sk-tr{grid-column:2;grid-row:2}
+  html.skin-b .sk-ctr .mix{grid-column:1/-1;grid-row:3;justify-content:center}
+  .sk-tr{gap:4px}
+  .sk-right{grid-column:1/-1;grid-row:4;align-items:stretch}
+  .sk-row{justify-content:space-between}
+  html.skin-b .sheet{position:fixed;left:0;right:0;bottom:0;width:auto}
+}
+html.skin-b .lickpdf{top:22px!important}
+html.skin-b .eyebrow{padding-right:210px}
+@media (max-width:760px){ html.skin-b .eyebrow{padding-right:0} }
+/* 휴대폰: 악보를 내리는 동안 재생 바를 한 줄로 줄임 (위로 올리면 다시 펼침) */
+@media (max-width:760px){ html.skin-b.sk-compact .sk-ctr .mix,html.skin-b.sk-compact .sk-right{display:none} html.skin-b.sk-compact .bar{min-height:0} }
+html.skin-b .licksel .lickmsg{bottom:calc(var(--bh) + 16px)}
