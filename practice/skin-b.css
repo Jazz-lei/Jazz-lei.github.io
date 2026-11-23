@@ -91,3 +91,12 @@ html.skin-b .eyebrow{padding-right:210px}
 /* 휴대폰: 악보를 내리는 동안 재생 바를 한 줄로 줄임 (위로 올리면 다시 펼침) */
 @media (max-width:760px){ html.skin-b.sk-compact .sk-ctr .mix,html.skin-b.sk-compact .sk-right{display:none} html.skin-b.sk-compact .bar{min-height:0} }
 html.skin-b .licksel .lickmsg{bottom:calc(var(--bh) + 16px)}
+/* 패드 세로(761~999px): 왼쪽 목차 대신 재생 바 위 사이클 칩 → 악보 한 줄에 4마디 */
+@media (min-width:761px) and (max-width:999px){
+  html.skin-b{--ol:0px;--bh:128px}
+  html.skin-b body{padding-left:32px;padding-right:32px}
+  .sk-out{display:none}
+  html.skin-b .jump{display:flex;grid-column:1/-1;grid-row:1}
+  .sk-info,.sk-ctr,.sk-right{grid-row:2}
+  html.skin-b .sheet{width:min(560px,calc(100vw - 32px))}
+}
