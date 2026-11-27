@@ -487,3 +487,21 @@ JL.add('en',{
   [/^파커 릭 (\d+)$/, 'Parker Lick $1'],
   [/^파커 릭 (\d+) · (.+)$/, 'Parker Lick $1 · $2']
 ]);
+
+/* ===== 레드 갈랜드 릭 ===== */
+JL.add("en",{
+ "레드 갈랜드 릭": "Red Garland Licks",
+ "레드 갈랜드": "Red Garland",
+ "레드 갈랜드가 여러 곡에서 쓴 릭으로 곡을 연습해요.": "Practice tunes with licks Red Garland played in more than one tune.",
+ "곡의 코드에 맞게 Red Garland 20 Licks의 릭을 넣었어요. 기본은 <b>릭 → 즉흥 2마디</b>가 되풀이되고, 즉흥 칸은 직접 채워요. 재생 바의 <b>✎ 직접 배치</b>를 켜고 마디를 누르면 원하는 릭을 골라 넣을 수 있어요.": "Licks from Red Garland 20 Licks are placed to fit the tune's chords. By default <b>a lick → 2 bars of improv</b> repeats, and you fill the improv bars yourself. Turn on <b>✎ Place licks</b> in the play bar and tap a bar to choose the lick you want.",
+ "레드 갈랜드 릭은 원래 적힌 코드 진행이 곡과 맞는 자리에만 코드 근음에 맞게 옮겨 넣어요. m7 릭은 m7 코드, maj7 릭은 메이저 코드, 7 릭(♭9·♭13이 들어 있음)은 마이너로 해결하거나 alt인 도미넌트, 또는 I로 가는 도미넌트에 들어가요 (subV7에는 넣지 않아요).": "Red Garland licks go only where the tune's chords match the lick's original progression, moved to the chord root. m7 licks go on m7 chords, maj7 licks on major chords, and 7 licks (with ♭9·♭13) on dominants that resolve to minor, alt dominants, or dominants going to I (never on subV7).",
+ "ii–V–I 릭은 한 마디 안에 II-V가 있을 때 쓰고, V7 한 마디 릭으로도 써요. Key Center Line은 곡의 으뜸음 메이저 코드 마디에서 시작해 코드와 관계없이 이어져요.": "The ii–V–I lick is used where a bar has II-V in it, and also as a one-bar V7 lick. Key Center Lines start on a bar of the tune's tonic major chord and continue regardless of the chords.",
+ "✎ 직접 배치를 켜고 마디를 누르면 그 자리에 맞는 릭이 나와요. 원하는 릭을 고르거나 ‘자동으로’, ‘즉흥 칸으로’를 누르세요. ‘새로 섞기’를 누르면 기본 배치로 다시 섞어요.": "Turn on ✎ Place licks and tap a bar to see the licks that fit there. Pick one, or tap ‘Auto’ or ‘Make it improv’. ‘Reshuffle’ mixes the default placement again.",
+ "기본은 릭 → 즉흥 2마디예요. 위에 적힌 이름이 Red Garland 20 Licks의 릭 이름이에요.": "By default: a lick → 2 bars of improv. The names above are the lick names in Red Garland 20 Licks.",
+ "자세한 원리와 12키 드릴은 <b>Red Garland 20 Licks</b>에서 다뤄요.": "All the licks are in <b>Red Garland 20 Licks</b>.",
+ "레드 갈랜드가 여러 곡에서 쓴 릭 20개 (m7 · 7 · maj7 · ii–V–I · Key Center Line)": "20 licks Red Garland played in more than one tune (m7 · 7 · maj7 · ii–V–I · Key Center Line)",
+ "ii–V–I 릭": "ii–V–I Licks",
+ "Key Center 라인": "Key Center Lines"
+},[
+  [/^(.+) 레드 갈랜드 릭$/, '$1 · Red Garland Licks']
+]);

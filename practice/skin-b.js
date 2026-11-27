@@ -3,7 +3,7 @@
 (function(){
   const $=id=>document.getElementById(id);
   const bar=document.querySelector('.bar'); if(!bar) return;
-  const MC={chordtone:['#2b2b30','CH.1'],arpeggio:['#c9bfa6','CH.2'],bebop:['#d8a43f','CH.3'],enclosure:['#2d5b86','CH.4'],combo:['#7a3a52','MIX'],lick:['#1d3557','LICK'],parker:['#6b3a1f','CP']};
+  const MC={chordtone:['#2b2b30','CH.1'],arpeggio:['#c9bfa6','CH.2'],bebop:['#d8a43f','CH.3'],enclosure:['#2d5b86','CH.4'],combo:['#7a3a52','MIX'],lick:['#1d3557','LICK'],parker:['#6b3a1f','CP'],garland:['#3b2f5c','RG']};
   const meth=(typeof METHOD!=='undefined'&&METHOD)||'bebop', mc=MC[meth]||MC.bebop;
   const svg=d=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="${d}"/></svg>`;
 

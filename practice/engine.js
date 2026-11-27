@@ -870,7 +870,8 @@ METHODS.lick={name:'릭', book:'Jazz Lick 10',
 /* ===== 찰리 파커 릭 연습 (Charlie Parker 20 Chord Licks) =====
    기초 릭과 같은 화면·규칙(릭 → 즉흥 2마디, 직접 배치)이고, 릭 데이터는 parker.js.
    파커 릭은 II-V 한 마디·두세 마디짜리·다음 코드에 안착하는 음까지 있어서, 곡의 코드 진행이 맞는 자리에만 들어가요. */
-const LKM=()=>METHOD==='lick'||METHOD==='parker';
+const LKM=()=>METHOD==='lick'||METHOD==='parker'||METHOD==='garland';
+const PKM=()=>METHOD==='parker'||METHOD==='garland';
 METHODS.parker={name:'찰리 파커 릭', book:'Charlie Parker 20 Chord Licks',
   lead:'곡의 코드에 맞게 Charlie Parker 20 Chord Licks의 릭을 넣었어요. 기본은 <b>릭 → 즉흥 2마디</b>가 되풀이되고, 즉흥 칸은 직접 채워요. 재생 바의 <b>✎ 직접 배치</b>를 켜고 마디를 누르면 원하는 릭을 골라 넣을 수 있어요.',
   rules:['파커 릭은 원래 적힌 코드 진행이 곡과 맞는 자리에만 코드 근음에 맞게 옮겨 넣어요. m7 릭은 m7 코드, maj7 릭은 메이저 코드, 7alt 릭은 마이너로 해결하거나 alt인 도미넌트에 들어가요 (subV7에는 넣지 않아요).',
@@ -878,10 +879,20 @@ METHODS.parker={name:'찰리 파커 릭', book:'Charlie Parker 20 Chord Licks',
     '다음 마디 첫 음에 안착하는 릭은 그 음이 다음 코드의 코드톤일 때만 들어가요.',
     '✎ 직접 배치를 켜고 마디를 누르면 그 자리에 맞는 릭 번호가 나와요. 원하는 릭을 고르거나 ‘자동으로’, ‘즉흥 칸으로’를 누르세요. ‘새로 섞기’를 누르면 기본 배치로 다시 섞어요.'],
   groups:{A:['찰리 파커 릭','기본은 릭 → 즉흥 2마디예요. 위에 적힌 이름이 Charlie Parker 20 Chord Licks의 릭 번호예요.']}, v:[]};
+/* ===== 레드 갈랜드 릭 연습 (Red Garland 20 Licks) =====
+   찰리 파커 릭과 같은 방식(릭 → 즉흥 2마디, 직접 배치). 릭 데이터는 garland.js.
+   Key Center Line은 코드가 아니라 곡의 키(으뜸음 메이저 코드)에서 시작해요. */
+METHODS.garland={name:'레드 갈랜드 릭', book:'Red Garland 20 Licks',
+  lead:'곡의 코드에 맞게 Red Garland 20 Licks의 릭을 넣었어요. 기본은 <b>릭 → 즉흥 2마디</b>가 되풀이되고, 즉흥 칸은 직접 채워요. 재생 바의 <b>✎ 직접 배치</b>를 켜고 마디를 누르면 원하는 릭을 골라 넣을 수 있어요.',
+  rules:['레드 갈랜드 릭은 원래 적힌 코드 진행이 곡과 맞는 자리에만 코드 근음에 맞게 옮겨 넣어요. m7 릭은 m7 코드, maj7 릭은 메이저 코드, 7 릭(♭9·♭13이 들어 있음)은 마이너로 해결하거나 alt인 도미넌트, 또는 I로 가는 도미넌트에 들어가요 (subV7에는 넣지 않아요).',
+    'ii–V–I 릭은 한 마디 안에 II-V가 있을 때 쓰고, V7 한 마디 릭으로도 써요. Key Center Line은 곡의 으뜸음 메이저 코드 마디에서 시작해 코드와 관계없이 이어져요.',
+    '다음 마디 첫 음에 안착하는 릭은 그 음이 다음 코드의 코드톤일 때만 들어가요.',
+    '✎ 직접 배치를 켜고 마디를 누르면 그 자리에 맞는 릭이 나와요. 원하는 릭을 고르거나 ‘자동으로’, ‘즉흥 칸으로’를 누르세요. ‘새로 섞기’를 누르면 기본 배치로 다시 섞어요.'],
+  groups:{A:['레드 갈랜드 릭','기본은 릭 → 즉흥 2마디예요. 위에 적힌 이름이 Red Garland 20 Licks의 릭 이름이에요.']}, v:[]};
 const SUBV_NO=[6]; // subV7에서 빼는 7 릭 (♭9이 들어 있음)
 let LKIT=null;
 function lickKit(){
-  const L=METHOD==='parker'?{m7:[],dom:[],maj:[]}:window.LICKS; if(!L||(METHOD==='parker'&&!window.PARKER)) return null;
+  const PKD=METHOD==='garland'?window.GARLAND:window.PARKER; const L=PKM()?{m7:[],dom:[],maj:[]}:window.LICKS; if(!L||(PKM()&&!PKD)) return null;
   const save=METHOD; let base; try{ METHOD='chordtone'; base=genMethod('chordtone')[0]; } finally{ METHOD=save; }
   const nB=CHORDS.length, cl=x=>JSON.parse(JSON.stringify(x)), rnd=a=>a[Math.floor(Math.random()*a.length)];
   const restBar=b=>base.bars[b].map(sg=>Object.assign(cl(sg),{notes:sg.notes.map(()=>({rest:true})),lab:null}));
@@ -922,7 +933,7 @@ function lickKit(){
   // 고른 릭을 악보 마디로 (bars 배열에 바로 넣음)
   const put=(bars,b,P)=>{ const lk=P.x, bb=place(lk,rootOf(P.c),P.shift,null); if(!bb) return 0;
     bb.forEach((nts,k)=>{ const segs=cl(base.bars[b+k]); let i=0; segs.forEach((sg,j)=>{ const n=j===segs.length-1?nts.length-i:sg.notes.length; sg.notes=nts.slice(i,i+n); i+=n; sg.lid=P.fam+lk.no; }); // 코드가 둘인 마디도 릭은 한 마디 전체
-      if(k===0) segs[0].lab=(P.fam==='cp'?'파커 릭 '+lk.no+(P.fit?' · '+chordNm(P.c):''):(P.fam==='m7'?'m7':P.fam==='maj'?'maj7':lk.alt?'7alt':'7')+' 릭 '+lk.no+(P.sub?' (6도 위)':'')+(CHORDS[b].length===2?' · '+chordNm(P.c):'')); bars[b+k]=segs; });
+      if(k===0) segs[0].lab=(P.fam==='cp'?(lk.name||'파커 릭 '+lk.no)+(P.fit?' · '+chordNm(P.c):''):(P.fam==='m7'?'m7':P.fam==='maj'?'maj7':lk.alt?'7alt':'7')+' 릭 '+lk.no+(P.sub?' (6도 위)':'')+(CHORDS[b].length===2?' · '+chordNm(P.c):'')); bars[b+k]=segs; });
     return bb.length; };
   // 직접 배치에서 고를 수 있는 릭 (코드 종류·subV7 규칙에 맞는 것만)
   const choices=(b,c,nx,twoOk)=>{ let f=famOf(c); if(!f) return [];
@@ -932,36 +943,38 @@ function lickKit(){
     const nm={m7:'m7 릭',maj:'maj7 릭',dom:'7 릭',alt:'7alt 릭'};
     return gs.map(g=>({name:nm[g],items:(g==='m7'?L.m7:g==='maj'?L.maj:L.dom.filter(x=>g==='alt'?x.alt:!x.alt&&!(subV&&SUBV_NO.includes(x.no)))).filter(x=>x.bars.length===1||twoOk).map(x=>({fam:g==='alt'?'dom':g,x}))})); };
   const make=(b,o,ch)=>{ const c=o.chord||one(b); if(!c) return null; const x=(ch.fam==='m7'?L.m7:ch.fam==='maj'?L.maj:L.dom).find(x=>x.no===ch.no); return x?{shift:[0,0],c,fam:ch.fam,x}:null; };
-  if(METHOD==='parker'){ // 찰리 파커 릭: 릭마다 들어갈 수 있는 코드 진행(uses)과 맞는 자리만
-    const PK=window.PARKER, TONES={maj7:[0,4,7,11],maj6:[0,4,7,9],m7:[0,3,7,10],m6:[0,3,7,9],mmaj7:[0,3,7,11],dom:[0,4,7,10],lyd:[0,4,7,10],alt:[0,4,7,10],m7b5:[0,3,6,10],dim7:[0,3,6,9]};
+  if(PKM()){ // 찰리 파커·레드 갈랜드 릭: 릭마다 들어갈 수 있는 코드 진행(uses)과 맞는 자리만
+    const PK=PKD, TONES={maj7:[0,4,7,11],maj6:[0,4,7,9],m7:[0,3,7,10],m6:[0,3,7,9],mmaj7:[0,3,7,11],dom:[0,4,7,10],lyd:[0,4,7,10],alt:[0,4,7,10],m7b5:[0,3,6,10],dim7:[0,3,6,9]};
     const nextOf=(b,j)=>(CHORDS[b]&&CHORDS[b][j+1])||((CHORDS[b+1]||[])[0])||null;
-    const famOk=(c,f,nx,auto)=>{ const q=c.qual; if(f==='m7') return q==='m7'; if(f==='maj') return q==='maj7'||q==='maj6';
+    const famOk=(c,f,nx,auto)=>{ const q=c.qual; if(f==='any') return true; if(f==='key') return (q==='maj7'||q==='maj6')&&c.pc===parse(REF).pc; if(f==='m7') return q==='m7'; if(f==='maj') return q==='maj7'||q==='maj6';
       if(!(q==='dom'||q==='lyd'||q==='alt')) return false; if(f==='dom') return q!=='alt';
       if([1,3,5,6,8,10].includes(((c.pc-parse(REF).pc)%12+12)%12)) return false; // subV7에는 alt 릭을 쓰지 않음
       const toI=nx&&((nx.pc-c.pc+12)%12===5), toMinor=toI&&['m7','m6','mmaj7','m7b5'].includes(nx.qual);
       return q==='alt'||toMinor||(toI&&(!auto||Math.random()<.35)); };
     const tailPcs=(lk,bi)=>lk.bars[bi].flatMap(x=>x&&x.n?[x.n[1]]:x&&(x.six||x.trip)?(x.six||x.trip).filter(e=>Array.isArray(e)).map(e=>e[1]):[]);
-    const match=(b,lk,u,o,auto)=>{ const fit=!!o.chord&&u.req.length===1&&u.req[0].length===1&&(!u.tail||u.cut); let anc=null, c0=null;
-      for(let k=0;k<u.req.length;k++){ const cs=k===0&&fit?[o.chord]:CHORDS[b+k]; if(!cs||cs.length!==u.req[k].length) return null;
+    const match=(b,lk,u,o,auto)=>{ const fit=!!o.chord&&u.req.length===1&&u.req[0].length===1&&(!u.tail||u.cut); let anc=null, c0=null, r0=null;
+      for(let k=0;k<u.req.length;k++){ const cs=k===0&&fit?[o.chord]:CHORDS[b+k]; if(!cs) return null;
+        if(u.req[k].length===1&&u.req[k][0].f==='any') continue; // 못갖춘마디·Key Center Line: 코드와 관계없이
+        if(cs.length!==u.req[k].length) return null;
         for(let j=0;j<cs.length;j++){ const c=cs[j], rq=u.req[k][j];
-          if(anc==null){ anc=((c.pc-rq.o[1])%12+12)%12; c0=c; }
+          if(anc==null){ anc=((c.pc-rq.o[1])%12+12)%12; c0=c; r0=rq; }
           if(((c.pc-anc-rq.o[1])%12+12)%12) return null;
           if(!famOk(c,rq.f,fit?o.next:nextOf(b+k,j),auto)) return null; } }
       let take=u.req.length;
       if(u.tail&&!fit){ const ct=(CHORDS[b+take]||[])[0], ps=tailPcs(lk,take);
         if(ct&&ps.length&&ps.every(se=>(TONES[ct.qual]||TONES.dom).includes((((anc+se-ct.pc)%12)+12)%12))) take++;
         else if(!u.cut) return null; }
-      if(b+take>nB) return null;
-      const r0=u.req[0][0]; return {shift:[-r0.o[0],-r0.o[1]],c:c0,fam:'cp',fit,x:{no:lk.no,bars:lk.bars.slice(0,take)},u}; };
-    const grpOf=P=>P.u.req.length>1||P.u.req[0].length>1?'II-V':P.u.req[0][0].f;
+      if(b+take>nB||anc==null) return null;
+      return {shift:[-r0.o[0],-r0.o[1]],c:c0,fam:'cp',fit,x:{no:lk.no,name:lk.name,bars:lk.bars.slice(0,take)},u}; };
+    const grpOf=P=>{ const lk=PK.find(x=>x.no===P.x.no); if(lk&&lk.grp) return lk.grp; return P.u.req.length>1||P.u.req[0].length>1?'II-V':P.u.req[0][0].f; };
     const pickP=(b,o)=>{ let cand=[]; PK.forEach(lk=>lk.uses.forEach(u=>{ const P=match(b,lk,u,o,true); if(P&&(!o.one||P.x.bars.length===1)) cand.push(P); }));
       if(!cand.length) return null; const fresh=cand.filter(P=>!o.used.has('cp'+P.x.no)); if(fresh.length) cand=fresh;
       const k=P=>((o.cnt||{})['cp'+P.x.no]||0)*2+((o.usedAll||{})['cp'+P.x.no+'@'+b]?3:0), mn=Math.min(...cand.map(k));
       return rnd(cand.filter(P=>k(P)===mn)); };
-    const NM={'II-V':'II-V 릭',m7:'m7 릭',maj:'maj7 릭',dom:'7 릭',alt:'7alt 릭'};
+    const NM=METHOD==='garland'?{m7:'m7 릭',alt:'7 릭',dom:'7 릭',maj:'maj7 릭','II-V':'ii–V–I 릭',key:'Key Center 라인'}:{'II-V':'II-V 릭',m7:'m7 릭',maj:'maj7 릭',dom:'7 릭',alt:'7alt 릭'};
     const choicesP=(b,c)=>{ const o=CHORDS[b]&&CHORDS[b].length===2?{chord:c,next:nextOf(b,CHORDS[b].indexOf(c))}:{}, g={};
       PK.forEach(lk=>{ for(const u of lk.uses){ const P=match(b,lk,u,o,false); if(P){ (g[grpOf(P)]=g[grpOf(P)]||[]).push({fam:'cp',x:P.x}); break; } } });
-      return ['II-V','m7','maj','dom','alt'].filter(k=>g[k]).map(k=>({name:NM[k],items:g[k]})); };
+      return ['II-V','m7','maj','dom','alt','key'].filter(k=>g[k]).map(k=>({name:NM[k],items:g[k]})); };
     const makeP=(b,o,ch)=>{ const lk=PK.find(x=>x.no===ch.no); if(!lk) return null; for(const u of lk.uses){ const P=match(b,lk,u,o,false); if(P) return P; } return null; };
     return {nB,one,famOf,pickLick:pickP,put,restBar,choices:choicesP,make:makeP};
   }
@@ -1026,7 +1039,7 @@ function openLickPop(ci,b,half,x,y){
   d.innerHTML=`<div class="lkpop-h"><b>${b+1}마디 · ${chordNm(ch)}</b>${two?`<span>${h?'뒤':'앞'} 코드로 한 마디</span>`:''}<button type="button" class="lkx" aria-label="닫기">✕</button></div><div class="lkpop-body">`+
     grp.map(g=>`<div class="lkpop-g"><span class="gn">${g.name}</span><div class="lkcards">`+g.items.map(it=>{ const id=it.fam+it.x.no, abc=lickPreview(b,h,two,it), u=usedAt[id];
       if(abc) abcs.push(abc);
-      return `<button type="button" class="lkc${id===cur?' cur':u?' used':''}" data-f="${it.fam}" data-n="${it.x.no}" data-g="${g.name}"${u?` data-u="${u}"`:''}${abc?'':' disabled'}><span class="lkc-h"><b>${it.x.no}</b>${it.x.bars.length>1&&!two?'<i>'+it.x.bars.length+'마디</i>':''}${id===cur?'<em>지금 들어 있음</em>':u?`<em>${u}마디에 이미 있음</em>`:''}${abc?'':'<em>음역 밖</em>'}</span>${abc?`<span class="mini" data-k="${abcs.length-1}"></span>`:''}</button>`; }).join('')+`</div></div>`).join('')+
+      return `<button type="button" class="lkc${id===cur?' cur':u?' used':''}" data-f="${it.fam}" data-n="${it.x.no}" data-g="${g.name}"${u?` data-u="${u}"`:''}${abc?'':' disabled'}><span class="lkc-h"><b>${it.x.name?it.x.name.replace(/^.* (\d+)$/,'$1'):it.x.no}</b>${it.x.bars.length>1&&!two?'<i>'+it.x.bars.length+'마디</i>':''}${id===cur?'<em>지금 들어 있음</em>':u?`<em>${u}마디에 이미 있음</em>`:''}${abc?'':'<em>음역 밖</em>'}</span>${abc?`<span class="mini" data-k="${abcs.length-1}"></span>`:''}</button>`; }).join('')+`</div></div>`).join('')+
     `</div><div class="lkpop-f">${grp.length?'<button type="button" data-auto>🎲 자동으로</button>':''}${has?'<button type="button" data-clear>즉흥 칸으로</button>':''}</div>`;
   document.body.appendChild(d); lickMsg('');
   d.querySelectorAll('.mini').forEach(m=>{ try{ ABCJS.renderAbc(m,abcs[+m.dataset.k],{responsive:'resize',staffwidth:340,paddingtop:0,paddingbottom:0,paddingleft:0,paddingright:4}); }catch(e){} });
@@ -1552,7 +1565,7 @@ function loadSong(){
   $('lead').innerHTML=M?M.lead:HEAD0.lead;
   $('rules').innerHTML=M?M.rules.map(r=>'<li>'+r+'</li>').join('')+'<li>다음 코드로 이끄는 음(접근음·당김음)이 있는 코러스는 1마디 앞 못갖춘마디에서 시작하고, 마지막 마디 끝은 쉼표로 비워 둬요. 반복하거나 12키 순환을 켜면 그 자리에 다음 반복의 못갖춘마디가 이어져요.</li><li>자세한 원리와 12키 드릴은 <b>'+M.book+'</b>에서 다뤄요.</li>':HEAD0.rules;
   $('space').closest('label').hidden=!!M;
-  { const bk=(window.BOOKS||[]).find(b=>b.method===METHOD), bb=$('bookbtn'); if(bb){ const lk=METHOD==='lick', pk=METHOD==='parker'; bb.hidden=!bk&&!lk&&!pk; if(lk){ bb.href='https://akoguy.gumroad.com/l/htaglb'; bb.textContent='Jazz Lick 10 PDF ↗'; bb.title='Jazz Lick 10 - 12 keys'; bb.dataset.ch='lick'; } else if(pk){ bb.href='https://akoguy.gumroad.com/l/dxnmzo'; bb.textContent='Charlie Parker 20 Licks PDF ↗'; bb.title='Charlie Parker 20 Chord Licks'; bb.dataset.ch='parker'; } else if(bk){ bb.href=bk.url; bb.textContent='Ch.'+bk.ch+' Guide PDF ↗'; bb.title=bk.name+' · '+bk.price; bb.dataset.ch=bk.ch; } } } /* 연습법별 챕터 PDF(검로드) 버튼 */
+  { const bk=(window.BOOKS||[]).find(b=>b.method===METHOD), bb=$('bookbtn'); if(bb){ const lk=METHOD==='lick', pk=METHOD==='parker', gl=METHOD==='garland'; bb.hidden=gl?!(bk&&bk.url):!bk&&!lk&&!pk; if(gl){ if(bk&&bk.url){ bb.href=bk.url; bb.textContent='Red Garland 20 Licks PDF ↗'; bb.title='Red Garland 20 Licks'; bb.dataset.ch='garland'; } } else if(lk){ bb.href='https://akoguy.gumroad.com/l/htaglb'; bb.textContent='Jazz Lick 10 PDF ↗'; bb.title='Jazz Lick 10 - 12 keys'; bb.dataset.ch='lick'; } else if(pk){ bb.href='https://akoguy.gumroad.com/l/dxnmzo'; bb.textContent='Charlie Parker 20 Licks PDF ↗'; bb.title='Charlie Parker 20 Chord Licks'; bb.dataset.ch='parker'; } else if(bk){ bb.href=bk.url; bb.textContent='Ch.'+bk.ch+' Guide PDF ↗'; bb.title=bk.name+' · '+bk.price; bb.dataset.ch=bk.ch; } } } /* 연습법별 챕터 PDF(검로드) 버튼 */
   $('licksel').hidden=!LKM(); document.querySelectorAll('#blank .phopt').forEach(o=>o.hidden=!LKM()); { const o=document.querySelector('#blank option[value=pick]'); if(o) o.hidden=LKM(); } if(!LKM()&&LEDIT) setLedit(false);
   if(LKM()&&!/^(ph|off$)/.test($('blank').value)) $('blank').value='off'; if(!LKM()&&/^ph/.test($('blank').value)) $('blank').value='off';
   $('encsel').hidden=METHOD!=='enclosure'&&METHOD!=='combo'; document.querySelectorAll('#encsel button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===ENC_T)));
@@ -1657,4 +1670,4 @@ async function saveFile(name,blob){
 }
 
 // 위쪽 "릭 악보 PDF" 버튼: 보통은 링크로 바로 다운로드, Claude 아티팩트 안에서는 저장 창으로
-{ const b=document.getElementById('bookbtn'); if(b) b.addEventListener('click',()=>{ try{ const f=document.createElement('iframe'); f.hidden=true; f.tabIndex=-1; f.src='/t/'+(b.dataset.ch==='lick'||b.dataset.ch==='parker'?b.dataset.ch:'ch'+b.dataset.ch)+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),8000); }catch(e){} }); } // 클릭 집계
+{ const b=document.getElementById('bookbtn'); if(b) b.addEventListener('click',()=>{ try{ const f=document.createElement('iframe'); f.hidden=true; f.tabIndex=-1; f.src='/t/'+(b.dataset.ch==='lick'||b.dataset.ch==='parker'||b.dataset.ch==='garland'?b.dataset.ch:'ch'+b.dataset.ch)+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),8000); }catch(e){} }); } // 클릭 집계

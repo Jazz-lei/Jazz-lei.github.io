@@ -420,6 +420,7 @@ const M={
   enclosure:{n:'엔클로저',en:'Enclosure Approach',ch:4,c:'#2d5b86',f:'#ffffff',d:'목표음을 위아래에서 감싸 안착하는 2Note · 3Note · 4Note 어프로치'},
   combo:{n:'조합',en:'Combination',c:'#7a3a52',f:'#ffffff',d:'두 챕터를 조합해서 연습하는 Combination Practice · A–D 4 사이클'},
   lick:{n:'기초 릭',en:'Basic Lick · Jazz Lick 10',c:'#1d3557',f:'#f2c14e',art:'JAZZ LICK 10',d:'코드별 기초 재즈 릭 10개 · 릭 하나 뒤에 즉흥 두 마디, 마디를 눌러 릭을 직접 배치',grp:'lick'},
+  garland:{n:'레드 갈랜드 릭',en:'Red Garland Lick',c:'#3b2f5c',f:'#efe3c4',art:'RED GARLAND',d:'레드 갈랜드가 여러 곡에서 쓴 릭으로 곡을 연습해요.',grp:'lick'},
   parker:{n:'찰리 파커 릭',en:'Charlie Parker Lick',c:'#6b3a1f',f:'#f3e3c3',art:'CHARLIE PARKER',d:'찰리 파커 솔로에서 고른 릭으로 곡을 연습해요.',grp:'lick'},
   penta:{n:'펜타토닉',en:'Pentatonic',c:'#3c8c6e',f:'#ffffff',d:'코드 → 펜타토닉, 라인 생성기, 진행 만들기'},
 };
@@ -443,12 +444,12 @@ const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><pat
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 $('nav').innerHTML=ORDER.map(m=>m==='lick'
-  ?`<a href="#m-lick" data-m="lickgrp"><span class="sq" style="background:${M.lick.c};color:${M.lick.f}">LICK</span><span><b>릭</b><small>기초 · 찰리 파커</small></span></a><div class="subnav">${['lick','parker'].map(k=>`<a href="#m-${k}" data-m="${k}" data-sub><i style="background:${M[k].c}"></i>${M[k].n}</a>`).join('')}</div>`
+  ?`<a href="#m-lick" data-m="lickgrp"><span class="sq" style="background:${M.lick.c};color:${M.lick.f}">LICK</span><span><b>릭</b><small>기초 · 찰리 파커 · 레드 갈랜드</small></span></a><div class="subnav">${['lick','parker','garland'].map(k=>`<a href="#m-${k}" data-m="${k}" data-sub><i style="background:${M[k].c}"></i>${M[k].n}</a>`).join('')}</div>`
   :`<a href="#m-${m}" data-m="${m}"><span class="sq" style="background:${M[m].c};color:${M[m].f}">${M[m].ch?'CH.'+M[m].ch:'MIX'}</span><span><b>${M[m].n}</b>${EN?'':`<small>${M[m].en}</small>`}</span></a>`).join('');
 $('albums').innerHTML=ORDER.map(m=>m==='lick'
-  ?`<a class="album" href="#m-lick"><span class="art" style="background:${M.lick.c};color:${M.lick.f}"><small>LICK</small><b>릭</b></span><span>기초 릭 · 찰리 파커 릭</span></a>`
+  ?`<a class="album" href="#m-lick"><span class="art" style="background:${M.lick.c};color:${M.lick.f}"><small>LICK</small><b>릭</b></span><span>기초 릭 · 찰리 파커 릭 · 레드 갈랜드 릭</span></a>`
   :`<a class="album" href="#m-${m}"><span class="art" style="background:${M[m].c};color:${M[m].f}"><small>${M[m].ch?'CHAPTER '+M[m].ch:'COMBINATION'}</small><b>${M[m].n}</b></span><span>${M[m].en} · ${P.filter(p=>p.m===m).length}곡</span></a>`).join('');
-$('bkimgs').innerHTML=(window.BOOKS||[]).map(b=>`<img src="${b.img}" alt="" loading="lazy">`).join('');
+$('bkimgs').innerHTML=(window.BOOKS||[]).filter(b=>b.url).map(b=>`<img src="${b.img}" alt="" loading="lazy">`).join('');
 
 let curM=null;
 function renderM(m){
@@ -457,14 +458,14 @@ function renderM(m){
   $('mart').style.background=x.c; $('mart').style.color=x.f;
   $('mart').innerHTML=`<small>${x.ch?'CHAPTER '+x.ch:m==='combo'?'COMBINATION':x.art||'TOOLS'}</small><b>${x.n}</b>`+(b?`<img src="${b.img}" alt="">`:'');
   $('meb').textContent=(x.grp?'연습법 · 릭':'연습법'+(x.ch?' · Chapter '+x.ch:''))+' · '+x.en;
-  $('mtabs').hidden=!x.grp; $('mtabs').innerHTML=x.grp?['lick','parker'].map(k=>`<a href="#m-${k}"${k===m?' aria-current="page"':''}>${M[k].n}</a>`).join(''):'';
+  $('mtabs').hidden=!x.grp; $('mtabs').innerHTML=x.grp?['lick','parker','garland'].map(k=>`<a href="#m-${k}"${k===m?' aria-current="page"':''}>${M[k].n}</a>`).join(''):'';
   $('mtitle').textContent=x.n; $('mdesc').textContent=x.d;
   const g={}; items.forEach(p=>(g[p.grp]=g[p.grp]||[]).push(p));
   $('mmeta').textContent=Object.entries(g).map(([k,v])=>k+' '+v.length).join(' · ')||'준비 중';
   $('mplay').hidden=!items.length; $('q').hidden=!items.length;
   $('mplay').href='#'+(items[0]?items[0].id:'');
   $('mplay').style.background=x.c==='#e9e4d8'?'#2b2b30':x.c; $('mplay').style.color=x.c==='#e9e4d8'?'#fff':x.f;
-  if(b){ $('mbook').hidden=false; $('mbook').href=b.url; $('mbook').dataset.t=b.t||'ch'+b.ch; $('mbook').innerHTML='PDF로 보기 ↗'; } else $('mbook').hidden=true;
+  if(b&&b.url){ $('mbook').hidden=false; $('mbook').href=b.url; $('mbook').dataset.t=b.t||'ch'+b.ch; $('mbook').innerHTML='PDF로 보기 ↗'; } else $('mbook').hidden=true;
   renderTracks();
 }
 function renderTracks(){
@@ -517,7 +518,7 @@ function renderCont(st){
   $('bt').textContent=p.title; $('bs').textContent=x.n+(p.key?' · '+p.key:'');
   $('bplay').href='#'+p.id; $('bplay').hidden=now;
   $('bstate').textContent=now?'지금 연습 중':'마지막으로 연습한 곡';
-  if(b){ $('bbook').hidden=false; $('bbook').href=b.url; $('bbook').dataset.t=b.t||'ch'+b.ch; $('bbook').textContent=(x.ch?'Ch.'+x.ch+' ':'')+'Guide PDF ↗'; } else $('bbook').hidden=true;
+  if(b&&b.url){ $('bbook').hidden=false; $('bbook').href=b.url; $('bbook').dataset.t=b.t||'ch'+b.ch; $('bbook').textContent=(x.ch?'Ch.'+x.ch+' ':'')+'Guide PDF ↗'; } else $('bbook').hidden=true;
 }
 // 모바일 메뉴
 function closeMenu(){ $('side').classList.remove('open'); $('scrim').classList.remove('on'); $('menu').setAttribute('aria-expanded','false'); $('menu2').setAttribute('aria-expanded','false'); }
@@ -531,7 +532,7 @@ $('scrim').addEventListener('click',closeMenu);
 // 클릭 집계
 function track(n){ try{ const f=document.createElement('iframe'); f.hidden=true; f.setAttribute('aria-hidden','true'); f.tabIndex=-1; f.src='/t/'+n+'.html'; document.body.appendChild(f); setTimeout(()=>f.remove(),15000); }catch(e){} }
 document.addEventListener('click',e=>{ const a=e.target.closest('a[data-t]'); if(a) track(a.dataset.t); });
-$('bk-grid').innerHTML=(window.BOOKS||[]).map(b=>`<a class="bk" data-t="${b.t||'ch'+b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="${b.label||'Chapter '+b.ch} ${b.name} 표지" loading="lazy"><div><small>${b.label||'CHAPTER '+b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>Gumroad →</span></div></a>`).join('');
+$('bk-grid').innerHTML=(window.BOOKS||[]).filter(b=>b.url).map(b=>`<a class="bk" data-t="${b.t||'ch'+b.ch}" href="${b.url}" target="_blank" rel="noopener"><img src="${b.img}" alt="${b.label||'Chapter '+b.ch} ${b.name} 표지" loading="lazy"><div><small>${b.label||'CHAPTER '+b.ch}</small><b>${b.name}</b><p>${b.desc}</p><span>Gumroad →</span></div></a>`).join('');
 document.querySelectorAll('[data-sec]').forEach(x=>x.addEventListener('click',e=>{ e.preventDefault(); const t=document.getElementById(x.dataset.sec); if(t) t.scrollIntoView({behavior:'smooth',block:'start'}); }));
 addEventListener('hashchange',show); show();
 if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
